@@ -1,0 +1,163 @@
+program_level,program_name,program_code,is_seed_list
+college,Bachelor of Arts in Communication,AB_COMMUNICATION,yes
+college,Bachelor of Arts in Economics,AB_ECONOMICS,yes
+college,Bachelor of Arts in English Language Studies,AB_ENGLISH_LANGUAGE_STUDIES,yes
+college,Bachelor of Arts in Filipino,AB_FILIPINO,yes
+college,Bachelor of Arts in History,AB_HISTORY,yes
+college,Bachelor of Arts in International Studies,AB_INTERNATIONAL_STUDIES,yes
+college,Bachelor of Arts in Journalism,AB_JOURNALISM,yes
+college,Bachelor of Arts in Philosophy,AB_PHILOSOPHY,yes
+college,Bachelor of Arts in Political Science,AB_POLITICAL_SCIENCE,yes
+college,Bachelor of Arts in Psychology,AB_PSYCHOLOGY,yes
+college,Bachelor of Arts in Public Administration,AB_PUBLIC_ADMINISTRATION,yes
+college,Bachelor of Arts in Sociology,AB_SOCIOLOGY,yes
+college,Bachelor of Elementary Education,B_ELEMENTARY_EDUCATION,yes
+college,Bachelor of Secondary Education,B_SECONDARY_EDUCATION,yes
+college,Bachelor of Early Childhood Education,B_EARLY_CHILDHOOD_EDUCATION,yes
+college,Bachelor of Special Needs Education,B_SPECIAL_NEEDS_EDUCATION,yes
+college,Bachelor of Physical Education,B_PHYSICAL_EDUCATION,yes
+college,Bachelor of Library and Information Science,B_LIBRARY_AND_INFORMATION_SCIENCE,yes
+college,Bachelor of Science in Accountancy,BS_ACCOUNTANCY,yes
+college,Bachelor of Science in Accounting Information System,BS_ACCOUNTING_INFORMATION_SYSTEM,yes
+college,Bachelor of Science in Accounting Technology,BS_ACCOUNTING_TECHNOLOGY,yes
+college,Bachelor of Science in Agribusiness,BS_AGRIBUSINESS,yes
+college,Bachelor of Science in Agriculture,BS_AGRICULTURE,yes
+college,Bachelor of Science in Architecture,BS_ARCHITECTURE,yes
+college,Bachelor of Science in Biology,BS_BIOLOGY,yes
+college,Bachelor of Science in Business Administration,BS_BUSINESS_ADMINISTRATION,yes
+college,Bachelor of Science in Civil Engineering,BS_CIVIL_ENGINEERING,yes
+college,Bachelor of Science in Commerce,BS_COMMERCE,yes
+college,Bachelor of Science in Community Development,BS_COMMUNITY_DEVELOPMENT,yes
+college,Bachelor of Science in Computer Engineering,BS_COMPUTER_ENGINEERING,yes
+college,Bachelor of Science in Computer Science,BS_COMPUTER_SCIENCE,yes
+college,Bachelor of Science in Criminology,BS_CRIMINOLOGY,yes
+college,Bachelor of Science in Customs Administration,BS_CUSTOMS_ADMINISTRATION,yes
+college,Bachelor of Science in Data Science,BS_DATA_SCIENCE,yes
+college,Bachelor of Science in Dentistry,BS_DENTISTRY,yes
+college,Bachelor of Science in Electrical Engineering,BS_ELECTRICAL_ENGINEERING,yes
+college,Bachelor of Science in Electronics Engineering,BS_ELECTRONICS_ENGINEERING,yes
+college,Bachelor of Science in Entrepreneurship,BS_ENTREPRENEURSHIP,yes
+college,Bachelor of Science in Environmental Science,BS_ENVIRONMENTAL_SCIENCE,yes
+college,Bachelor of Science in Fisheries,BS_FISHERIES,yes
+college,Bachelor of Science in Food Technology,BS_FOOD_TECHNOLOGY,yes
+college,Bachelor of Science in Forestry,BS_FORESTRY,yes
+college,Bachelor of Science in Geology,BS_GEOLOGY,yes
+college,Bachelor of Science in Hospitality Management,BS_HOSPITALITY_MANAGEMENT,yes
+college,Bachelor of Science in Hotel and Restaurant Management,BS_HOTEL_AND_RESTAURANT_MANAGEMENT,yes
+college,Bachelor of Science in Industrial Engineering,BS_INDUSTRIAL_ENGINEERING,yes
+college,Bachelor of Science in Information Systems,BS_INFORMATION_SYSTEMS,yes
+college,Bachelor of Science in Information Technology,BS_INFORMATION_TECHNOLOGY,yes
+college,Bachelor of Science in Interior Design,BS_INTERIOR_DESIGN,yes
+college,Bachelor of Science in Legal Management,BS_LEGAL_MANAGEMENT,yes
+college,Bachelor of Science in Management Accounting,BS_MANAGEMENT_ACCOUNTING,yes
+college,Bachelor of Science in Marine Biology,BS_MARINE_BIOLOGY,yes
+college,Bachelor of Science in Marine Engineering,BS_MARINE_ENGINEERING,yes
+college,Bachelor of Science in Marine Transportation,BS_MARINE_TRANSPORTATION,yes
+college,Bachelor of Science in Mathematics,BS_MATHEMATICS,yes
+college,Bachelor of Science in Mechanical Engineering,BS_MECHANICAL_ENGINEERING,yes
+college,Bachelor of Science in Medical Technology,BS_MEDICAL_TECHNOLOGY,yes
+college,Bachelor of Science in Midwifery,BS_MIDWIFERY,yes
+college,Bachelor of Science in Mining Engineering,BS_MINING_ENGINEERING,yes
+college,Bachelor of Science in Nursing,BS_NURSING,yes
+college,Bachelor of Science in Nutrition and Dietetics,BS_NUTRITION_AND_DIETETICS,yes
+college,Bachelor of Science in Occupational Therapy,BS_OCCUPATIONAL_THERAPY,yes
+college,Bachelor of Science in Office Administration,BS_OFFICE_ADMINISTRATION,yes
+college,Bachelor of Science in Pharmacy,BS_PHARMACY,yes
+college,Bachelor of Science in Physical Therapy,BS_PHYSICAL_THERAPY,yes
+college,Bachelor of Science in Physics,BS_PHYSICS,yes
+college,Bachelor of Science in Psychology,BS_PSYCHOLOGY,yes
+college,Bachelor of Science in Public Administration,BS_PUBLIC_ADMINISTRATION,yes
+college,Bachelor of Science in Public Health,BS_PUBLIC_HEALTH,yes
+college,Bachelor of Science in Real Estate Management,BS_REAL_ESTATE_MANAGEMENT,yes
+college,Bachelor of Science in Respiratory Therapy,BS_RESPIRATORY_THERAPY,yes
+college,Bachelor of Science in Social Work,BS_SOCIAL_WORK,yes
+college,Bachelor of Science in Statistics,BS_STATISTICS,yes
+college,Bachelor of Science in Tourism Management,BS_TOURISM_MANAGEMENT,yes
+college,Bachelor of Science in Radiologic Technology,BS_RADIOLOGIC_TECHNOLOGY,yes
+college,Bachelor of Science in Speech-Language Pathology,BS_SPEECH_LANGUAGE_PATHOLOGY,yes
+college,Bachelor of Science in Exercise and Sports Sciences,BS_EXERCISE_AND_SPORTS_SCIENCES,yes
+college,Bachelor of Laws,LLB,yes
+college,Juris Doctor,JD,yes
+masteral,Master in Public Administration,M_PUBLIC_ADMINISTRATION,yes
+masteral,Master in Business Administration,M_BUSINESS_ADMINISTRATION,yes
+masteral,Master in Information Technology,M_INFORMATION_TECHNOLOGY,yes
+masteral,Master in Nursing,M_NURSING,yes
+masteral,Master in Psychology,M_PSYCHOLOGY,yes
+masteral,Master in Social Work,M_SOCIAL_WORK,yes
+masteral,Master in Management,M_MANAGEMENT,yes
+masteral,Master in Engineering,M_ENGINEERING,yes
+masteral,Master of Arts in Communication,MA_COMMUNICATION,yes
+masteral,Master of Arts in Economics,MA_ECONOMICS,yes
+masteral,Master of Arts in Education,MA_EDUCATION,yes
+masteral,Master of Arts in Educational Management,MA_EDUCATIONAL_MANAGEMENT,yes
+masteral,Master of Arts in English,MA_ENGLISH,yes
+masteral,Master of Arts in Guidance and Counseling,MA_GUIDANCE_AND_COUNSELING,yes
+masteral,Master of Arts in Nursing,MA_NURSING,yes
+masteral,Master of Arts in Philosophy,MA_PHILOSOPHY,yes
+masteral,Master of Arts in Political Science,MA_POLITICAL_SCIENCE,yes
+masteral,Master of Arts in Psychology,MA_PSYCHOLOGY,yes
+masteral,Master of Arts in Sociology,MA_SOCIOLOGY,yes
+masteral,Master of Arts in Teaching,MA_TEACHING,yes
+masteral,Master of Arts in Anthropology,MA_ANTHROPOLOGY,yes
+masteral,Master of Arts in Applied Social Research,MA_APPLIED_SOCIAL_RESEARCH,yes
+masteral,Master of Science in Accountancy,MS_ACCOUNTANCY,yes
+masteral,Master of Science in Agriculture,MS_AGRICULTURE,yes
+masteral,Master of Science in Biology,MS_BIOLOGY,yes
+masteral,Master of Science in Chemistry,MS_CHEMISTRY,yes
+masteral,Master of Science in Civil Engineering,MS_CIVIL_ENGINEERING,yes
+masteral,Master of Science in Computer Science,MS_COMPUTER_SCIENCE,yes
+masteral,Master of Science in Criminology,MS_CRIMINOLOGY,yes
+masteral,Master of Science in Data Science,MS_DATA_SCIENCE,yes
+masteral,Master of Science in Economics,MS_ECONOMICS,yes
+masteral,Master of Science in Education,MS_EDUCATION,yes
+masteral,Master of Science in Electronics Engineering,MS_ELECTRONICS_ENGINEERING,yes
+masteral,Master of Science in Environmental Science,MS_ENVIRONMENTAL_SCIENCE,yes
+masteral,Master of Science in Fisheries,MS_FISHERIES,yes
+masteral,Master of Science in Food Technology,MS_FOOD_TECHNOLOGY,yes
+masteral,Master of Science in Forestry,MS_FORESTRY,yes
+masteral,Master of Science in Geology,MS_GEOLOGY,yes
+masteral,Master of Science in Information Technology,MS_INFORMATION_TECHNOLOGY,yes
+masteral,Master of Science in Management,MS_MANAGEMENT,yes
+masteral,Master of Science in Marine Biology,MS_MARINE_BIOLOGY,yes
+masteral,Master of Science in Marine Engineering,MS_MARINE_ENGINEERING,yes
+masteral,Master of Science in Mathematics,MS_MATHEMATICS,yes
+masteral,Master of Science in Mechanical Engineering,MS_MECHANICAL_ENGINEERING,yes
+masteral,Master of Science in Medical Technology,MS_MEDICAL_TECHNOLOGY,yes
+masteral,Master of Science in Nursing,MS_NURSING,yes
+masteral,Master of Science in Pharmacy,MS_PHARMACY,yes
+masteral,Master of Science in Physics,MS_PHYSICS,yes
+masteral,Master of Science in Psychology,MS_PSYCHOLOGY,yes
+masteral,Master of Science in Public Health,MS_PUBLIC_HEALTH,yes
+masteral,Master of Science in Social Work,MS_SOCIAL_WORK,yes
+masteral,Master of Science in Statistics,MS_STATISTICS,yes
+masteral,Master of Science in Teaching,MS_TEACHING,yes
+masteral,Master of Laws,LLM,yes
+masteral,Master of Divinity,M_DIVINITY,yes
+doctorate,Doctor of Philosophy in Education,PHD_EDUCATION,yes
+doctorate,Doctor of Philosophy in Educational Management,PHD_EDUCATIONAL_MANAGEMENT,yes
+doctorate,Doctor of Philosophy in Education Administration,PHD_EDUCATION_ADMINISTRATION,yes
+doctorate,Doctor of Philosophy in English,PHD_ENGLISH,yes
+doctorate,Doctor of Philosophy in Mathematics,PHD_MATHEMATICS,yes
+doctorate,Doctor of Philosophy in Physics,PHD_PHYSICS,yes
+doctorate,Doctor of Philosophy in Psychology,PHD_PSYCHOLOGY,yes
+doctorate,Doctor of Philosophy in Sociology,PHD_SOCIOLOGY,yes
+doctorate,Doctor of Philosophy in Public Administration,PHD_PUBLIC_ADMINISTRATION,yes
+doctorate,Doctor of Philosophy in Information Technology,PHD_INFORMATION_TECHNOLOGY,yes
+doctorate,Doctor of Philosophy in Computer Science,PHD_COMPUTER_SCIENCE,yes
+doctorate,Doctor of Philosophy in Nursing,PHD_NURSING,yes
+doctorate,Doctor of Philosophy in Biology,PHD_BIOLOGY,yes
+doctorate,Doctor of Philosophy in Chemistry,PHD_CHEMISTRY,yes
+doctorate,Doctor of Philosophy in Statistics,PHD_STATISTICS,yes
+doctorate,Doctor of Philosophy in Agricultural Education,PHD_AGRICULTURAL_EDUCATION,yes
+doctorate,Doctor of Philosophy in Agriculture,PHD_AGRICULTURE,yes
+doctorate,Doctor of Philosophy in Forestry,PHD_FORESTRY,yes
+doctorate,Doctor of Philosophy in Fisheries,PHD_FISHERIES,yes
+doctorate,Doctor of Philosophy in Environmental Science,PHD_ENVIRONMENTAL_SCIENCE,yes
+doctorate,Doctor of Philosophy in Management,PHD_MANAGEMENT,yes
+doctorate,Doctor of Public Administration,D_PUBLIC_ADMINISTRATION,yes
+doctorate,Doctor of Education,D_EDUCATION,yes
+doctorate,Doctor of Business Administration,D_BUSINESS_ADMINISTRATION,yes
+doctorate,Doctor of Dental Medicine,D_DENTAL_MEDICINE,yes
+doctorate,Doctor of Medicine,D_MEDICINE,yes
+doctorate,Doctor of Optometry,D_OPTOMETRY,yes
+doctorate,Juris Doctor,JD,yes

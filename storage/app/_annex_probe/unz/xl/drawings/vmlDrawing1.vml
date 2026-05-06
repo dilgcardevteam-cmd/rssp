@@ -1,0 +1,255 @@
+<xml xmlns:v="urn:schemas-microsoft-com:vml"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel">
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout><v:shapetype id="_x0000_t201" coordsize="21600,21600" o:spt="201"
+  path="m,l,21600r21600,l21600,xe">
+  <v:stroke joinstyle="miter"/>
+  <v:path shadowok="f" o:extrusionok="f" strokeok="f" fillok="f" o:connecttype="rect"/>
+  <o:lock v:ext="edit" shapetype="t"/>
+ </v:shapetype><v:shape id="_x0000_s1055" type="#_x0000_t201" style='position:absolute;
+  margin-left:436.8pt;margin-top:243pt;width:240.6pt;height:24pt;z-index:1;
+  mso-wrap-style:tight' stroked="f" strokecolor="windowText [64]" o:insetmode="auto">
+  <o:lock v:ext="edit" rotation="t" text="t"/>
+  <x:ClientData ObjectType="Drop">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    9, 3, 15, 0, 13, 78, 15, 40</x:Anchor>
+   <x:Locked>False</x:Locked>
+   <x:AutoLine>False</x:AutoLine>
+   <x:Val>3</x:Val>
+   <x:Min>0</x:Min>
+   <x:Max>167</x:Max>
+   <x:Inc>1</x:Inc>
+   <x:Page>39</x:Page>
+   <x:Dx>16</x:Dx>
+   <x:FmlaRange>Q11:Q216</x:FmlaRange>
+   <x:Sel>4</x:Sel>
+   <x:NoThreeD2/>
+   <x:SelType>Single</x:SelType>
+   <x:LCT>Normal</x:LCT>
+   <x:DropStyle>Combo</x:DropStyle>
+   <x:DropLines>50</x:DropLines>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1045" type="#_x0000_t201" style='position:absolute;
+  margin-left:443.4pt;margin-top:187.2pt;width:87pt;height:24pt;z-index:2;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Filipino</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    9, 14, 12, 8, 11, 19, 13, 8</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1046" type="#_x0000_t201" style='position:absolute;
+  margin-left:506.4pt;margin-top:185.4pt;width:110.4pt;height:26.4pt;z-index:3;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Dual Citizenship</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    10, 49, 12, 5, 12, 60, 13, 9</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1049" type="#_x0000_t201" style='position:absolute;
+  margin-left:124.2pt;margin-top:243pt;width:66.6pt;height:24pt;z-index:4;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Male</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    3, 9, 15, 0, 3, 120, 15, 40</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1050" type="#_x0000_t201" style='position:absolute;
+  margin-left:222pt;margin-top:243pt;width:61.8pt;height:23.4pt;z-index:5;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Female</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    4, 3, 15, 0, 6, 0, 15, 39</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1058" type="#_x0000_t201" style='position:absolute;
+  margin-left:124.2pt;margin-top:264pt;width:66.6pt;height:24pt;z-index:6;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Single</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    3, 9, 15, 35, 3, 120, 17, 8</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1059" type="#_x0000_t201" style='position:absolute;
+  margin-left:222pt;margin-top:265.8pt;width:61.8pt;height:22.2pt;z-index:7;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Married</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    4, 3, 15, 38, 6, 0, 17, 8</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1060" type="#_x0000_t201" style='position:absolute;
+  margin-left:124.2pt;margin-top:278.4pt;width:66.6pt;height:23.4pt;z-index:8;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Widowed</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    3, 9, 16, 18, 3, 120, 19, 8</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1061" type="#_x0000_t201" style='position:absolute;
+  margin-left:124.2pt;margin-top:294pt;width:66.6pt;height:21.6pt;z-index:9;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Other/s:</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    3, 9, 18, 3, 3, 120, 21, 0</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1062" type="#_x0000_t201" style='position:absolute;
+  margin-left:222pt;margin-top:279pt;width:61.8pt;height:22.8pt;z-index:10;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000"><span
+   style='mso-spacerun:yes'> </span>Separated</font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    4, 3, 16, 19, 6, 0, 19, 8</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1063" type="#_x0000_t201" style='position:absolute;
+  margin-left:524.4pt;margin-top:202.2pt;width:51pt;height:24pt;z-index:11;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000">by
+   birth </font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    11, 9, 12, 33, 11, 94, 14, 13</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape><v:shape id="_x0000_s1064" type="#_x0000_t201" style='position:absolute;
+  margin-left:8in;margin-top:202.2pt;width:101.4pt;height:25.2pt;z-index:12;
+  mso-wrap-style:tight' filled="f" fillcolor="window [65]" stroked="f"
+  strokecolor="windowText [64]" o:insetmode="auto">
+  <v:fill color2="window [65]"/>
+  <v:path shadowok="t" strokeok="t" fillok="t"/>
+  <o:lock v:ext="edit" rotation="t"/>
+  <v:textbox style='mso-direction-alt:auto' o:singleclick="f">
+   <div style='text-align:left'><font face="Tahoma" size="160" color="#000000">by
+   naturalization </font></div>
+  </v:textbox>
+  <x:ClientData ObjectType="Checkbox">
+   <x:SizeWithCells/>
+   <x:Anchor>
+    11, 95, 12, 33, 13, 78, 14, 15</x:Anchor>
+   <x:AutoFill>False</x:AutoFill>
+   <x:AutoLine>False</x:AutoLine>
+   <x:TextVAlign>Center</x:TextVAlign>
+   <x:NoThreeD/>
+  </x:ClientData>
+ </v:shape></xml>

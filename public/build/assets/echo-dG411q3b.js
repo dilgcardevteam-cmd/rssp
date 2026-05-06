@@ -1,0 +1,1 @@
+import{P as s,E as o}from"./pusher-Beq8V-_D.js";window.Pusher=s;window.Echo=new o({broadcaster:"reverb",key:void 0,wsHost:void 0,wsPort:80,wssPort:443,forceTLS:!0,enabledTransports:["ws","wss"]});window.Echo.channel("delivery").listen("PackageSent",e=>{console.log(e)});

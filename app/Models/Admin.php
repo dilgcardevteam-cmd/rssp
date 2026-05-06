@@ -13,6 +13,7 @@ class Admin extends Authenticatable
         'username',
         'name',
         'office',
+        'section_unit',
         'designation',
         'email',
         'password',

@@ -9,10 +9,28 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Str;
 
 class AdminAuthController extends Controller
 {
+    private const ADMIN_SUFFIX_OPTIONS = [
+        'Jr.',
+        'Sr.',
+        'II',
+        'III',
+        'IV',
+        'V',
+        'VI',
+        'VII',
+    ];
+
+    private function getAdminSuffixOptions(): array
+    {
+        return self::ADMIN_SUFFIX_OPTIONS;
+    }
+
     private function generateUniqueUsername(string $firstName, string $lastName, string $email): string
     {
         $nameBase = Str::slug(trim($firstName . ' ' . $lastName), '_');
@@ -90,7 +108,9 @@ class AdminAuthController extends Controller
             return redirect()->route('dashboard_user');
         }
 
-        return view('login_register.admin_login');
+        return view('login_register.admin_login', [
+            'adminSuffixOptions' => $this->getAdminSuffixOptions(),
+        ]);
     }
 
     public function register(Request $request)
@@ -104,29 +124,82 @@ class AdminAuthController extends Controller
             Auth::guard('admin')->logout();
         }
 
+        $request->merge([
+            'first_name' => trim((string) $request->input('first_name', '')),
+            'middle_name' => trim((string) $request->input('middle_name', '')),
+            'last_name' => trim((string) $request->input('last_name', '')),
+            'suffix' => trim((string) $request->input('suffix', '')),
+            'office' => trim((string) $request->input('office', '')),
+            'section_unit' => trim((string) $request->input('section_unit', '')),
+            'designation' => trim((string) $request->input('designation', '')),
+            'email' => Str::lower(trim((string) $request->input('email', ''))),
+            'company_website' => trim((string) $request->input('company_website', '')),
+        ]);
+
+        if ($request->filled('company_website')) {
+            activity()
+                ->withProperties([
+                    'ip' => $request->ip(),
+                    'email' => $request->input('email'),
+                    'section' => 'Login',
+                ])
+                ->event('registration_blocked')
+                ->log('Blocked suspected bot admin registration attempt.');
+        }
+
         $validator = Validator::make($request->all(), [
-            'first_name' => ['required', 'string', 'max:255'],
-            'middle_name' => ['nullable', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'office' => ['required', 'string', 'max:255'],
-            'designation' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:admins,email'],
+            'first_name' => ['required', 'string', 'min:2', 'max:100', "regex:/^[\pL][\pL\s.'-]*$/u"],
+            'middle_name' => ['nullable', 'string', 'max:100', "regex:/^[\pL][\pL\s.'-]*$/u"],
+            'last_name' => ['required', 'string', 'min:2', 'max:100', "regex:/^[\pL][\pL\s.'-]*$/u"],
+            'suffix' => ['nullable', 'string', Rule::in($this->getAdminSuffixOptions())],
+            'office' => ['required', 'string', 'min:2', 'max:150', "regex:/^[\pL\pN\s&.,()\/-]+$/u"],
+            'section_unit' => ['nullable', 'string', 'min:2', 'max:150', "regex:/^[\pL\pN\s&.,()\/-]+$/u"],
+            'designation' => ['required', 'string', 'min:2', 'max:150', "regex:/^[\pL\pN\s&.,()\/-]+$/u"],
+            'email' => ['required', 'string', 'email:rfc', 'max:255', 'unique:admins,email'],
+            'company_website' => ['nullable', 'string', 'max:0'],
             'password' => [
                 'required',
                 'string',
-                'min:8',
                 'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/',
+                Password::min(12)->mixedCase()->numbers()->symbols(),
+                function (string $attribute, mixed $value, \Closure $fail) use ($request) {
+                    $normalizedPassword = preg_replace('/[^\pL\pN]+/u', '', Str::lower((string) $value));
+                    $personalFragments = collect([
+                        $request->input('first_name'),
+                        $request->input('last_name'),
+                        Str::before((string) $request->input('email', ''), '@'),
+                    ])->map(function ($fragment) {
+                        return preg_replace('/[^\pL\pN]+/u', '', Str::lower((string) $fragment));
+                    })->filter(fn ($fragment) => is_string($fragment) && mb_strlen($fragment) >= 3);
+
+                    foreach ($personalFragments as $fragment) {
+                        if ($fragment !== '' && str_contains((string) $normalizedPassword, $fragment)) {
+                            $fail('Password must not contain your first name, last name, or email handle.');
+                            return;
+                        }
+                    }
+                },
             ],
         ], [
-            'password.regex' => 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.',
             'email.unique' => 'The email has already been taken.',
+            'company_website.max' => 'Registration could not be completed. Please try again.',
+            'first_name.regex' => 'First name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+            'middle_name.regex' => 'Middle name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+            'last_name.regex' => 'Last name may only contain letters, spaces, apostrophes, periods, and hyphens.',
+            'suffix.in' => 'Please select a valid suffix option.',
+            'office.regex' => 'Division contains unsupported characters.',
+            'section_unit.regex' => 'Section/Unit contains unsupported characters.',
+            'designation.regex' => 'Designation contains unsupported characters.',
         ]);
 
         if ($validator->fails()) {
             return redirect()->back()
                 ->withErrors($validator, 'adminRegister')
-                ->withInput()
+                ->withInput($request->except([
+                    'password',
+                    'password_confirmation',
+                    'company_website',
+                ]))
                 ->with('auth_tab', 'register');
         }
 
@@ -135,6 +208,7 @@ class AdminAuthController extends Controller
             trim((string) ($validated['first_name'] ?? '')),
             trim((string) ($validated['middle_name'] ?? '')),
             trim((string) ($validated['last_name'] ?? '')),
+            trim((string) ($validated['suffix'] ?? '')),
         ])));
         $generatedUsername = $this->generateUniqueUsername(
             (string) ($validated['first_name'] ?? ''),
@@ -146,6 +220,7 @@ class AdminAuthController extends Controller
             'username' => $generatedUsername,
             'name' => $fullName,
             'office' => $validated['office'],
+            'section_unit' => $validated['section_unit'] ?? null,
             'designation' => $validated['designation'],
             'email' => $validated['email'],
             'password' => Hash::make((string) $validated['password']),

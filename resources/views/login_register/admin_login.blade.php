@@ -151,105 +151,221 @@
     </div>
 
     <div id="adminRegisterModal"
-        class="fixed inset-0 z-[12000] {{ $openRegisterModal ? 'flex' : 'hidden' }} items-center justify-center bg-[linear-gradient(180deg,rgba(2,10,29,0.74)_0%,rgba(2,10,29,0.66)_100%)] px-4 py-6 backdrop-blur-[3px]">
-        <div class="w-full max-w-4xl overflow-hidden rounded-2xl border border-[#d8e3f3] bg-[linear-gradient(180deg,#ffffff_0%,#fbfdff_100%)] shadow-[0_24px_52px_rgba(7,24,58,0.3)]">
-            <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
-                <div>
-                    <h3 class="text-lg font-bold text-[#0D2B70]">Employee Registration</h3>
-                    <p class="text-xs text-slate-500">Role assignment is handled by superadmin after approval.</p>
-                </div>
-                <button id="closeRegisterModalBtn" type="button"
-                    class="rounded-lg p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                    aria-label="Close registration modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-
-            <div class="max-h-[78vh] overflow-y-auto p-6">
-                @if ($registerErrors->any())
-                    <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                        <ul class="list-disc pl-5">
-                            @foreach ($registerErrors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+        class="fixed inset-0 z-[12000] {{ $openRegisterModal ? 'flex' : 'hidden' }} items-center justify-center bg-[linear-gradient(180deg,rgba(2,10,29,0.74)_0%,rgba(2,10,29,0.66)_100%)] px-4 py-6 backdrop-blur-[3px]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="adminRegisterModalTitle"
+        aria-describedby="adminRegisterModalDescription">
+        <div class="w-full max-w-[70rem] overflow-hidden rounded-[1.7rem] border border-[#d8e3f3] bg-[linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)] shadow-[0_24px_52px_rgba(7,24,58,0.3)]">
+            <div class="relative">
+                    <div class="flex items-start justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
+                        <div>
+                            <p class="text-[0.7rem] font-bold uppercase tracking-[0.22em] text-[#2f5b9a] lg:hidden">Secure Onboarding</p>
+                            <h3 id="adminRegisterModalTitle" class="text-lg font-bold text-[#0D2B70]">Employee Registration</h3>
+                            <p id="adminRegisterModalDescription" class="mt-1 text-xs text-slate-500 sm:text-sm">Role assignment is handled after superadmin approval.</p>
+                        </div>
+                        <button id="closeRegisterModalBtn" type="button"
+                            class="rounded-xl border border-transparent p-1.5 text-slate-400 transition hover:border-slate-200 hover:bg-slate-50 hover:text-slate-700"
+                            aria-label="Close registration modal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
-                @endif
 
-                <form id="adminRegisterForm" action="{{ route('admin.register.submit') }}" method="POST" class="space-y-4" autocomplete="off">
-                    @csrf
-                    <input type="hidden" name="auth_tab" value="register">
-
-                    <div class="grid gap-3 md:grid-cols-2">
-                        <div>
-                            <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Email</label>
-                            <input type="email" name="email" value="{{ old('email') }}" required
-                                class="w-full rounded-[0.85rem] border border-[#cdd9eb] bg-[#fbfdff] px-3 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">First Name</label>
-                            <input type="text" name="first_name" value="{{ old('first_name') }}" required
-                                class="w-full rounded-[0.85rem] border border-[#cdd9eb] bg-[#fbfdff] px-3 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Last Name</label>
-                            <input type="text" name="last_name" value="{{ old('last_name') }}" required
-                                class="w-full rounded-[0.85rem] border border-[#cdd9eb] bg-[#fbfdff] px-3 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Middle Name</label>
-                            <input type="text" name="middle_name" value="{{ old('middle_name') }}"
-                                class="w-full rounded-[0.85rem] border border-[#cdd9eb] bg-[#fbfdff] px-3 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
-                        </div>
-                        <div class="md:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                            <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Work Assignment</p>
-                            <div class="grid gap-3 md:grid-cols-2">
-                                <div>
-                                    <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Office</label>
-                                    <input type="text" name="office" value="{{ old('office') }}" required placeholder="Enter office/unit"
-                                        class="w-full rounded-[0.85rem] border border-[#cdd9eb] bg-[#fbfdff] px-3 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
-                                </div>
-                                <div>
-                                    <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Designation</label>
-                                    <input type="text" name="designation" value="{{ old('designation') }}" required placeholder="Enter position/designation"
-                                        class="w-full rounded-[0.85rem] border border-[#cdd9eb] bg-[#fbfdff] px-3 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                    <div class="px-5 py-5 sm:px-6 sm:py-5">
+                        @if ($registerErrors->any())
+                            <div class="mb-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                                <div class="flex items-start gap-3">
+                                    <span class="pt-0.5 text-rose-500"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                                    <div>
+                                        <p class="font-semibold">Registration could not be completed.</p>
+                                        <ul class="mt-1 list-disc pl-5">
+                                            @foreach ($registerErrors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Password</label>
-                            <input id="registerPassword" type="password" name="password" required minlength="8"
-                                class="w-full rounded-[0.85rem] border border-[#cdd9eb] bg-[#fbfdff] px-3 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
-                        </div>
-                        <div>
-                            <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Confirm Password</label>
-                            <input id="registerPasswordConfirm" type="password" name="password_confirmation" required minlength="8"
-                                class="w-full rounded-[0.85rem] border border-[#cdd9eb] bg-[#fbfdff] px-3 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
-                        </div>
-                    </div>
+                        @endif
 
-                    <div id="adminPasswordRequirementsPanel" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">Password Requirements</p>
-                        <ul id="passwordRequirements" class="mt-2 space-y-1 text-xs">
-                            <li data-rule="length" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 8 characters</span></li>
-                            <li data-rule="upper" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 uppercase letter</span></li>
-                            <li data-rule="lower" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 lowercase letter</span></li>
-                            <li data-rule="number" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 number</span></li>
-                            <li data-rule="special" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 special character</span></li>
-                            <li data-rule="match" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>Password and confirm password must match</span></li>
-                        </ul>
-                    </div>
+                        <div class="mb-4 grid gap-2 rounded-2xl border border-[#dbe8f8] bg-[linear-gradient(180deg,#f8fbff_0%,#f2f7fd_100%)] p-3 text-sm text-slate-600 lg:hidden sm:grid-cols-2">
+                            <div class="rounded-xl border border-[#d9e6f6] bg-white/80 p-2.5">
+                                <p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#315c9a]">Approval</p>
+                                <p class="mt-1 text-xs text-slate-600 sm:text-sm">New employee accounts stay pending until a superadmin approves the request.</p>
+                            </div>
+                            <div class="rounded-xl border border-[#d9e6f6] bg-white/80 p-2.5">
+                                <p class="text-[0.7rem] font-bold uppercase tracking-[0.18em] text-[#315c9a]">Password Policy</p>
+                                <p class="mt-1 text-xs text-slate-600 sm:text-sm">Use a 12+ character password with uppercase, lowercase, numbers, and symbols.</p>
+                            </div>
+                        </div>
 
-                    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                        <button id="cancelRegisterModalBtn" type="button"
-                            class="rounded-[0.85rem] border border-[#0d2b70]/45 bg-white px-4 py-2.5 text-sm font-semibold text-[#0D2B70] transition-[background-color,color,border-color] hover:border-[#0d2b70] hover:bg-[#0d2b70] hover:text-white">
-                            Cancel
-                        </button>
-                        <button type="submit" class="rounded-[0.85rem] bg-[linear-gradient(135deg,#0d2b70_0%,#174493_100%)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_9px_20px_rgba(13,43,112,0.26)] transition-[transform,box-shadow,filter] hover:-translate-y-px hover:brightness-[1.02] hover:shadow-[0_12px_26px_rgba(13,43,112,0.35)]">
-                            Create Account
-                        </button>
-                    </div>
-                </form>
+                        <form id="adminRegisterForm" action="{{ route('admin.register.submit') }}" method="POST" class="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0" autocomplete="off">
+                            @csrf
+                            <input type="hidden" name="auth_tab" value="register">
+
+                            <div class="absolute left-[-10000px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+                                <label for="company_website">Leave this field blank</label>
+                                <input id="company_website" type="text" name="company_website" value="" tabindex="-1" autocomplete="off">
+                            </div>
+
+                            <section class="rounded-2xl border border-[#dbe7f5] bg-white p-3.5 shadow-[0_12px_26px_rgba(15,37,74,0.04)]">
+                                <div class="mb-3 flex items-start gap-3">
+                                    <span class="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-[#eaf2ff] text-[#0d2b70]">
+                                        <i class="fa-solid fa-id-card"></i>
+                                    </span>
+                                    <div>
+                                        <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-[#0D2B70]">Identity Details</h4>
+                                        <p class="mt-1 text-xs text-slate-500 sm:text-sm">Enter your name exactly as it appears in official personnel records.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid gap-3 md:grid-cols-2">
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">First Name</label>
+                                        <input id="registerFirstNameInput" type="text" name="first_name" value="{{ old('first_name') }}" required maxlength="100" autocomplete="given-name" autocapitalize="words"
+                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                    </div>
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Middle Name</label>
+                                        <input type="text" name="middle_name" value="{{ old('middle_name') }}" maxlength="100" autocomplete="additional-name" autocapitalize="words"
+                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                    </div>
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Last Name</label>
+                                        <input type="text" name="last_name" value="{{ old('last_name') }}" required maxlength="100" autocomplete="family-name" autocapitalize="words"
+                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                    </div>
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Suffix</label>
+                                        <select name="suffix"
+                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            <option value="">Select suffix</option>
+                                            @foreach ($adminSuffixOptions as $suffixOption)
+                                                <option value="{{ $suffixOption }}" @selected(old('suffix') === $suffixOption)>{{ $suffixOption }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="rounded-2xl border border-[#dbe7f5] bg-white p-3.5 shadow-[0_12px_26px_rgba(15,37,74,0.04)]">
+                                <div class="mb-3 flex items-start gap-3">
+                                    <span class="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-[#eaf2ff] text-[#0d2b70]">
+                                        <i class="fa-solid fa-building-user"></i>
+                                    </span>
+                                    <div>
+                                        <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-[#0D2B70]">Work Assignment</h4>
+                                        <p class="mt-1 text-xs text-slate-500 sm:text-sm">Provide your division, section or unit, and designation for approval routing.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid gap-3 md:grid-cols-3">
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Division</label>
+                                        <input type="text" name="office" value="{{ old('office') }}" required maxlength="150" placeholder="Enter division" autocomplete="organization" autocapitalize="words"
+                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                    </div>
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Section/Unit</label>
+                                        <input type="text" name="section_unit" value="{{ old('section_unit') }}" maxlength="150" placeholder="Enter section or unit" autocomplete="organization" autocapitalize="words"
+                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                    </div>
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Designation</label>
+                                        <input type="text" name="designation" value="{{ old('designation') }}" required maxlength="150" placeholder="Enter position or designation" autocomplete="organization-title" autocapitalize="words"
+                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section class="rounded-2xl border border-[#dbe7f5] bg-white p-3.5 shadow-[0_12px_26px_rgba(15,37,74,0.04)] lg:col-span-2">
+                                <div class="mb-3 flex items-start gap-3">
+                                    <span class="mt-0.5 flex h-9 w-9 items-center justify-center rounded-xl bg-[#eaf2ff] text-[#0d2b70]">
+                                        <i class="fa-solid fa-user-shield"></i>
+                                    </span>
+                                    <div>
+                                        <h4 class="text-sm font-bold uppercase tracking-[0.16em] text-[#0D2B70]">Access Credentials</h4>
+                                        <p class="mt-1 text-xs text-slate-500 sm:text-sm">Use your official email and create a password that meets the security baseline.</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid gap-3 md:grid-cols-2">
+                                    <div class="md:col-span-2">
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Email</label>
+                                        <input type="email" name="email" value="{{ old('email') }}" required maxlength="255" autocomplete="email" autocapitalize="none" spellcheck="false" inputmode="email"
+                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                        <p class="mt-1 text-xs text-slate-500">Use your official agency email address for verification and approval notice routing.</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Password</label>
+                                        <div class="relative">
+                                            <input id="registerPassword" type="password" name="password" required minlength="12" maxlength="128" autocomplete="new-password"
+                                                class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 pr-12 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            <button type="button"
+                                                class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
+                                                data-password-toggle="registerPassword"
+                                                aria-label="Toggle password visibility">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Confirm Password</label>
+                                        <div class="relative">
+                                            <input id="registerPasswordConfirm" type="password" name="password_confirmation" required minlength="12" maxlength="128" autocomplete="new-password"
+                                                class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 pr-12 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            <button type="button"
+                                                class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
+                                                data-password-toggle="registerPasswordConfirm"
+                                                aria-label="Toggle password confirmation visibility">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="adminPasswordRequirementsPanel" class="mt-3 hidden rounded-2xl border border-[#dbe5f2] bg-[linear-gradient(180deg,#f8fbff_0%,#f3f8fe_100%)] p-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">Password Requirements</p>
+                                            <p class="mt-0.5 text-xs text-slate-500">Create a strong password that satisfies the approval baseline.</p>
+                                        </div>
+                                        <span class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-emerald-700">Live Check</span>
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <div class="h-1.5 overflow-hidden rounded-full bg-slate-200">
+                                            <div id="adminPasswordStrengthBar" class="h-full w-0 rounded-full bg-slate-300 transition-all duration-200"></div>
+                                        </div>
+                                        <p id="adminPasswordStrengthText" class="mt-1.5 text-xs font-medium text-slate-500">Use a long password that is difficult to guess and unique to this portal.</p>
+                                    </div>
+
+                                    <ul id="passwordRequirements" class="mt-2 grid gap-x-3 gap-y-1.5 text-[0.72rem] sm:grid-cols-2 lg:grid-cols-3">
+                                        <li data-rule="length" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 12 characters</span></li>
+                                        <li data-rule="upper" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 uppercase letter</span></li>
+                                        <li data-rule="lower" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 lowercase letter</span></li>
+                                        <li data-rule="number" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 number</span></li>
+                                        <li data-rule="special" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 special character</span></li>
+                                        <li data-rule="personal" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>Does not contain your name or email handle</span></li>
+                                        <li data-rule="match" class="flex items-center gap-2 text-slate-500 sm:col-span-2 lg:col-span-3"><i class="fa-regular fa-circle"></i><span>Password and confirm password must match</span></li>
+                                    </ul>
+                                </div>
+                            </section>
+
+                            <div class="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:justify-end lg:col-span-2">
+                                <button id="cancelRegisterModalBtn" type="button"
+                                    class="rounded-[0.9rem] border border-[#0d2b70]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#0D2B70] transition-[background-color,color,border-color,box-shadow] hover:border-[#0d2b70] hover:bg-[#f1f6ff] hover:shadow-[0_10px_20px_rgba(13,43,112,0.08)]">
+                                    Cancel
+                                </button>
+                                <button type="submit"
+                                    class="rounded-[0.9rem] bg-[linear-gradient(135deg,#0d2b70_0%,#174493_100%)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(13,43,112,0.26)] transition-[transform,box-shadow,filter] hover:-translate-y-px hover:brightness-[1.02] hover:shadow-[0_16px_28px_rgba(13,43,112,0.35)]">
+                                    Submit Registration Request
+                                </button>
+                            </div>
+                        </form>
+                </div>
             </div>
         </div>
     </div>
@@ -279,21 +395,33 @@
             const openRegisterButton = document.getElementById('openRegisterModalBtn');
             const closeRegisterButton = document.getElementById('closeRegisterModalBtn');
             const cancelRegisterButton = document.getElementById('cancelRegisterModalBtn');
+            const registerForm = document.getElementById('adminRegisterForm');
+            const registerFirstNameInput = document.getElementById('registerFirstNameInput');
 
             const passwordInput = document.getElementById('registerPassword');
             const passwordConfirmInput = document.getElementById('registerPasswordConfirm');
             const passwordRequirementsPanel = document.getElementById('adminPasswordRequirementsPanel');
+            const passwordStrengthBar = document.getElementById('adminPasswordStrengthBar');
+            const passwordStrengthText = document.getElementById('adminPasswordStrengthText');
+            const registerPasswordToggleButtons = document.querySelectorAll('[data-password-toggle]');
+            const passwordDependencyInputs = [
+                registerForm?.querySelector('input[name="first_name"]'),
+                registerForm?.querySelector('input[name="last_name"]'),
+                registerForm?.querySelector('input[name="email"]'),
+            ].filter(Boolean);
 
             const openRegisterModal = () => {
                 if (!registerModal) return;
                 registerModal.classList.remove('hidden');
                 registerModal.classList.add('flex');
+                requestAnimationFrame(() => registerFirstNameInput?.focus());
             };
 
             const closeRegisterModal = () => {
                 if (!registerModal) return;
                 registerModal.classList.add('hidden');
                 registerModal.classList.remove('flex');
+                openRegisterButton?.focus();
             };
 
             if (openRegisterButton) {
@@ -308,13 +436,20 @@
                 cancelRegisterButton.addEventListener('click', closeRegisterModal);
             }
 
-            if (registerModal) {
-                registerModal.addEventListener('click', (event) => {
-                    if (event.target === registerModal) {
-                        closeRegisterModal();
-                    }
+            registerPasswordToggleButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-password-toggle');
+                    const targetInput = targetId ? document.getElementById(targetId) : null;
+                    const icon = button.querySelector('i');
+
+                    if (!targetInput || !icon) return;
+
+                    const showPassword = targetInput.type === 'password';
+                    targetInput.type = showPassword ? 'text' : 'password';
+                    icon.classList.toggle('fa-eye', !showPassword);
+                    icon.classList.toggle('fa-eye-slash', showPassword);
                 });
-            }
+            });
 
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && registerModal && !registerModal.classList.contains('hidden')) {
@@ -340,13 +475,22 @@
             const updatePasswordRequirements = () => {
                 const password = passwordInput ? passwordInput.value : '';
                 const passwordConfirm = passwordConfirmInput ? passwordConfirmInput.value : '';
+                const firstName = registerForm?.querySelector('input[name="first_name"]')?.value ?? '';
+                const lastName = registerForm?.querySelector('input[name="last_name"]')?.value ?? '';
+                const email = registerForm?.querySelector('input[name="email"]')?.value ?? '';
+                const normalizedPassword = password.toLowerCase().replace(/[^a-z0-9]/gi, '');
+                const personalFragments = [firstName, lastName, email.split('@')[0] ?? '']
+                    .map((value) => value.toLowerCase().replace(/[^a-z0-9]/gi, ''))
+                    .filter((value) => value.length >= 3);
+                const excludesPersonalInfo = personalFragments.every((fragment) => !normalizedPassword.includes(fragment));
 
                 const rules = {
-                    length: password.length >= 8,
+                    length: password.length >= 12,
                     upper: /[A-Z]/.test(password),
                     lower: /[a-z]/.test(password),
                     number: /\d/.test(password),
                     special: /[^A-Za-z\d]/.test(password),
+                    personal: excludesPersonalInfo,
                     match: password.length > 0 && password === passwordConfirm,
                 };
 
@@ -354,6 +498,37 @@
                     const element = document.querySelector(`[data-rule="${ruleName}"]`);
                     setRequirementState(element, rules[ruleName]);
                 });
+
+                const strengthChecks = ['length', 'upper', 'lower', 'number', 'special', 'personal'];
+                const passedChecks = strengthChecks.filter((ruleName) => rules[ruleName]).length;
+                const width = `${(passedChecks / strengthChecks.length) * 100}%`;
+
+                if (passwordStrengthBar) {
+                    passwordStrengthBar.style.width = width;
+                    passwordStrengthBar.className = 'h-full rounded-full transition-all duration-200';
+
+                    if (passedChecks <= 2) {
+                        passwordStrengthBar.classList.add('bg-rose-400');
+                    } else if (passedChecks <= 4) {
+                        passwordStrengthBar.classList.add('bg-amber-400');
+                    } else {
+                        passwordStrengthBar.classList.add('bg-emerald-500');
+                    }
+                }
+
+                if (passwordStrengthText) {
+                    if (password.length === 0) {
+                        passwordStrengthText.textContent = 'Use a long password that is difficult to guess and unique to this portal.';
+                    } else if (passedChecks <= 2) {
+                        passwordStrengthText.textContent = 'Weak password. Add length, mixed case, symbols, and avoid personal details.';
+                    } else if (passedChecks <= 4) {
+                        passwordStrengthText.textContent = 'Moderate password. Strengthen it further before submitting.';
+                    } else {
+                        passwordStrengthText.textContent = rules.match
+                            ? 'Strong password. Confirmation matches and the password satisfies the current baseline.'
+                            : 'Strong password. Confirm it exactly to complete registration.';
+                    }
+                }
             };
 
             const setPasswordRequirementsVisibility = (isVisible) => {
@@ -390,6 +565,10 @@
                     requestAnimationFrame(syncPasswordRequirementsVisibility);
                 });
             }
+
+            passwordDependencyInputs.forEach((input) => {
+                input.addEventListener('input', updatePasswordRequirements);
+            });
 
             updatePasswordRequirements();
             setPasswordRequirementsVisibility(false);

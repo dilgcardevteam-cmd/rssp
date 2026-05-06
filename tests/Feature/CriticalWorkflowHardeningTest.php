@@ -75,6 +75,71 @@ class CriticalWorkflowHardeningTest extends TestCase
         $this->assertAuthenticatedAs($admin, 'admin');
     }
 
+    public function test_admin_registration_requires_strong_non_personal_password(): void
+    {
+        $response = $this->post(route('admin.register.submit'), [
+            'first_name' => 'Jane',
+            'middle_name' => 'Santos',
+            'last_name' => 'Doe',
+            'office' => 'Human Resource Management Unit',
+            'designation' => 'Administrative Officer',
+            'email' => 'jane.doe@example.com',
+            'password' => 'JaneDoeAdmin1!',
+            'password_confirmation' => 'JaneDoeAdmin1!',
+            'company_website' => '',
+        ]);
+
+        $response->assertSessionHasErrorsIn('adminRegister', ['password']);
+        $this->assertDatabaseMissing('admins', ['email' => 'jane.doe@example.com']);
+        $this->assertGuest('admin');
+    }
+
+    public function test_admin_registration_blocks_honeypot_submission(): void
+    {
+        $response = $this->post(route('admin.register.submit'), [
+            'first_name' => 'Maria',
+            'middle_name' => 'Lopez',
+            'last_name' => 'Cruz',
+            'office' => 'Regional Office',
+            'designation' => 'Information Systems Analyst I',
+            'email' => 'maria.cruz@example.com',
+            'password' => 'SecurePortal#2026',
+            'password_confirmation' => 'SecurePortal#2026',
+            'company_website' => 'https://bot.example.test',
+        ]);
+
+        $response->assertSessionHasErrorsIn('adminRegister', ['company_website']);
+        $this->assertDatabaseMissing('admins', ['email' => 'maria.cruz@example.com']);
+        $this->assertGuest('admin');
+    }
+
+    public function test_admin_registration_normalizes_email_and_creates_pending_account(): void
+    {
+        $response = $this->post(route('admin.register.submit'), [
+            'first_name' => 'Angela',
+            'middle_name' => 'Reyes',
+            'last_name' => 'Applicant',
+            'suffix' => 'Jr.',
+            'office' => 'Field Operations Division',
+            'section_unit' => 'Recruitment and Selection Unit',
+            'designation' => 'Project Development Officer II',
+            'email' => 'Angela.Applicant@Example.com',
+            'password' => 'SecurePortal#2026',
+            'password_confirmation' => 'SecurePortal#2026',
+            'company_website' => '',
+        ]);
+
+        $response->assertRedirect(route('admin.pending.dashboard'));
+        $this->assertDatabaseHas('admins', [
+            'email' => 'angela.applicant@example.com',
+            'name' => 'Angela Reyes Applicant Jr.',
+            'section_unit' => 'Recruitment and Selection Unit',
+            'role' => 'viewer',
+            'approval_status' => 'pending',
+        ]);
+        $this->assertAuthenticated('admin');
+    }
+
     public function test_viewer_cannot_access_exam_scoring_page(): void
     {
         $viewer = Admin::create([

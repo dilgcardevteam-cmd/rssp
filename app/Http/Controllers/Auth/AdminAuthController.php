@@ -26,9 +26,31 @@ class AdminAuthController extends Controller
         'VII',
     ];
 
+    private const ADMIN_DIVISION_SECTIONS = [
+        'ORD' => ['PDMU', 'ORD', 'OARD'],
+        'LGMED' => ['LGCO', 'LGPCRDM', 'LGPOPS'],
+        'LGCDD' => ['LGEGS', 'LGEPDRR', 'LGPSCS', 'LGRIS'],
+        'FAD' => ['Accounting Section', 'Budget Section', 'Cash Section', 'HRRS', 'GSS'],
+    ];
+
     private function getAdminSuffixOptions(): array
     {
         return self::ADMIN_SUFFIX_OPTIONS;
+    }
+
+    private function getAdminDivisionSections(): array
+    {
+        return self::ADMIN_DIVISION_SECTIONS;
+    }
+
+    private function getAdminDivisionOptions(): array
+    {
+        return array_keys($this->getAdminDivisionSections());
+    }
+
+    private function getSectionOptionsForDivision(string $division): array
+    {
+        return $this->getAdminDivisionSections()[$division] ?? [];
     }
 
     private function generateUniqueUsername(string $firstName, string $lastName, string $email): string
@@ -110,6 +132,8 @@ class AdminAuthController extends Controller
 
         return view('login_register.admin_login', [
             'adminSuffixOptions' => $this->getAdminSuffixOptions(),
+            'adminDivisionOptions' => $this->getAdminDivisionOptions(),
+            'adminDivisionSections' => $this->getAdminDivisionSections(),
         ]);
     }
 
@@ -152,8 +176,19 @@ class AdminAuthController extends Controller
             'middle_name' => ['nullable', 'string', 'max:100', "regex:/^[\pL][\pL\s.'-]*$/u"],
             'last_name' => ['required', 'string', 'min:2', 'max:100', "regex:/^[\pL][\pL\s.'-]*$/u"],
             'suffix' => ['nullable', 'string', Rule::in($this->getAdminSuffixOptions())],
-            'office' => ['required', 'string', 'min:2', 'max:150', "regex:/^[\pL\pN\s&.,()\/-]+$/u"],
-            'section_unit' => ['nullable', 'string', 'min:2', 'max:150', "regex:/^[\pL\pN\s&.,()\/-]+$/u"],
+            'office' => ['required', 'string', Rule::in($this->getAdminDivisionOptions())],
+            'section_unit' => [
+                'required',
+                'string',
+                function (string $attribute, mixed $value, \Closure $fail) use ($request) {
+                    $division = (string) $request->input('office', '');
+                    $allowedSections = $this->getSectionOptionsForDivision($division);
+
+                    if (!in_array((string) $value, $allowedSections, true)) {
+                        $fail('Please select a valid Section/Unit for the chosen Division.');
+                    }
+                },
+            ],
             'designation' => ['required', 'string', 'min:2', 'max:150', "regex:/^[\pL\pN\s&.,()\/-]+$/u"],
             'email' => ['required', 'string', 'email:rfc', 'max:255', 'unique:admins,email'],
             'company_website' => ['nullable', 'string', 'max:0'],
@@ -187,8 +222,7 @@ class AdminAuthController extends Controller
             'middle_name.regex' => 'Middle name may only contain letters, spaces, apostrophes, periods, and hyphens.',
             'last_name.regex' => 'Last name may only contain letters, spaces, apostrophes, periods, and hyphens.',
             'suffix.in' => 'Please select a valid suffix option.',
-            'office.regex' => 'Division contains unsupported characters.',
-            'section_unit.regex' => 'Section/Unit contains unsupported characters.',
+            'office.in' => 'Please select a valid Division.',
             'designation.regex' => 'Designation contains unsupported characters.',
         ]);
 

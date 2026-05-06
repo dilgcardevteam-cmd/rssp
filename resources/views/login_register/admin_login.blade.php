@@ -223,22 +223,22 @@
                                     <div>
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">First Name</label>
                                         <input id="registerFirstNameInput" type="text" name="first_name" value="{{ old('first_name') }}" required maxlength="100" autocomplete="given-name" autocapitalize="words"
-                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
                                     </div>
                                     <div>
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Middle Name</label>
                                         <input type="text" name="middle_name" value="{{ old('middle_name') }}" maxlength="100" autocomplete="additional-name" autocapitalize="words"
-                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
                                     </div>
                                     <div>
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Last Name</label>
                                         <input type="text" name="last_name" value="{{ old('last_name') }}" required maxlength="100" autocomplete="family-name" autocapitalize="words"
-                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
                                     </div>
                                     <div>
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Suffix</label>
                                         <select name="suffix"
-                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
                                             <option value="">Select suffix</option>
                                             @foreach ($adminSuffixOptions as $suffixOption)
                                                 <option value="{{ $suffixOption }}" @selected(old('suffix') === $suffixOption)>{{ $suffixOption }}</option>
@@ -262,18 +262,25 @@
                                 <div class="grid gap-3 md:grid-cols-3">
                                     <div>
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Division</label>
-                                        <input type="text" name="office" value="{{ old('office') }}" required maxlength="150" placeholder="Enter division" autocomplete="organization" autocapitalize="words"
-                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                        <select name="office" required
+                                            class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            <option value="">Select division</option>
+                                            @foreach ($adminDivisionOptions as $divisionOption)
+                                                <option value="{{ $divisionOption }}" @selected(old('office') === $divisionOption)>{{ $divisionOption }}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                     <div>
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Section/Unit</label>
-                                        <input type="text" name="section_unit" value="{{ old('section_unit') }}" maxlength="150" placeholder="Enter section or unit" autocomplete="organization" autocapitalize="words"
-                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                        <select name="section_unit" required
+                                            class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            <option value="">Select section/unit</option>
+                                        </select>
                                     </div>
                                     <div>
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Designation</label>
                                         <input type="text" name="designation" value="{{ old('designation') }}" required maxlength="150" placeholder="Enter position or designation" autocomplete="organization-title" autocapitalize="words"
-                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                            class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
                                     </div>
                                 </div>
                             </section>
@@ -293,15 +300,14 @@
                                     <div class="md:col-span-2">
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Email</label>
                                         <input type="email" name="email" value="{{ old('email') }}" required maxlength="255" autocomplete="email" autocapitalize="none" spellcheck="false" inputmode="email"
-                                            class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
-                                        <p class="mt-1 text-xs text-slate-500">Use your official agency email address for verification and approval notice routing.</p>
+                                            class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
                                     </div>
 
                                     <div>
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Password</label>
                                         <div class="relative">
                                             <input id="registerPassword" type="password" name="password" required minlength="12" maxlength="128" autocomplete="new-password"
-                                                class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 pr-12 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                                class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 pr-12 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
                                             <button type="button"
                                                 class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
                                                 data-password-toggle="registerPassword"
@@ -315,7 +321,7 @@
                                         <label class="mb-1.5 block text-[0.68rem] font-bold uppercase tracking-[0.12em] text-[#52627d]">Confirm Password</label>
                                         <div class="relative">
                                             <input id="registerPasswordConfirm" type="password" name="password_confirmation" required minlength="12" maxlength="128" autocomplete="new-password"
-                                                class="w-full rounded-[0.9rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 pr-12 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
+                                                class="w-full rounded-[0.4rem] border border-[#cdd9eb] bg-[#fbfdff] px-3.5 py-2.5 pr-12 text-sm text-[#203457] outline-none transition-[border-color,box-shadow,background-color] hover:border-[#b5c8e7] hover:bg-white focus:border-[#0d2b70] focus:bg-white focus:ring-4 focus:ring-[#0d2b70]/15">
                                             <button type="button"
                                                 class="absolute inset-y-0 right-3 flex items-center text-slate-400 transition hover:text-slate-700"
                                                 data-password-toggle="registerPasswordConfirm"
@@ -327,19 +333,17 @@
                                 </div>
 
                                 <div id="adminPasswordRequirementsPanel" class="mt-3 hidden rounded-2xl border border-[#dbe5f2] bg-[linear-gradient(180deg,#f8fbff_0%,#f3f8fe_100%)] p-3">
-                                    <div class="flex items-start justify-between gap-3">
+                                    <div>
                                         <div>
                                             <p class="text-xs font-semibold uppercase tracking-wide text-slate-600">Password Requirements</p>
                                             <p class="mt-0.5 text-xs text-slate-500">Create a strong password that satisfies the approval baseline.</p>
                                         </div>
-                                        <span class="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-emerald-700">Live Check</span>
                                     </div>
 
                                     <div class="mt-2">
                                         <div class="h-1.5 overflow-hidden rounded-full bg-slate-200">
                                             <div id="adminPasswordStrengthBar" class="h-full w-0 rounded-full bg-slate-300 transition-all duration-200"></div>
                                         </div>
-                                        <p id="adminPasswordStrengthText" class="mt-1.5 text-xs font-medium text-slate-500">Use a long password that is difficult to guess and unique to this portal.</p>
                                     </div>
 
                                     <ul id="passwordRequirements" class="mt-2 grid gap-x-3 gap-y-1.5 text-[0.72rem] sm:grid-cols-2 lg:grid-cols-3">
@@ -349,18 +353,17 @@
                                         <li data-rule="number" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 number</span></li>
                                         <li data-rule="special" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>At least 1 special character</span></li>
                                         <li data-rule="personal" class="flex items-center gap-2 text-slate-500"><i class="fa-regular fa-circle"></i><span>Does not contain your name or email handle</span></li>
-                                        <li data-rule="match" class="flex items-center gap-2 text-slate-500 sm:col-span-2 lg:col-span-3"><i class="fa-regular fa-circle"></i><span>Password and confirm password must match</span></li>
                                     </ul>
                                 </div>
                             </section>
 
                             <div class="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:justify-end lg:col-span-2">
                                 <button id="cancelRegisterModalBtn" type="button"
-                                    class="rounded-[0.9rem] border border-[#0d2b70]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#0D2B70] transition-[background-color,color,border-color,box-shadow] hover:border-[#0d2b70] hover:bg-[#f1f6ff] hover:shadow-[0_10px_20px_rgba(13,43,112,0.08)]">
+                                    class="rounded-[0.7rem] border border-[#0d2b70]/20 bg-white px-4 py-2.5 text-sm font-semibold text-[#0D2B70] transition-[background-color,color,border-color,box-shadow] hover:border-[#0d2b70] hover:bg-[#f1f6ff] hover:shadow-[0_10px_20px_rgba(13,43,112,0.08)]">
                                     Cancel
                                 </button>
                                 <button type="submit"
-                                    class="rounded-[0.9rem] bg-[linear-gradient(135deg,#0d2b70_0%,#174493_100%)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(13,43,112,0.26)] transition-[transform,box-shadow,filter] hover:-translate-y-px hover:brightness-[1.02] hover:shadow-[0_16px_28px_rgba(13,43,112,0.35)]">
+                                    class="rounded-[0.7rem] bg-[linear-gradient(135deg,#0d2b70_0%,#174493_100%)] px-4 py-2.5 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(13,43,112,0.26)] transition-[transform,box-shadow,filter] hover:-translate-y-px hover:brightness-[1.02] hover:shadow-[0_16px_28px_rgba(13,43,112,0.35)]">
                                     Submit Registration Request
                                 </button>
                             </div>
@@ -397,18 +400,49 @@
             const cancelRegisterButton = document.getElementById('cancelRegisterModalBtn');
             const registerForm = document.getElementById('adminRegisterForm');
             const registerFirstNameInput = document.getElementById('registerFirstNameInput');
+            const divisionSelect = registerForm?.querySelector('select[name="office"]');
+            const sectionUnitSelect = registerForm?.querySelector('select[name="section_unit"]');
+            const sectionOptionsByDivision = @json($adminDivisionSections);
+            const previousSectionUnitValue = @json(old('section_unit'));
 
             const passwordInput = document.getElementById('registerPassword');
             const passwordConfirmInput = document.getElementById('registerPasswordConfirm');
             const passwordRequirementsPanel = document.getElementById('adminPasswordRequirementsPanel');
             const passwordStrengthBar = document.getElementById('adminPasswordStrengthBar');
-            const passwordStrengthText = document.getElementById('adminPasswordStrengthText');
             const registerPasswordToggleButtons = document.querySelectorAll('[data-password-toggle]');
             const passwordDependencyInputs = [
                 registerForm?.querySelector('input[name="first_name"]'),
                 registerForm?.querySelector('input[name="last_name"]'),
                 registerForm?.querySelector('input[name="email"]'),
             ].filter(Boolean);
+
+            const syncSectionUnitOptions = (selectedDivision, selectedSection = '') => {
+                if (!sectionUnitSelect) return;
+
+                const allowedSections = sectionOptionsByDivision[selectedDivision] ?? [];
+                sectionUnitSelect.innerHTML = '';
+
+                const placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = allowedSections.length > 0
+                    ? 'Select section/unit'
+                    : 'Select division first';
+                sectionUnitSelect.appendChild(placeholderOption);
+
+                allowedSections.forEach((sectionName) => {
+                    const option = document.createElement('option');
+                    option.value = sectionName;
+                    option.textContent = sectionName;
+                    option.selected = sectionName === selectedSection;
+                    sectionUnitSelect.appendChild(option);
+                });
+
+                sectionUnitSelect.disabled = allowedSections.length === 0;
+
+                if (!allowedSections.includes(selectedSection)) {
+                    sectionUnitSelect.value = '';
+                }
+            };
 
             const openRegisterModal = () => {
                 if (!registerModal) return;
@@ -434,6 +468,13 @@
 
             if (cancelRegisterButton) {
                 cancelRegisterButton.addEventListener('click', closeRegisterModal);
+            }
+
+            if (divisionSelect) {
+                syncSectionUnitOptions(divisionSelect.value, previousSectionUnitValue || '');
+                divisionSelect.addEventListener('change', () => {
+                    syncSectionUnitOptions(divisionSelect.value);
+                });
             }
 
             registerPasswordToggleButtons.forEach((button) => {
@@ -513,20 +554,6 @@
                         passwordStrengthBar.classList.add('bg-amber-400');
                     } else {
                         passwordStrengthBar.classList.add('bg-emerald-500');
-                    }
-                }
-
-                if (passwordStrengthText) {
-                    if (password.length === 0) {
-                        passwordStrengthText.textContent = 'Use a long password that is difficult to guess and unique to this portal.';
-                    } else if (passedChecks <= 2) {
-                        passwordStrengthText.textContent = 'Weak password. Add length, mixed case, symbols, and avoid personal details.';
-                    } else if (passedChecks <= 4) {
-                        passwordStrengthText.textContent = 'Moderate password. Strengthen it further before submitting.';
-                    } else {
-                        passwordStrengthText.textContent = rules.match
-                            ? 'Strong password. Confirmation matches and the password satisfies the current baseline.'
-                            : 'Strong password. Confirm it exactly to complete registration.';
                     }
                 }
             };

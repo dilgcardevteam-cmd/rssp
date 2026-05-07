@@ -3,23 +3,22 @@
 @section('content')
 @php
     $documentMeta = [
-        'application_letter' => ['label' => 'Signed Application letter indicating the position applying for', 'accept' => 'application/pdf'],
-        'pqe_result' => ['label' => 'DILG Pre-Qualifying Exam (PQE) Result', 'accept' => 'application/pdf'],
-        'transcript_records' => ['label' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned', 'accept' => 'application/pdf'],
-        'photocopy_diploma' => ['label' => 'Duly Authenticated Diploma', 'accept' => 'application/pdf'],
-        'signed_pds' => ['label' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)', 'accept' => 'application/pdf'],
-        'signed_work_exp_sheet' => ['label' => 'Fully accomplished and subcribed/notarized Work Experience Sheet (for position/s requiring relevant Experience)', 'accept' => 'application/pdf'],
-        'cert_lgoo_induction' => ['label' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)', 'accept' => 'application/pdf'],
+        'application_letter' => ['label' => '1. Signed Application Letter indicating the position applying for', 'accept' => 'application/pdf'],
+        'signed_pds' => ['label' => '2. Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) with Work Experience Sheet, printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)', 'accept' => 'application/pdf'],
+        'transcript_records' => ['label' => '3. Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned', 'accept' => 'application/pdf'],
+        'photocopy_diploma' => ['label' => '4. Duly authenticated Diploma', 'accept' => 'application/pdf'],
+        'cert_eligibility' => ['label' => '5. Certificate of Eligibility/Board Rating/License', 'accept' => 'application/pdf'],
+        'cert_employment' => ['label' => '6. Certificate of Employment with duties and responsibilities', 'accept' => 'application/pdf'],
+        'ipcr' => ['label' => '7. Performance Rating in the last rating period in the present position', 'accept' => 'application/pdf'],
+        'cert_training' => ['label' => '8. Certificate/s of Training Attended/Participated relevant to the position being applied', 'accept' => 'application/pdf'],
+        'non_academic' => ['label' => '9. Non-academic Awards received within the past 2 years', 'accept' => 'application/pdf'],
+        'cert_lgoo_induction' => ['label' => '10. Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)', 'accept' => 'application/pdf'],
+        'pqe_result' => ['label' => '11. DILG Pre-Qualifying Exam (PQE) Result, if available', 'accept' => 'application/pdf'],
         'passport_photo' => ['label' => 'Passport-Sized Picture', 'accept' => 'application/pdf,image/*'],
-        'cert_eligibility' => ['label' => 'Certificate of Eligibility/Board Rating License', 'accept' => 'application/pdf'],
-        'ipcr' => ['label' => 'Performance Rating in the last rating period in the present position', 'accept' => 'application/pdf'],
-        'non_academic' => ['label' => 'Non-academic Awards received within the past 2 years', 'accept' => 'application/pdf'],
-        'cert_training' => ['label' => 'Certificate/s of Training Attended/Participated relevant to the position being applied', 'accept' => 'application/pdf'],
+        'signed_work_exp_sheet' => ['label' => 'Work Experience Sheet', 'accept' => 'application/pdf'],
         'designation_order' => ['label' => 'Confirmed Designation Order/s', 'accept' => 'application/pdf'],
-        'grade_masteraldoctorate' => ['label' => 'Certificate of Grades with Masteral/Doctorate Units Earned', 'accept' => 'application/pdf'],
-        'tor_masteraldoctorate' => ['label' => 'TOR with Masteral/Doctorate Degree', 'accept' => 'application/pdf'],
-        'cert_employment' => ['label' => 'Certificate of Employment with duties and responsibilities', 'accept' => 'application/pdf'],
-        'other_documents' => ['label' => 'Other Documents Submitted', 'accept' => 'application/pdf'],
+        'grade_masteraldoctorate' => ['label' => 'Certificate of Grades with Masteral Units Earned', 'accept' => 'application/pdf'],
+        'tor_masteraldoctorate' => ['label' => 'TOR with Masteral Degree', 'accept' => 'application/pdf'],
     ];
 
     $isApplicationFlow = !empty($applicationVacancyId);
@@ -176,16 +175,7 @@
 
                 <p id="doc-track-hint" class="mb-6 text-sm text-slate-600"></p>
 
-                <div id="documents-container">
-                    <div id="required-section" class="mb-6">
-                        <h4 class="text-sm font-semibold text-gray-500 mb-3">Required<span class="text-red-600"> *</span></h4>
-                        <div id="required-list"></div>
-                    </div>
-
-                    <div id="other-section" class="mb-6 pt-6 border-t border-gray-300">
-                        <h4 class="text-sm font-semibold text-gray-500 mb-3">Other Documents:</h4>
-                        <div id="other-list"></div>
-                    </div>
+                <div id="documents-container" class="flex flex-col gap-3">
 
                     <input type="hidden" id="pqe_result_status_input" name="pqe_result_status" value="{{ $pqeRequirement }}">
 
@@ -375,51 +365,7 @@
     const lockedTrack = @json($activeTrack);
 
     function reorderDocumentRows(track) {
-        const container = document.getElementById('documents-container');
-        if (!container) return;
-        const requiredList = container.querySelector('#required-list');
-        const otherList = container.querySelector('#other-list');
-        if (!requiredList || !otherList) return;
-
-        const pqeRequired = getPqeRequirementState() !== 'none';
-
-        const rows = Array.from(container.querySelectorAll('.doc-row'));
-        rows.sort((a, b) => {
-            const baseReqA = track === 'COS'
-                ? a.dataset.baseRequiredCos === '1'
-                : a.dataset.baseRequiredPlantilla === '1';
-            const baseReqB = track === 'COS'
-                ? b.dataset.baseRequiredCos === '1'
-                : b.dataset.baseRequiredPlantilla === '1';
-            const isPqeA = (a.querySelector('.doc-required-badge')?.dataset.docType || '') === 'pqe_result';
-            const isPqeB = (b.querySelector('.doc-required-badge')?.dataset.docType || '') === 'pqe_result';
-            const reqA = baseReqA && (!isPqeA || pqeRequired);
-            const reqB = baseReqB && (!isPqeB || pqeRequired);
-
-            if (reqA !== reqB) {
-                return reqB - reqA; // required first
-            }
-
-            const orderA = Number(a.dataset.order || 0);
-            const orderB = Number(b.dataset.order || 0);
-            return orderA - orderB;
-        });
-
-        // Clear existing lists
-        requiredList.innerHTML = '';
-        otherList.innerHTML = '';
-
-        // Append into respective sections
-        rows.forEach((row) => {
-            const baseReq = track === 'COS' ? row.dataset.baseRequiredCos === '1' : row.dataset.baseRequiredPlantilla === '1';
-            const isPqe = (row.querySelector('.doc-required-badge')?.dataset.docType || '') === 'pqe_result';
-            const isRequiredNow = baseReq && (!isPqe || pqeRequired);
-            if (isRequiredNow) {
-                requiredList.appendChild(row);
-            } else {
-                otherList.appendChild(row);
-            }
-        });
+        // We no longer reorder rows; they stay in the exact numerical order
     }
 
     function getPqeRequirementState() {

@@ -260,7 +260,7 @@
                 <div class="w-full mb-6 border-b border-dashed border-gray-300 pb-4">
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between w-full gap-2">
                         <div class="w-full md:w-2/3">
-                            <h3 class="text-gray-700 font-medium">Application Letter</h3>
+                            <h3 class="text-gray-700 font-medium">1. Signed Application Letter indicating the position applying for</h3>
                             @if(!empty($documents?->application_letter))
                                 <div class="text-sm text-green-600 mt-2">
                                     ✅ File uploaded:
@@ -284,23 +284,21 @@
                 </div>
                 
                 @php $fields = [
-      'application_letter' => 'Signed Application letter indicating the position applying for',
-      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result',
-      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned',
-      'photocopy_diploma' => 'Duly Authenticated Diploma',
-      'signed_pds' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)',
-      'signed_work_exp_sheet' => 'Fully accomplished and subcribed/notarized Work Experience Sheet (for position/s requiring relevant Experience)',
-      'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
-      'passport_photo' => 'Passport-Sized Picture',
-      'cert_eligibility' => 'Certificate of Eligibility/Board Rating License',
-      'ipcr' => 'Performance Rating in the last rating period in the present position',
-      'non_academic' => 'Non-academic Awards received within the past 2 years',
-      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
-      'designation_order' => 'Confirmed Designation Order/s',
-      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral/Doctorate Units Earned',
-      'tor_masteraldoctorate' => 'TOR with Masteral/Doctorate Degree',
-      'cert_employment' => 'Certificate of Employment with duties and responsibilities',
-      'other_documents' => 'Other Documents Submitted',
+                    'signed_pds' => '2. Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) with Work Experience Sheet, printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
+                    'transcript_records' => '3. Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned',
+                    'photocopy_diploma' => '4. Duly authenticated Diploma',
+                    'cert_eligibility' => '5. Certificate of Eligibility/Board Rating/License',
+                    'cert_employment' => '6. Certificate of Employment with duties and responsibilities',
+                    'ipcr' => '7. Performance Rating in the last rating period in the present position',
+                    'cert_training' => '8. Certificate/s of Training Attended/Participated relevant to the position being applied',
+                    'non_academic' => '9. Non-academic Awards received within the past 2 years',
+                    'cert_lgoo_induction' => '10. Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
+                    'pqe_result' => '11. DILG Pre-Qualifying Exam (PQE) Result, if available',
+                    'passport_photo' => 'Passport-Sized Picture',
+                    'signed_work_exp_sheet' => 'Work Experience Sheet',
+                    'designation_order' => 'Confirmed Designation Order/s',
+                    'grade_masteraldoctorate' => 'Certificate of Grades with Masteral Units Earned',
+                    'tor_masteraldoctorate' => 'TOR with Masteral Degree',
                 ]; @endphp
                 
                 @foreach($fields as $key => $label)

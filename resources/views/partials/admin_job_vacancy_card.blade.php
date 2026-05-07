@@ -5,9 +5,12 @@
 </style>
 <tr class="text-sm text-[#0D2B70] select-none hover:bg-blue-50 transition-colors duration-200">
   <td class="w-[10%] px-3 py-2 text-center font-semibold">
-    <div class="flex items-center justify-center gap-1.5">
-      <div class="h-2.5 w-2.5 rounded-full {{ $vacancy->status === 'OPEN' ? 'bg-green-500' : 'bg-red-500' }}"></div>
-      {{ $vacancy->vacancy_id }}
+    <div class="flex flex-col items-center justify-center">
+      <div class="flex items-center justify-center gap-1.5">
+        <div class="h-2.5 w-2.5 flex-shrink-0 rounded-full {{ $vacancy->status === 'OPEN' ? 'bg-green-500' : 'bg-red-500' }}"></div>
+        <span class="truncate" title="{{ $vacancy->plantilla_item_no ?: 'N/A' }}">{{ $vacancy->plantilla_item_no ?: 'N/A' }}</span>
+      </div>
+      <span class="text-[10px] text-gray-500 font-normal mt-0.5">ID: {{ $vacancy->vacancy_id }}</span>
     </div>
   </td>
   <td class="w-[25%] px-3 py-2 text-center">
@@ -19,7 +22,7 @@
         : ($vacancyTypeRaw !== '' ? $vacancyTypeRaw : '');
     @endphp
     <p class="text-xs italic text-[#0D2B70]/70">
-      {{ $vacancyTypeLabel }}@if(filled($vacancy->plantilla_item_no)), <span class="font-bold text-[#0D2B70]">{{ $vacancy->plantilla_item_no }}</span>@endif
+      {{ $vacancyTypeLabel }}
     </p>
   </td>
   <td class="w-[15%] px-3 py-2 text-center">&#8369;{{ number_format($vacancy->monthly_salary, 2) }}</td>
@@ -74,6 +77,32 @@
           </a>
         </div>
       </div>
+
+      <button
+        onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this vacancy? This action cannot be undone.')) { 
+          fetch('{{ route('vacancies.destroy', $vacancy->vacancy_id) }}', { 
+            method: 'DELETE', 
+            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } 
+          })
+          .then(response => response.json())
+          .then(data => { 
+            if(data.success) { 
+                window.location.reload(); 
+            } else { 
+                alert(data.message || 'Failed to delete vacancy'); 
+            } 
+          })
+          .catch(err => { 
+            console.error(err);
+            alert('An error occurred while deleting the vacancy.'); 
+          });
+        }"
+        class="rounded-md border border-red-600 px-2.5 py-1 text-xs font-bold text-red-600 transition-all duration-300 hover:scale-105 hover:bg-red-600 hover:text-white hover:shadow-md"
+        aria-label="Delete Vacancy"
+        title="Delete Vacancy"
+      >
+        Delete
+      </button>
     </div>
   </td>
 </tr>

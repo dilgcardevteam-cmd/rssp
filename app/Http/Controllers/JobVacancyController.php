@@ -1397,7 +1397,7 @@ class JobVacancyController extends Controller
             'salary_grade' => ['required', 'regex:/^SG-\\d{2}$/'],
             'pcn_no' => 'nullable|string',
             'plantilla_item_no' => 'nullable|string',
-            'csc_form' => [Rule::requiredIf($requiresCscFormUpload), 'nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
 
         if (!$this->hrDivisionCanManageVacancy($vacancy)) {
@@ -1622,7 +1622,7 @@ class JobVacancyController extends Controller
                 'to_position' => 'nullable|string',
                 'to_office' => 'nullable|string',
                 'to_office_address' => 'nullable|string',
-                'csc_form' => [Rule::requiredIf($requiresPositionModeCscFormUpload), 'nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+                'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
             ]);
 
             if ($this->isHrDivisionAdmin() && strcasecmp((string) ($validated['vacancy_type'] ?? ''), 'COS') !== 0) {
@@ -1691,7 +1691,7 @@ class JobVacancyController extends Controller
             'to_office_address' => 'required|string',
 
             // CSC Form
-            'csc_form' => [Rule::requiredIf($requiresCscFormUpload), 'nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
         ]);
 
         if ($this->isHrDivisionAdmin() && strcasecmp((string) ($validated['vacancy_type'] ?? ''), 'COS') !== 0) {
@@ -2082,6 +2082,28 @@ class JobVacancyController extends Controller
                     }
                 }
             }
+
+            // Fallback to defaults if the database table is empty or missing
+            if (empty($assessmentEligibilityOptions)) {
+                $assessmentEligibilityOptions = [
+                    ['name' => 'CSC Professional Eligibility', 'legal_basis' => 'CSR 2017 / PD 807', 'level' => 'Second Level'],
+                    ['name' => 'CSC Subprofessional Eligibility', 'legal_basis' => 'CSR 2017 / PD 807', 'level' => 'First Level'],
+                    ['name' => 'Bar/Board Eligibility', 'legal_basis' => 'RA 1080', 'level' => 'Second Level'],
+                    ['name' => 'Honor Graduate Eligibility', 'legal_basis' => 'PD 907', 'level' => 'Second Level'],
+                    ['name' => 'Foreign School Honor Graduate Eligibility', 'legal_basis' => 'CSC Resolution No. 1302714', 'level' => 'Second Level'],
+                    ['name' => 'Scientific and Technological Specialist Eligibility', 'legal_basis' => 'PD 997', 'level' => 'Second Level'],
+                    ['name' => 'Electronic Data Processing Specialist Eligibility', 'legal_basis' => 'CSC Resolution No. 90-083', 'level' => 'Second Level'],
+                    ['name' => 'Skills Eligibility – Category II', 'legal_basis' => 'CSC MC No. 11, s. 1996, as amended', 'level' => 'First Level'],
+                    ['name' => 'Barangay Official Eligibility', 'legal_basis' => 'RA 7160', 'level' => 'First Level'],
+                    ['name' => 'Barangay Health Worker Eligibility', 'legal_basis' => 'RA 7883', 'level' => 'First Level'],
+                    ['name' => 'Barangay Nutrition Scholar Eligibility', 'legal_basis' => 'PD 1569', 'level' => 'First Level'],
+                    ['name' => 'Sanggunian Member First Level Eligibility', 'legal_basis' => 'RA 10156', 'level' => 'First Level'],
+                    ['name' => 'Sanggunian Member Second Level Eligibility', 'legal_basis' => 'RA 10156', 'level' => 'Second Level'],
+                    ['name' => 'Veteran Preference Rating Eligibility', 'legal_basis' => 'Professional or Subprofessional, depending on exam/rating', 'level' => 'Second Level'],
+                    ['name' => 'Career Service Eligibility – Preference Rating', 'legal_basis' => 'CSE-PR', 'level' => 'Second Level'],
+                    ['name' => 'Career Service Eligibility – Preference Rating for Military and Uniformed Personnel', 'legal_basis' => 'CSE-PR for MUP', 'level' => 'Second Level'],
+                ];
+            }
         } catch (\Throwable $e) {
             Log::warning('Unable to load eligibility preset options for initial assessment.', [
                 'error' => $e->getMessage(),
@@ -2127,7 +2149,7 @@ class JobVacancyController extends Controller
 
             // Sort by name
             $assessmentEligibilityOptions = collect($assessmentEligibilityOptions)
-                ->sortBy(fn($item) => strnatcasecmp($item['name'], $item['name']))
+                ->sortBy(fn($item) => strtolower($item['name']))
                 ->values()
                 ->all();
         } catch (\Throwable $e) {
@@ -2154,10 +2176,7 @@ class JobVacancyController extends Controller
             'qualificationChecks' => $qualificationGateState['checks'],
             'missingQualificationLabels' => $missingQualificationLabels,
             'assessmentProgramOptions' => $assessmentProgramOptions,
-            'assessmentEligibilityOptions' => $this->filterEligibilityOptionsByEducation(
-                $assessmentEligibilityOptions,
-                Auth::id()
-            ),
+            'assessmentEligibilityOptions' => $assessmentEligibilityOptions,
         ]);
 
 
@@ -2295,6 +2314,37 @@ class JobVacancyController extends Controller
             'vacancies' => $vacancies,
             'isHrDivisionUser' => $isHrDivisionUser,
         ])->render();
+    }
+
+    public function destroyVacancy($vacancy_id)
+    {
+        $vacancy = JobVacancy::where('vacancy_id', $vacancy_id)->firstOrFail();
+        
+        // Security check
+        if (!$this->hrDivisionCanManageVacancy($vacancy)) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $vacancy->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vacancy deleted successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error deleting vacancy: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete vacancy.'
+            ], 500);
+        }
     }
 
 

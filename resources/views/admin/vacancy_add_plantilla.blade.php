@@ -91,23 +91,22 @@
         ? array_values(array_unique(array_values(array_filter($persistedSupportingDocumentSelection, fn($doc) => in_array((string) $doc, $allSupportingDocumentTypes, true)))))
         : $defaultRequiredSupportingDocuments;
       $documentLabelMap = [
-        'application_letter' => 'Application Letter',
-        'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
-        'transcript_records' => 'Transcript of Records (Baccalaureate Degree)',
-        'photocopy_diploma' => 'Diploma',
-        'signed_pds' => 'Signed and Subscribed Personal Data Sheet',
-        'signed_work_exp_sheet' => 'Signed Work Experience Sheet',
-        'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training',
-        'passport_photo' => '2" x 2" or Passport Size Picture',
-        'cert_eligibility' => 'Certificate of Eligibility/Board Rating',
-        'ipcr' => 'Certification of Numerical Rating/Performance Rating/IPCR',
-        'non_academic' => 'Non-Academic Awards Received',
-        'cert_training' => 'Certificates of Training/Participation',
-        'designation_order' => 'Confirmed Designation Order/s',
-        'grade_masteraldoctorate' => 'Certificate of Grades with Masteral/Doctorate Units Earned',
-        'tor_masteraldoctorate' => 'TOR with Masteral/Doctorate Degree',
-        'cert_employment' => 'Certificate of Employment',
-        'other_documents' => 'Other Documents Submitted',
+      'application_letter' => 'Signed Application Letter indicating the position applying for',
+      'signed_pds' => 'Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) with Work Experience Sheet, printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
+      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned',
+      'photocopy_diploma' => 'Duly authenticated Diploma',
+      'cert_eligibility' => 'Certificate of Eligibility/Board Rating/License',
+      'cert_employment' => 'Certificate of Employment with duties and responsibilities',
+      'ipcr' => 'Performance Rating in the last rating period in the present position',
+      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
+      'non_academic' => 'Non-academic Awards received within the past 2 years',
+      'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
+      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result, if available',
+      'passport_photo' => 'Passport-Sized Picture',
+      'signed_work_exp_sheet' => 'Work Experience Sheet',
+      'designation_order' => 'Confirmed Designation Order/s',
+      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral Units Earned',
+      'tor_masteraldoctorate' => 'TOR with Masteral Degree',
       ];
     @endphp
 
@@ -203,20 +202,6 @@
 
             <div class="grid gap-5 md:grid-cols-2">
               <div>
-                <label class="{{ $fieldLabel }}">Deadline of Application <span class="text-red-600">*</span></label>
-                <input id="closing_date" type="date" name="closing_date" value="{{ $displayClosingDate }}"
-                  placeholder="Select deadline" {{ $disablePositionFields ? 'disabled' : '' }} class="{{ $fieldInput }}">
-                @if($disablePositionFields)
-                  <input type="hidden" name="closing_date" value="{{ $defaultClosingDate }}">
-                @endif
-                <p id="closing_date_error" class="mt-1 hidden text-sm text-red-600">Deadline of application is required.
-                </p>
-                @if($disablePositionFields)
-                  <p class="mt-1 text-xs leading-5 text-slate-500">Deadline is managed in Add Vacancy.</p>
-                @endif
-              </div>
-
-              <div>
                 <label class="{{ $fieldLabel }}">Place of Assignment <span class="text-red-600">*</span></label>
                 @php
                   $placeOptions = ['DILG-CAR', 'DILG-CAR Regional Office', 'Apayao Provincial Office', 'Abra Provincial Office', 'Mountain Province Provincial Office', 'Ifugao Provincial Office', 'Kalinga Provincial Office', 'Benguet Provincial Office', 'Baguio City Office'];
@@ -238,18 +223,35 @@
                 <p id="place_of_assignment_error" class="mt-1 hidden text-sm text-red-600">Place of assignment is
                   required.</p>
               </div>
-            </div>
 
-            <div class="grid gap-5 md:grid-cols-2">
-              <div>
-                <label class="{{ $fieldLabel }}">Position Control Number</label>
-                  <input type="text" id="pcn_no" name="pcn_no" value="{{ old('pcn_no', $formSource?->pcn_no ?? '') }}"
-                    class="{{ $fieldInput }}" autocomplete="off">
-              </div>
               <div>
                 <label class="{{ $fieldLabel }}">Plantilla Item No.</label>
                 <input type="text" name="plantilla_item_no"
                   value="{{ old('plantilla_item_no', $formSource?->plantilla_item_no ?? '') }}" class="{{ $fieldInput }}">
+              </div>
+            </div>
+
+            <div class="grid gap-5 md:grid-cols-2">
+              @if(!$positionMode)
+              <div>
+                <label class="{{ $fieldLabel }}">Deadline of Application <span class="text-red-600">*</span></label>
+                <input id="closing_date" type="date" name="closing_date" value="{{ $displayClosingDate }}"
+                  placeholder="Select deadline" {{ $disablePositionFields ? 'disabled' : '' }} class="{{ $fieldInput }}">
+                @if($disablePositionFields)
+                  <input type="hidden" name="closing_date" value="{{ $defaultClosingDate }}">
+                @endif
+                <p id="closing_date_error" class="mt-1 hidden text-sm text-red-600">Deadline of application is required.
+                </p>
+                @if($disablePositionFields)
+                  <p class="mt-1 text-xs leading-5 text-slate-500">Deadline is managed in Add Vacancy.</p>
+                @endif
+              </div>
+              @endif
+              
+              <div>
+                <label class="{{ $fieldLabel }}">Position Control Number</label>
+                  <input type="text" id="pcn_no" name="pcn_no" value="{{ old('pcn_no', $formSource?->pcn_no ?? '') }}"
+                    class="{{ $fieldInput }}" autocomplete="off">
               </div>
             </div>
           </div>
@@ -354,7 +356,7 @@
             </p>
           </div>
 
-          <div class="grid gap-3 md:grid-cols-2">
+          <div class="flex flex-col gap-3">
             @foreach($allSupportingDocumentTypes as $supportingDocType)
               @php
                 $supportingDocKey = (string) $supportingDocType;
@@ -422,6 +424,7 @@
           </section>
         @endif
 
+        @if(!$positionMode)
         <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="mb-6 border-b border-slate-200 pb-5">
             <h2 class="{{ $sectionTitle }}">CSC Form Attachment <span class="text-red-600">*</span></h2>
@@ -461,6 +464,7 @@
             </p>
           @endif
         </section>
+        @endif
       </form>
 
       <div
@@ -1529,7 +1533,7 @@
       // Validate basics
       if (!positionTitle || !positionTitle.value.trim()) { errors.push('Position title is required.'); show(eTitle, 'Position title is required.'); }
       if (!salaryGrade || !/^SG-\d{2}$/.test(String(salaryGrade.value || '').trim())) { errors.push('Salary grade must be in SG-00 format.'); show(eSalaryGrade, 'Salary grade must be in SG-00 format (example: SG-23).'); }
-      if (!disablePositionFields && !closingDate.value) { errors.push('Deadline is required.'); show(eClosing, 'Deadline of application is required.'); }
+      if (closingDate && !closingDate.value) { errors.push('Deadline is required.'); show(eClosing, 'Deadline of application is required.'); }
       if (!place.value) { errors.push('Place of assignment is required.'); show(ePlace, 'Place of assignment is required.'); }
       const educationCode = document.getElementById('minimum_education_code');
       const educationHidden = document.getElementById('qualification_education');
@@ -1567,10 +1571,16 @@
         hasEligibilityValue = true;
       }
       if (!hasEligibilityValue) { errors.push('At least one eligibility is required.'); show(eEligibility, 'At least one eligibility is required.'); }
+      // CSC form is required if not in position mode (input will exist in DOM)
       const cscInput = document.getElementById('csc_form_upload_plantilla');
-      const hasExistingCsc = cscInput?.dataset?.hasExisting === '1';
-      const hasSelectedCsc = Boolean(cscInput?.files && cscInput.files.length > 0);
-      if (!(hasExistingCsc || hasSelectedCsc)) { errors.push('CSC form attachment is required for Plantilla.'); show(eCsc, 'CSC form attachment is required for Plantilla.'); }
+      if (cscInput) {
+        const hasExistingCsc = cscInput?.dataset?.hasExisting === '1';
+        const hasSelectedCsc = Boolean(cscInput?.files && cscInput.files.length > 0);
+        if (!(hasExistingCsc || hasSelectedCsc)) { 
+          errors.push('CSC form attachment is required for Plantilla.'); 
+          show(eCsc, 'CSC form attachment is required for Plantilla.'); 
+        }
+      }
       // Salary checks
       const MAX = 1000000;
       const MIN = 0;
@@ -1592,6 +1602,12 @@
         text.textContent = 'SAVING...';
 
         form.submit();
+      } else {
+        // Auto-scroll to the first visible error
+        const firstError = document.querySelector('.text-red-500:not(.hidden), .text-red-600:not(.hidden)');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       }
     });
 

@@ -44,23 +44,22 @@
 
         // Keep labels aligned with applicant document upload (resources/views/pds/c5.blade.php).
         $documentMetaForLanding = [
-            'application_letter' => 'Application Letter',
-            'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
-            'transcript_records' => 'Transcript of Records (Baccalaureate Degree)',
-            'photocopy_diploma' => 'Diploma',
-            'signed_pds' => 'Signed and Subscribed Personal Data Sheet',
-            'signed_work_exp_sheet' => 'Signed Work Experience Sheet',
-            'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training',
-            'passport_photo' => '2" x 2" or Passport Size Picture',
-            'cert_eligibility' => 'Certificate of Eligibility/Board Rating',
-            'ipcr' => 'Certification of Numerical Rating/Performance Rating/IPCR (If Any)',
-            'non_academic' => 'Non-Academic Awards Received (If Any)',
-            'cert_training' => 'Certificates of Training/Participation Relevant to the Position',
-            'designation_order' => 'Confirmed Designation Order/s (If Any)',
-            'grade_masteraldoctorate' => 'Certificate of Grades with Masteral/Doctorate Units Earned',
-            'tor_masteraldoctorate' => 'TOR with Masteral/Doctorate Degree',
-            'cert_employment' => 'Certificate of Employment (If Any)',
-            'other_documents' => 'Other Documents Submitted',
+            'application_letter' => '1. Signed Application Letter indicating the position applying for',
+            'signed_pds' => '2. Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) with Work Experience Sheet, printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
+            'transcript_records' => '3. Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned',
+            'photocopy_diploma' => '4. Duly authenticated Diploma',
+            'cert_eligibility' => '5. Certificate of Eligibility/Board Rating/License',
+            'cert_employment' => '6. Certificate of Employment with duties and responsibilities',
+            'ipcr' => '7. Performance Rating in the last rating period in the present position',
+            'cert_training' => '8. Certificate/s of Training Attended/Participated relevant to the position being applied',
+            'non_academic' => '9. Non-academic Awards received within the past 2 years',
+            'cert_lgoo_induction' => '10. Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
+            'pqe_result' => '11. DILG Pre-Qualifying Exam (PQE) Result, if available',
+            'passport_photo' => 'Passport-Sized Picture',
+            'signed_work_exp_sheet' => 'Work Experience Sheet',
+            'designation_order' => 'Confirmed Designation Order/s',
+            'grade_masteraldoctorate' => 'Certificate of Grades with Masteral Units Earned',
+            'tor_masteraldoctorate' => 'TOR with Masteral Degree',
         ];
 
         $allDocumentTypesForLanding = array_keys($documentMetaForLanding);
@@ -395,7 +394,7 @@
                             </div>
                         </article>
                     @empty
-                        <div class="text-center py-12 text-gray-500 flex flex-col items-center justify-center">
+                        <div id="emptyState" class="col-span-full text-center py-12 text-gray-500 flex flex-col items-center justify-center">
                             <div class="bg-gray-100 p-4 rounded-full mb-3">
                                 <i data-feather="inbox" class="w-8 h-8 text-gray-400"></i>
                             </div>

@@ -83,23 +83,22 @@
       ? array_values(array_unique(array_values(array_filter($persistedSupportingDocumentSelection, fn ($doc) => in_array((string) $doc, $allSupportingDocumentTypes, true)))))
       : $defaultRequiredSupportingDocuments;
     $documentLabelMap = [
-      'application_letter' => 'Application Letter',
-      'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
-      'transcript_records' => 'Transcript of Records (Baccalaureate Degree)',
-      'photocopy_diploma' => 'Diploma',
-      'signed_pds' => 'Signed and Subscribed Personal Data Sheet',
-      'signed_work_exp_sheet' => 'Signed Work Experience Sheet',
-      'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training',
-      'passport_photo' => '2" x 2" or Passport Size Picture',
-      'cert_eligibility' => 'Certificate of Eligibility/Board Rating',
-      'ipcr' => 'Certification of Numerical Rating/Performance Rating/IPCR',
-      'non_academic' => 'Non-Academic Awards Received',
-      'cert_training' => 'Certificates of Training/Participation',
+      'application_letter' => 'Signed Application Letter indicating the position applying for',
+      'signed_pds' => 'Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) with Work Experience Sheet, printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
+      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned',
+      'photocopy_diploma' => 'Duly authenticated Diploma',
+      'cert_eligibility' => 'Certificate of Eligibility/Board Rating/License',
+      'cert_employment' => 'Certificate of Employment with duties and responsibilities',
+      'ipcr' => 'Performance Rating in the last rating period in the present position',
+      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
+      'non_academic' => 'Non-academic Awards received within the past 2 years',
+      'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
+      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result, if available',
+      'passport_photo' => 'Passport-Sized Picture',
+      'signed_work_exp_sheet' => 'Work Experience Sheet',
       'designation_order' => 'Confirmed Designation Order/s',
-      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral/Doctorate Units Earned',
-      'tor_masteraldoctorate' => 'TOR with Masteral/Doctorate Degree',
-      'cert_employment' => 'Certificate of Employment',
-      'other_documents' => 'Other Documents Submitted',
+      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral Units Earned',
+      'tor_masteraldoctorate' => 'TOR with Masteral Degree',
     ];
   @endphp
 
@@ -190,6 +189,7 @@
           </div>
 
           <div class="grid gap-5 md:grid-cols-2">
+            @if(!$positionMode)
             <div>
               <label class="{{ $fieldLabel }}">Deadline of Application <span class="text-red-600">*</span></label>
               <input
@@ -208,6 +208,7 @@
                 <p class="{{ $helperText }}">Deadline is managed in Add Vacancy.</p>
               @endif
             </div>
+            @endif
 
             <div>
               <label class="{{ $fieldLabel }}">Place of Assignment <span class="text-red-600">*</span></label>
@@ -332,7 +333,7 @@
           </p>
         </div>
 
-        <div class="grid gap-3 md:grid-cols-2">
+        <div class="flex flex-col gap-3">
           @foreach($allSupportingDocumentTypes as $supportingDocType)
             @php
               $supportingDocKey = (string) $supportingDocType;
@@ -1164,6 +1165,12 @@ window.addEventListener('confirm-cos-save', () => {
         if (text) text.textContent = 'SAVING...';
         
         form.submit();
+    } else {
+        // Auto-scroll to the first visible error
+        const firstError = document.querySelector('.text-red-500:not(.hidden), .text-red-600:not(.hidden)');
+        if (firstError) {
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 });
 

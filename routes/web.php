@@ -639,6 +639,7 @@ Route::middleware([RedirectIfNotAdmin::class])->group(function () {
     Route::put('/admin/vacancies/plantilla/{vacancy_id}/edit', [JobVacancyController::class, 'update'])->name('plantilla.update');
     Route::get('/admin/vacancies_management', [JobVacancyController::class, 'jobVacancyManagement'])->name('vacancies_management');
     Route::get('/admin/vacancies_management/filter', [JobVacancyController::class, 'adminFilterVacancy'])->name('admin.vacancies.filter');
+    Route::delete('/admin/vacancies_management/{vacancy_id}', [JobVacancyController::class, 'destroyVacancy'])->name('vacancies.destroy');
     Route::get('/admin/vacancies/{vacancy_id}/edit', [JobVacancyController::class, 'edit'])->name('vacancies.edit');
     Route::put('/admin/vacancies/cos/{vacancy_id}/edit', [JobVacancyController::class, 'update'])->name('vacancies.update');
     Route::delete('/admin/vacancies/{vacancy_id}/delete', [JobVacancyController::class, 'delete'])->name('vacancies.delete');
@@ -1013,19 +1014,118 @@ Route::get('/preview-file/{path}', function ($path) {
         return response($file, 200)->header("Content-Type", $type);
     }
 
-    // Otherwise show "Preview Not Available"
-    return response('
-        <html>
-        <body style="display:flex;justify-content:center;align-items:center;height:100%;margin:0;font-family:sans-serif;background-color:#f9fafb;color:#6b7280;">
-            <div style="text-align:center;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:1rem;display:inline-block;"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                <p style="font-size:1.125rem;font-weight:500;">Preview Not Available</p>
-                <p style="font-size:0.875rem;margin-top:0.5rem;color:#9ca3af;">File type: ' . htmlspecialchars($type) . '</p>
-            </div>
+    $downloadUrl = route('preview.file.download', ['path' => $path]);
+    $isDocx = str_ends_with(strtolower($decodedPath), '.docx');
+    $fileName = htmlspecialchars(basename($decodedPath));
+    
+    $html = '
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Document Preview</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <script src="https://unpkg.com/jszip/dist/jszip.min.js"></script>
+            <script src="https://unpkg.com/docx-preview/dist/docx-preview.min.js"></script>
+            <style>
+                #docx-container > .docx-wrapper { background: transparent !important; padding: 2rem !important; display: flex; flex-direction: column; align-items: center; }
+                #docx-container > .docx-wrapper > section.docx { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; margin: 0 auto 2rem auto !important; width: max-content !important; min-width: 800px !important; overflow: visible !important; }
+                #docx-container table { max-width: 100%; }
+            </style>
+        </head>
+        <body class="bg-gray-100 min-h-screen">
+            <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
+                <div class="bg-white rounded-xl shadow p-4 sm:p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                        <div>
+                            <h1 class="text-lg sm:text-xl font-bold text-gray-900">Document Preview</h1>
+                            <p class="text-sm text-gray-500">' . $fileName . '</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <a
+                                href="' . $downloadUrl . '"
+                                class="inline-flex items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+                            >
+                                Download
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="rounded-lg border border-gray-200 overflow-hidden h-[80vh] bg-gray-200 relative">';
+
+    if ($isDocx) {
+        $html .= '
+                        <div id="docx-container" class="w-full h-full overflow-auto"></div>
+                        <div id="fallback" class="absolute inset-0 flex flex-col items-center justify-center hidden bg-white">
+                            <svg class="w-12 h-12 text-[#0D2B70] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p class="text-lg font-semibold text-gray-800">Preview Failed</p>
+                            <p class="text-sm text-gray-500">We could not render this Word document natively.</p>
+                        </div>
+                        <script>
+                            fetch("' . $downloadUrl . '")
+                                .then(response => response.blob())
+                                .then(blob => {
+                                    const options = {
+                                        inWrapper: true,
+                                        ignoreWidth: true,
+                                        ignoreHeight: false,
+                                        ignoreFonts: false,
+                                        breakPages: true,
+                                        trimXmlDeclaration: true
+                                    };
+                                    docx.renderAsync(blob, document.getElementById("docx-container"), null, options)
+                                        .catch(error => {
+                                            console.error(error);
+                                            document.getElementById("docx-container").style.display = "none";
+                                            document.getElementById("fallback").style.display = "flex";
+                                        });
+                                })
+                                .catch(error => {
+                                    console.error(error);
+                                    document.getElementById("docx-container").style.display = "none";
+                                    document.getElementById("fallback").style.display = "flex";
+                                });
+                        </script>';
+    } else {
+        $html .= '
+                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-white p-6 text-center">
+                            <svg class="w-12 h-12 text-[#0D2B70] mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <p class="text-lg font-semibold text-gray-800">Browser Preview Not Supported</p>
+                            <p class="text-sm text-gray-500 mt-2">Web browsers cannot natively preview this file format.</p>
+                            <p class="text-xs text-gray-400 mt-1">File type: ' . htmlspecialchars($type) . '</p>
+                        </div>';
+    }
+
+    $html .= '
+                    </div>
+                </div>
+            </main>
         </body>
-        </html>
-    ', 200);
+        </html>';
+
+    return response($html, 200);
 })->where('path', '.*')->name('preview.file')->middleware('signed');
+
+Route::get('/preview-file-download/{path}', function ($path) {
+    $decodedPath = base64_decode($path);
+    if ($decodedPath === false) {
+        abort(404);
+    }
+
+    $fullPath = collect([
+        storage_path('app/attachments'),
+        storage_path('app/public'),
+        public_path('storage'),
+    ])->map(fn($root) => $root . DIRECTORY_SEPARATOR . $decodedPath)
+      ->first(fn($p) => file_exists($p));
+
+    if (!$fullPath) {
+        abort(404);
+    }
+
+    return response()->download($fullPath);
+})->where('path', '.*')->name('preview.file.download');
 
 Route::get('storage/{filename}', function ($filename) {
     $normalizedFilename = trim(str_replace(["\0", "\r", "\n"], '', str_replace('\\', '/', (string) $filename)));

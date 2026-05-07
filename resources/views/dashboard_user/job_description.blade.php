@@ -572,7 +572,7 @@
 
         <div id="initialAssessmentEligibilityModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-6 border border-[#0D2B70]/10">
-                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Initial Assessment</p>
+                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
                 <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 2</h2>
                 <p class="text-sm text-gray-700 mt-3 font-medium">What is your civil service eligibility?</p>
                 <div class="mt-4">
@@ -608,12 +608,12 @@
 
         <div id="initialAssessmentPqeModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-[#0D2B70]/10">
-                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Initial Assessment</p>
+                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
                 <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 3</h2>
                 <p class="text-sm text-gray-700 mt-3 font-medium">Have you taken and passed the PQE (Pre Qualifying Exam)?</p>
                 <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" onclick="closeInitialAssessmentPqeModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                        Close
+                    <button type="button" onclick="goBackToInitialAssessmentEligibility()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                        Back
                     </button>
                     <button type="button" onclick="answerInitialAssessmentPqe(false)" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
                         No
@@ -627,12 +627,12 @@
 
         <div id="initialAssessmentSubscribedPdsModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-[#0D2B70]/10">
-                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Initial Assessment</p>
+                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
                 <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 4</h2>
                 <p class="text-sm text-gray-700 mt-3 font-medium">Do you have a subscribed PDS form?</p>
                 <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" onclick="closeInitialAssessmentSubscribedPdsModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                        Close
+                    <button type="button" onclick="goBackToInitialAssessmentPqeOrEligibility()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                        Back
                     </button>
                     <button type="button" onclick="answerInitialAssessmentSubscribedPds(false)" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
                         No
@@ -646,7 +646,7 @@
 
         <div id="initialAssessmentFeedbackModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-[#0D2B70]/10">
-                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Initial Assessment</p>
+                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
                 <h2 id="initialAssessmentFeedbackTitle" class="text-lg font-semibold text-[#002C76] mt-1">Assessment Result</h2>
                 <p id="initialAssessmentFeedbackMessage" class="text-sm text-gray-700 mt-3 leading-6"></p>
                 <div id="initialAssessmentFeedbackNoticeActions" class="mt-6 flex justify-end gap-2">
@@ -1303,6 +1303,16 @@
     function goBackToInitialAssessmentEducation() {
         closeModal('initialAssessmentEligibilityModal');
         openModal('initialAssessmentEducationModal');
+    }
+
+    function goBackToInitialAssessmentPqeOrEligibility() {
+        closeModal('initialAssessmentSubscribedPdsModal');
+        if (typeof initialAssessmentState.hasPqe === 'boolean') {
+            openModal('initialAssessmentPqeModal');
+            return;
+        }
+
+        openModal('initialAssessmentEligibilityModal');
     }
 
     async function completeInitialAssessmentEligibility() {

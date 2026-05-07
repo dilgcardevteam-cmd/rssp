@@ -4,6 +4,7 @@
   [x-cloak] { display: none !important; }
 </style>
 <tr class="text-sm text-[#0D2B70] select-none hover:bg-blue-50 transition-colors duration-200">
+<<<<<<< Updated upstream
   <td class="w-[10%] px-3 py-2 text-center font-semibold">
     <div class="flex flex-col items-center justify-center">
       <div class="flex items-center justify-center gap-1.5">
@@ -11,22 +12,41 @@
         <span class="truncate" title="{{ $vacancy->plantilla_item_no ?: 'N/A' }}">{{ $vacancy->plantilla_item_no ?: 'N/A' }}</span>
       </div>
       <span class="text-[10px] text-gray-500 font-normal mt-0.5">ID: {{ $vacancy->vacancy_id }}</span>
+=======
+  <td class="w-[23%] px-3 py-2 text-center font-semibold">
+    <div class="flex items-center justify-center gap-1.5">
+      <div class="h-2.5 w-2.5 rounded-full {{ $vacancy->status === 'OPEN' ? 'bg-green-500' : 'bg-red-500' }}"></div>
+      @php
+        $isPlantilla = strcasecmp((string) ($vacancy->vacancy_type ?? ''), 'Plantilla') === 0;
+      @endphp
+      {{ ($isPlantilla && filled($vacancy->plantilla_item_no)) ? $vacancy->plantilla_item_no : $vacancy->vacancy_id }}
+>>>>>>> Stashed changes
     </div>
   </td>
-  <td class="w-[25%] px-3 py-2 text-center">
-    <p>{{ $vacancy->position_title }}</p>
+  <td class="w-[30%] px-3 py-2 text-left">
+    <div class="flex flex-col items-center gap-1 leading-tight">
+      <p class="font-medium text-center">{{ $vacancy->position_title }}</p>
     @php
       $vacancyTypeRaw = trim((string) ($vacancy->vacancy_type ?? ''));
       $vacancyTypeLabel = strcasecmp($vacancyTypeRaw, 'cos') === 0
         ? 'Contract of Service'
         : ($vacancyTypeRaw !== '' ? $vacancyTypeRaw : '');
     @endphp
+<<<<<<< Updated upstream
     <p class="text-xs italic text-[#0D2B70]/70">
       {{ $vacancyTypeLabel }}
     </p>
+=======
+      @if($vacancyTypeLabel !== '')
+        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-700">
+          {{ $vacancyTypeLabel }}
+        </span>
+      @endif
+    </div>
+>>>>>>> Stashed changes
   </td>
-  <td class="w-[15%] px-3 py-2 text-center">&#8369;{{ number_format($vacancy->monthly_salary, 2) }}</td>
-  <td class="w-[15%] px-3 py-2 text-center">{{ \Carbon\Carbon::parse($vacancy->closing_date)->format('F j, Y') }}</td>
+  <td class="w-[10%] px-3 py-2 text-center">&#8369;{{ number_format($vacancy->monthly_salary, 2) }}</td>
+  <td class="w-[20%] px-5 py-2 text-center">{{ \Carbon\Carbon::parse($vacancy->closing_date)->format('F j, Y') }}</td>
   <td class="w-[25%] px-3 py-2 text-center">{{ $vacancy->place_of_assignment }}</td>
   <td class="w-[10%] px-3 py-2 text-center">
     <div class="flex items-center justify-center gap-2">

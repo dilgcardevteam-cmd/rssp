@@ -788,12 +788,6 @@
     document.getElementById('placeFilter')?.addEventListener('change', fetchVacancies);
     document.getElementById('sortFilter')?.addEventListener('change', fetchVacancies);
 
-<<<<<<< Updated upstream
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            closeDeleteVacancyModal();
-        }
-=======
     // Handle vacancy deletion from the confirmation modal
     window.addEventListener('confirm-delete-vacancy', () => {
         if (!window._pendingDeleteUrl) return;
@@ -819,7 +813,6 @@
         .finally(() => {
             window._pendingDeleteUrl = null;
         });
->>>>>>> Stashed changes
     });
 </script>
 @endpush

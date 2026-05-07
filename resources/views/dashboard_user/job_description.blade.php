@@ -521,7 +521,7 @@
 
         <div id="initialAssessmentEducationModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-6 border border-[#0D2B70]/10">
-                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Initial Assessment</p>
+                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
                 <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 1</h2>
                 <p class="text-sm text-gray-700 mt-3 font-medium">What is your highest educational attainment?</p>
                 <div class="mt-4">

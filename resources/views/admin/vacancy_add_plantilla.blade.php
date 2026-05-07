@@ -154,6 +154,7 @@
         <input type="hidden" id="supporting_documents_required" name="supporting_documents_required"
           value='@json($selectedSupportingDocuments)'>
 
+        @if(!$positionMode)
         <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="mb-6 border-b border-slate-200 pb-5">
             <h2 class="{{ $sectionTitle }}">Job Information</h2>
@@ -256,6 +257,7 @@
             </div>
           </div>
         </section>
+        @endif
 
         <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="mb-6 border-b border-slate-200 pb-5">

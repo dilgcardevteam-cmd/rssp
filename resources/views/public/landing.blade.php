@@ -116,8 +116,39 @@
                         </div>
                     </div>
                 </div>
-
+<!-- ftext-2xl font-bold text-[#0D2B70] -->
                 <div id="modalJobInfoContainer">
+                    <div class="mb-6 rounded-2xl border border-blue-50 bg-blue-50 p-5 shadow-sm">
+                        <h4 class="font-bold text-[#0D2B70] mb-4 text-xl sm:text-2xl">
+                            Position: <span id="modalPositionTitleInline"></span>
+                        </h4>
+                        <div class="space-y-3 text-sm sm:text-base text-slate-700">
+                            <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2">
+                                <span class="font-semibold text-slate-600">Location:</span>
+                                <span id="modalLocation" class="text-slate-700"></span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2">
+                                <span class="font-semibold text-slate-600">Salary:</span>
+                                <span id="modalSalary" class="text-slate-700"></span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2">
+                                <span class="font-semibold text-slate-600">Job Type:</span>
+                                <span id="modalJobType" class="text-slate-700"></span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2">
+                                <span class="font-semibold text-slate-600">Plantilla Item Number:</span>
+                                <span id="modalPlantillaItemNo" class="text-slate-700"></span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-2">
+                                <span class="font-semibold text-slate-600">Position Control Number:</span>
+                                <span id="modalPcnNo" class="text-slate-700"></span>
+                            </div>
+                                <!-- Deadline row removed -->
+                        </div>
+                    </div>
+
+
+
                     <div class="mb-6">
                         <h4 class="font-bold text-[#0D2B70] mb-3 flex items-center gap-2">
                             <i data-feather="check-circle" class="w-5 h-5"></i>
@@ -159,18 +190,17 @@
                             </ul>
                         </div>
                     </div>
-                    
-                    <div class="mt-6">
-                        <h4 class="font-bold text-[#0D2B70] mb-3 flex items-center gap-2">
-                            <i data-feather="info" class="w-5 h-5"></i>
-                            Additional Information
-                        </h4>
-                        <div class="text-sm text-gray-600 space-y-2" id="additionalInfo">
-                            <p>• Ensure all documents are clear and legible</p>
-                            <p>• Upload in PDF or image format (max 2MB per file)</p>
-                            <p>• Incomplete requirements may delay application processing</p>
+                    <!-- Submission Deadline and Equal Opportunity Statement -->
+                    <div class="mb-6">
+                        <div class="rounded-2xl border-t-2 border-[#0D2B70]"></div>
+                        <div class="py-6 text-center">
+                            <h3 class="text-2xl font-bold text-gray-800">Submission Deadline</h3>
+                            <p id="modalSubmissionDeadlineDate" class="text-red-600 font-bold text-lg mt-2"></p>
                         </div>
+                        <div class="rounded-2xl border-t-2 border-[#0D2B70]"></div>
+                        <p class="mt-4 text-gray-700 italic text-sm">This Office highly encourages all interested and qualified applicants to apply, which include persons with disability (PWD) and members of the indigenous communities, irrespective of sexual orientation and gender identities and/or expression, civil status, religion, and political affiliation. This Office does not discriminate in the selection of employees based on the aforementioned pursuant to Equal Opportunities for Employment Principle (EOP).</p>
                     </div>
+
                     
                     <!-- Login Prompt for Guest Users -->
                     <div class="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
@@ -181,6 +211,9 @@
                     </div>
                 </div>
             </div>
+
+            
+
             
             <!-- Modal Footer -->
             <div class="flex-shrink-0 flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-white rounded-b-3xl">
@@ -309,6 +342,13 @@
                                 'vacancy_id' => $vacancy->vacancy_id,
                                 'position_title' => $vacancy->position_title,
                                 'vacancy_type' => $vacancy->vacancy_type,
+                                'place_of_assignment' => $vacancy->place_of_assignment,
+                                'monthly_salary' => $vacancy->monthly_salary,
+                                'salary_grade' => $vacancy->salary_grade,
+                                'pcn_no' => $vacancy->pcn_no,
+                                'closing_date' => $vacancy->closing_date,
+                                'supporting_documents_required' => $vacancy->supporting_documents_required,
+                                'plantilla_item_no' => $vacancy->plantilla_item_no,
                                 'qualification_education' => $vacancy->qualification_education,
                                 'qualification_training' => $vacancy->qualification_training,
                                 'qualification_experience' => $vacancy->qualification_experience,
@@ -324,6 +364,16 @@
                                         <h3 class="font-bold text-[#0D2B70] text-lg sm:text-xl">{{ $vacancy->position_title }}</h3>
                                         <p class="text-gray-700 text-sm sm:text-base mt-1 font-medium">{{ $vacancy->office_assignment ?? 'DILG - CAR' }}</p>
                                         <p class="text-[#0D2B70]/75 text-sm mt-1 italic">{{ $vacancyTypeDisplay }}</p>
+                                        @if($vacancy->pcn_no || $vacancy->plantilla_item_no)
+                                            <div class="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-[#0D2B70]">
+                                                @if($vacancy->pcn_no)
+                                                    <span class="inline-flex items-center rounded-md bg-blue-50 px-3 py-1 border border-blue-100">PCN: {{ $vacancy->pcn_no }}</span>
+                                                @endif
+                                                @if($vacancy->plantilla_item_no)
+                                                    <span class="inline-flex items-center rounded-md bg-slate-50 px-3 py-1 border border-slate-200">Plantilla Item No.: {{ $vacancy->plantilla_item_no }}</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                     <span class="text-[#0D2B70] font-bold text-base sm:text-lg bg-blue-50 px-4 py-2 rounded-lg w-fit whitespace-nowrap">
                                         @if($vacancy->salary_grade)
@@ -345,7 +395,7 @@
                                             <i data-feather="map-pin" class="w-4 h-4"></i>
                                             <span>{{ $vacancy->place_of_assignment ?? 'DILG-CAR' }}</span>
                                         </div>
-                                        <div class="flex items-center gap-2 text-gray-500 text-sm sm:text-base">
+                                        <div class="flex items-center gap-2 text-red-600 text-sm sm:text-base">
                                             <i data-feather="calendar" class="w-4 h-4"></i>
                                             <span>{{ $processStatus === 'CONCLUDED' ? 'Concluded' : 'Deadline' }}: {{ \Carbon\Carbon::parse($vacancy->closing_date)->format('F d, Y') }}</span>
                                         </div>
@@ -524,7 +574,40 @@
             
             // Set modal title
             document.getElementById('modalJobTitle').textContent = job.position_title;
+            document.getElementById('modalPositionTitleInline').textContent = job.position_title;
             document.getElementById('modalVacancyType').textContent = job.vacancy_type + ' Position';
+
+            const salaryValue = Number(job.monthly_salary);
+            const salaryDisplay = Number.isFinite(salaryValue)
+                ? `SG ${String(job.salary_grade || '').replace(/[^0-9]/g, '') || job.salary_grade || 'N/A'} - PHP ${salaryValue.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                : (job.salary_grade ? `${job.salary_grade}` : 'N/A');
+
+            document.getElementById('modalLocation').textContent = job.place_of_assignment || 'N/A';
+            document.getElementById('modalSalary').textContent = salaryDisplay;
+            document.getElementById('modalJobType').textContent = job.vacancy_type || 'N/A';
+            document.getElementById('modalPlantillaItemNo').textContent = job.plantilla_item_no || 'N/A';
+            document.getElementById('modalPcnNo').textContent = job.pcn_no || 'N/A';
+            // Populate deadline if provided (fills the submission block date)
+            try {
+                let formatted = 'N/A';
+                if (job.closing_date) {
+                    const d = new Date(job.closing_date);
+                    if (!isNaN(d)) {
+                        const opts = { month: 'long', day: '2-digit', year: 'numeric' };
+                        formatted = d.toLocaleDateString('en-US', opts);
+                    } else {
+                        formatted = String(job.closing_date);
+                    }
+                }
+                const bigDateEl = document.getElementById('modalSubmissionDeadlineDate');
+                if (bigDateEl) bigDateEl.textContent = formatted;
+
+                // If a small deadline element exists, keep it in sync
+                const smallDeadline = document.getElementById('modalDeadline');
+                if (smallDeadline) smallDeadline.textContent = formatted;
+            } catch (e) {
+                // ignore
+            }
             
             // Set qualification standards
             document.getElementById('modalEducation').textContent = job.qualification_education || 'N/A';
@@ -578,14 +661,21 @@
                 competencyContainer.style.display = 'none';
             }
             
-            // Set required documents based on the same COS/Plantilla rules as applicant upload.
-            const normalizedTrack = normalizeVacancyTrack(job.vacancy_type);
-            const requiredDocLabels = getRequiredDocumentsForTrack(normalizedTrack);
+            // Build required documents list. Prefer per-vacancy selection when available.
             const documentsList = document.getElementById('requiredDocumentsList');
             const documentsHint = document.getElementById('requiredDocumentsHint');
             documentsList.innerHTML = ''; // Clear existing
-            if (documentsHint) {
-                documentsHint.textContent = `* Required for ${normalizedTrack} vacancy`;
+
+            let requiredDocLabels = [];
+            if (Array.isArray(job.supporting_documents_required) && job.supporting_documents_required.length) {
+                requiredDocLabels = job.supporting_documents_required
+                    .map(key => documentMetaForLanding[key] || key)
+                    .filter(Boolean);
+                if (documentsHint) documentsHint.textContent = '* Required (per vacancy)';
+            } else {
+                const normalizedTrack = normalizeVacancyTrack(job.vacancy_type);
+                requiredDocLabels = getRequiredDocumentsForTrack(normalizedTrack);
+                if (documentsHint) documentsHint.textContent = `* Required for ${normalizedTrack} vacancy`;
             }
 
             requiredDocLabels.forEach((label) => {

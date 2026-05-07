@@ -173,7 +173,7 @@
                             </div>
                             <div class="grid grid-cols-[120px_1fr] gap-2" id="modalCompetencyContainer">
                                 <span class="font-semibold text-gray-700">Competency:</span>
-                                <span class="text-gray-600" id="modalCompetency"></span>
+                                <div class="text-gray-600 break-words" id="modalCompetency"></div>
                             </div>
                         </div>
                     </div>
@@ -567,6 +567,23 @@
             container.appendChild(list);
         }
 
+        function renderCompetencies(container, rawValue) {
+            if (!container) return;
+            container.replaceChildren();
+
+            const raw = String(rawValue || '').trim();
+            if (!raw) {
+                container.textContent = 'N/A';
+                return;
+            }
+
+            // Preserve exact formatting from admin input (numbering, categories, line breaks)
+            const pre = document.createElement('pre');
+            pre.className = 'text-gray-600 text-sm font-sans whitespace-pre-wrap break-words';
+            pre.textContent = raw;
+            container.appendChild(pre);
+        }
+
         function showJobDetails(job) {
             // Store job ID in session storage or data attribute for later use
             sessionStorage.setItem('selectedJobId', job.vacancy_id);
@@ -655,7 +672,7 @@
             }
 
             if (job.competencies) {
-                document.getElementById('modalCompetency').textContent = job.competencies;
+                renderCompetencies(document.getElementById('modalCompetency'), job.competencies);
                 competencyContainer.style.display = 'grid';
             } else {
                 competencyContainer.style.display = 'none';

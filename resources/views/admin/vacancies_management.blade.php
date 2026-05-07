@@ -595,6 +595,17 @@
 </script>
 </main>
 
+<!-- Delete Vacancy Confirmation Modal -->
+<x-confirm-modal
+    title="Delete Vacancy"
+    message="Are you sure you want to delete this vacancy? This action cannot be undone."
+    event="open-delete-vacancy-confirm"
+    confirm="confirm-delete-vacancy"
+    confirmText="Delete"
+    cancelText="Cancel"
+    tone="danger"
+/>
+
 @push('scripts')
 <script>
     const loader_ = document.getElementById('loader');
@@ -777,10 +788,38 @@
     document.getElementById('placeFilter')?.addEventListener('change', fetchVacancies);
     document.getElementById('sortFilter')?.addEventListener('change', fetchVacancies);
 
+<<<<<<< Updated upstream
     document.addEventListener('keydown', function (event) {
         if (event.key === 'Escape') {
             closeDeleteVacancyModal();
         }
+=======
+    // Handle vacancy deletion from the confirmation modal
+    window.addEventListener('confirm-delete-vacancy', () => {
+        if (!window._pendingDeleteUrl) return;
+        fetch(window._pendingDeleteUrl, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                showAppToast(data.message || 'Failed to delete vacancy');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            showAppToast('An error occurred while deleting the vacancy.');
+        })
+        .finally(() => {
+            window._pendingDeleteUrl = null;
+        });
+>>>>>>> Stashed changes
     });
 </script>
 @endpush

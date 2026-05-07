@@ -80,8 +80,12 @@
       </div>
 
       <button
+<<<<<<< Updated upstream
         type="button"
         onclick="event.stopPropagation(); openDeleteVacancyModal('{{ $vacancy->vacancy_id }}', '{{ route('vacancies.destroy', $vacancy->vacancy_id) }}')"
+=======
+        onclick="event.stopPropagation(); window._pendingDeleteUrl = '{{ route('vacancies.destroy', $vacancy->vacancy_id) }}'; window.dispatchEvent(new CustomEvent('open-delete-vacancy-confirm'));"
+>>>>>>> Stashed changes
         class="rounded-md border border-red-600 px-2.5 py-1 text-xs font-bold text-red-600 transition-all duration-300 hover:scale-105 hover:bg-red-600 hover:text-white hover:shadow-md"
         aria-label="Delete Vacancy"
         title="Delete Vacancy"

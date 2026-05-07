@@ -479,8 +479,8 @@
                 Discard
               </button>
 
-              <button id="vacancy-save-btn" type="button" disabled
-                class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 opacity-50 cursor-not-allowed">
+              <button id="vacancy-save-btn" type="button"
+                class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
                 <span id="save-icon">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2">
@@ -1468,16 +1468,10 @@
         allFilled = false;
       }
 
-      const saveBtn = document.getElementById('vacancy-save-btn');
       const errorMsg = document.getElementById('form-error-msg');
-
       if (allFilled) {
-        saveBtn.disabled = false;
-        saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         errorMsg.classList.add('hidden');
       } else {
-        saveBtn.disabled = true;
-        saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
         errorMsg.classList.remove('hidden');
       }
     }
@@ -1494,30 +1488,40 @@
       checkAllFieldsFilled();
     });
 
-    // Open save confirmation modal from save button click.
-    document.addEventListener('DOMContentLoaded', () => {
-      const saveBtn = document.getElementById('vacancy-save-btn');
-      if (!saveBtn) return;
-      saveBtn.addEventListener('click', () => {
-        if (saveBtn.disabled) return;
-        window.dispatchEvent(new CustomEvent('open-plantilla-save-confirm'));
-      });
-    });
+    function scrollToFirstError() {
+      const errorEls = document.querySelectorAll('#plantillaForm p[id$="_error"], #plantillaForm span[id$="_msg"], #plantillaForm div[id$="_error"]');
+      let firstErrorMsg = null;
+      for (const el of errorEls) {
+        if (!el.classList.contains('hidden')) {
+          firstErrorMsg = el;
+          break;
+        }
+      }
+      if (!firstErrorMsg) {
+        firstErrorMsg = document.querySelector('#plantillaForm .text-red-500:not(.hidden), #plantillaForm .text-red-600:not(.hidden)');
+      }
+      if (firstErrorMsg) {
+        firstErrorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const container = firstErrorMsg.closest('div, section');
+        if (container) {
+          const input = container.querySelector('input:not([type="hidden"]), select, textarea');
+          if (input) input.focus();
+        }
+      }
+    }
 
-    // Validate and submit on confirm
-    window.addEventListener('confirm-plantilla-save', () => {
+    function validatePlantillaForm() {
       const disablePositionFields = @json($disablePositionFields);
-      const form = document.getElementById('plantillaForm');
       const errors = [];
       const show = (el, msg) => { if (el) { el.textContent = msg; el.classList.remove('hidden'); } };
       const hide = (el) => { if (el) { el.textContent = ''; el.classList.add('hidden'); } };
-      // Fields
+
       const positionTitle = document.getElementById('position_title_select');
       const salaryGrade = document.getElementById('salary_grade');
       const closingDate = document.getElementById('closing_date');
       const place = document.getElementById('place_of_assignment');
       const monthlySalary = document.getElementById('monthly_salary');
-      // Errors
+
       const eTitle = document.getElementById('position_title_error');
       const eSalaryGrade = document.getElementById('salary_grade_error');
       const eClosing = document.getElementById('closing_date_error');
@@ -1526,13 +1530,14 @@
       const eEligibility = document.getElementById('qualification_eligibility_error');
       const eSalary = document.getElementById('monthly_salary_error');
       const eCsc = document.getElementById('csc_form_error');
-      // Reset
+
       [eTitle, eSalaryGrade, eClosing, ePlace, eEducation, eEligibility, eSalary, eCsc].forEach(hide);
-      // Validate basics
+
       if (!positionTitle || !positionTitle.value.trim()) { errors.push('Position title is required.'); show(eTitle, 'Position title is required.'); }
       if (!salaryGrade || !/^SG-\d{2}$/.test(String(salaryGrade.value || '').trim())) { errors.push('Salary grade must be in SG-00 format.'); show(eSalaryGrade, 'Salary grade must be in SG-00 format (example: SG-23).'); }
-      if (!disablePositionFields && !closingDate.value) { errors.push('Deadline is required.'); show(eClosing, 'Deadline of application is required.'); }
-      if (!place.value) { errors.push('Place of assignment is required.'); show(ePlace, 'Place of assignment is required.'); }
+      if (!disablePositionFields && closingDate && !closingDate.value) { errors.push('Deadline is required.'); show(eClosing, 'Deadline of application is required.'); }
+      if (place && !place.value) { errors.push('Place of assignment is required.'); show(ePlace, 'Place of assignment is required.'); }
+
       const educationCode = document.getElementById('minimum_education_code');
       const educationHidden = document.getElementById('qualification_education');
       const educationValidation = typeof window.validateEducationRequirementConfig === 'function'
@@ -1548,6 +1553,7 @@
         errors.push('Education requirement is required.');
         show(eEducation, educationValidation.message || 'Education requirement is required.');
       }
+
       let hasEligibilityValue = typeof hasEligibilityItems === 'function' && hasEligibilityItems();
       const eligibilityHidden = document.getElementById('qualification_eligibility_hidden');
       const eligibilitySelect = document.getElementById('eligibility-select');
@@ -1555,8 +1561,6 @@
         hasEligibilityValue = true;
       }
       if (!hasEligibilityValue && String(eligibilitySelect?.value || '').trim() !== '') {
-        // If admin selected one from dropdown but skipped "Add Selected",
-        // convert it into a valid hidden payload on save.
         const selectedName = String(eligibilitySelect.value || '').trim();
         if (eligibilityHidden) {
           eligibilityHidden.value = JSON.stringify([{
@@ -1569,32 +1573,64 @@
         hasEligibilityValue = true;
       }
       if (!hasEligibilityValue) { errors.push('At least one eligibility is required.'); show(eEligibility, 'At least one eligibility is required.'); }
+
       const cscInput = document.getElementById('csc_form_upload_plantilla');
-      const hasExistingCsc = cscInput?.dataset?.hasExisting === '1';
-      const hasSelectedCsc = Boolean(cscInput?.files && cscInput.files.length > 0);
-      if (!(hasExistingCsc || hasSelectedCsc)) { errors.push('CSC form attachment is required for Plantilla.'); show(eCsc, 'CSC form attachment is required for Plantilla.'); }
-      // Salary checks
+      if (cscInput) {
+        const hasExistingCsc = cscInput?.dataset?.hasExisting === '1';
+        const hasSelectedCsc = Boolean(cscInput?.files && cscInput.files.length > 0);
+        if (!(hasExistingCsc || hasSelectedCsc)) {
+          errors.push('CSC form attachment is required for Plantilla.');
+          show(eCsc, 'CSC form attachment is required for Plantilla.');
+        }
+      }
+
       const MAX = 1000000;
       const MIN = 0;
-      const sal = parseFloat(monthlySalary.value);
-      if (isNaN(sal)) { errors.push('Monthly salary is required.'); show(eSalary, 'Monthly salary is required.'); }
-      else if (sal < MIN) { errors.push('Monthly salary cannot be negative.'); show(eSalary, 'Monthly salary cannot be negative.'); }
-      else if (sal > MAX) { errors.push('Monthly salary exceeds allowed maximum (1,000,000).'); show(eSalary, 'Monthly salary exceeds allowed maximum (1,000,000).'); }
-      if (errors.length === 0) {
-        // Disable button and show loader
-        const btn = document.getElementById('vacancy-save-btn');
-        const icon = document.getElementById('save-icon');
-        const loader = document.getElementById('save-loader');
-        const text = document.getElementById('save-text');
-
-        btn.disabled = true;
-        btn.classList.add('opacity-75', 'cursor-not-allowed');
-        icon.classList.add('hidden');
-        loader.classList.remove('hidden');
-        text.textContent = 'SAVING...';
-
-        form.submit();
+      if (monthlySalary) {
+        const sal = parseFloat(monthlySalary.value);
+        if (isNaN(sal)) { errors.push('Monthly salary is required.'); show(eSalary, 'Monthly salary is required.'); }
+        else if (sal < MIN) { errors.push('Monthly salary cannot be negative.'); show(eSalary, 'Monthly salary cannot be negative.'); }
+        else if (sal > MAX) { errors.push('Monthly salary exceeds allowed maximum (1,000,000).'); show(eSalary, 'Monthly salary exceeds allowed maximum (1,000,000).'); }
       }
+
+      return { valid: errors.length === 0, errors };
+    }
+
+    // Open save confirmation modal from save button click.
+    document.addEventListener('DOMContentLoaded', () => {
+      const saveBtn = document.getElementById('vacancy-save-btn');
+      if (!saveBtn) return;
+      saveBtn.addEventListener('click', () => {
+        const result = validatePlantillaForm();
+        if (!result.valid) {
+          scrollToFirstError();
+          return;
+        }
+        window.dispatchEvent(new CustomEvent('open-plantilla-save-confirm'));
+      });
+    });
+
+    // Validate and submit on confirm
+    window.addEventListener('confirm-plantilla-save', () => {
+      const result = validatePlantillaForm();
+      if (!result.valid) {
+        scrollToFirstError();
+        return;
+      }
+
+      const form = document.getElementById('plantillaForm');
+      const btn = document.getElementById('vacancy-save-btn');
+      const icon = document.getElementById('save-icon');
+      const loader = document.getElementById('save-loader');
+      const text = document.getElementById('save-text');
+
+      btn.disabled = true;
+      btn.classList.add('opacity-75', 'cursor-not-allowed');
+      icon.classList.add('hidden');
+      loader.classList.remove('hidden');
+      text.textContent = 'SAVING...';
+
+      form.submit();
     });
 
     // Live salary validation

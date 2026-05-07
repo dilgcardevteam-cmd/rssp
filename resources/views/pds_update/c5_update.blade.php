@@ -284,18 +284,23 @@
                 </div>
                 
                 @php $fields = [
-                    'pqe_result' => 'Pre-Qualifying Exam (PQE) result',
-                    'cert_eligibility' => 'Photocopy of Certificate of Eligibility/Board Rating',
-                    'ipcr' => 'Certification of Numerical Rating/Performance Rating/IPCR',
-                    'non_academic' => 'Non-Academic awards received',
-                    'cert_training' => 'Certified/authenticated copy of Certificates of Training/Participation',
-                    'designation_order' => 'List of certified photocopy of duly confirmed Designation Order/s',
-                    'transcript_records' => 'Photocopy of Transcript of Records (Baccalaureate Degree)',
-                    'photocopy_diploma' => 'Photocopy of Diploma',
-                    'grade_masteraldoctorate' => 'Certified photocopy of Certificate of Grades with Masteral/Doctorate units earned',
-                    'tor_masteraldoctorate' => 'Certified photocopy of TOR with Masteral/Doctorate Degree',
-                    'cert_employment' => 'Certificate of Employment (if any)',
-                    'other_documents' => 'Other documents submitted'
+      'application_letter' => 'Signed Application letter indicating the position applying for',
+      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result',
+      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned',
+      'photocopy_diploma' => 'Duly Authenticated Diploma',
+      'signed_pds' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)',
+      'signed_work_exp_sheet' => 'Fully accomplished and subcribed/notarized Work Experience Sheet (for position/s requiring relevant Experience)',
+      'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
+      'passport_photo' => 'Passport-Sized Picture',
+      'cert_eligibility' => 'Certificate of Eligibility/Board Rating License',
+      'ipcr' => 'Performance Rating in the last rating period in the present position',
+      'non_academic' => 'Non-academic Awards received within the past 2 years',
+      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
+      'designation_order' => 'Confirmed Designation Order/s',
+      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral/Doctorate Units Earned',
+      'tor_masteraldoctorate' => 'TOR with Masteral/Doctorate Degree',
+      'cert_employment' => 'Certificate of Employment with duties and responsibilities',
+      'other_documents' => 'Other Documents Submitted',
                 ]; @endphp
                 
                 @foreach($fields as $key => $label)

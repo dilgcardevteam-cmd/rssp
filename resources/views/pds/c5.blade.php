@@ -16,9 +16,7 @@
         'non_academic' => ['label' => 'Non-academic Awards received within the past 2 years', 'accept' => 'application/pdf'],
         'cert_training' => ['label' => 'Certificate/s of Training Attended/Participated relevant to the position being applied', 'accept' => 'application/pdf'],
         'designation_order' => ['label' => 'Confirmed Designation Order/s', 'accept' => 'application/pdf'],
-        'grade_masteraldoctorate' => ['label' => 'Certificate of Grades with Masteral/Doctorate Units Earned', 'accept' => 'application/pdf'],
-        'tor_masteraldoctorate' => ['label' => 'TOR with Masteral/Doctorate Degree', 'accept' => 'application/pdf'],
-        'cert_employment' => ['label' => 'Certificate of Employment with duties and responsibilities', 'accept' => 'application/pdf'],
+        'cert_employment' => ['label' => 'Certificate of Employment with duties and functions', 'accept' => 'application/pdf'],
         'other_documents' => ['label' => 'Other Documents Submitted', 'accept' => 'application/pdf'],
     ];
 

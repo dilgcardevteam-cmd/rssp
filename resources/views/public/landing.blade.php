@@ -57,9 +57,7 @@
       'non_academic' => 'Non-academic Awards received within the past 2 years',
       'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
       'designation_order' => 'Confirmed Designation Order/s',
-      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral/Doctorate Units Earned',
-      'tor_masteraldoctorate' => 'TOR with Masteral/Doctorate Degree',
-      'cert_employment' => 'Certificate of Employment with duties and responsibilities',
+      'cert_employment' => 'Certificate of Employment with duties and functions',
       'other_documents' => 'Other Documents Submitted',
         ];
 
@@ -76,8 +74,6 @@
             'Plantilla' => array_values(array_diff(
                 $allDocumentTypesForLanding,
                 [
-                    'tor_masteraldoctorate',
-                    'grade_masteraldoctorate',
                     'cert_lgoo_induction',
                     'other_documents',
                     'pqe_result',

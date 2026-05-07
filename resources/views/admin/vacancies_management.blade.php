@@ -529,21 +529,12 @@
             <table class="w-full border-collapse table-fixed">
                 <thead class="bg-[#0D2B70] text-white sticky top-0 z-10"> 
                     <tr>
-<<<<<<< Updated upstream
                         <th class="px-3 py-2 text-[11px] font-semibold text-center w-[10%]">Plantilla Item No.</th>
                         <th class="px-3 py-2 text-[11px] font-semibold text-center w-[25%]">Job Title</th>
                         <th class="px-3 py-2 text-[11px] font-semibold text-center w-[15%]">Monthly Salary</th>
                         <th class="px-3 py-2 text-[11px] font-semibold text-center w-[15%]">Closing Date</th>
                         <th class="px-3 py-2 text-[11px] font-semibold text-center w-[20%]">Place of Assignment</th>
                         <th class="px-3 py-2 text-[11px] font-semibold text-center w-[15%]">Actions</th>
-=======
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[23%]">Plantilla Item No.</th>
-                        <th class="px-3 ml-30 py-2 text-[11px] font-semibold text-center w-[30%]">Job Title</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[10%]">Monthly Salary</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[20%]">Closing Date</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[25%]">Place of Assignment</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[10%]">Actions</th>
->>>>>>> Stashed changes
                     </tr>
                 </thead>
             </table>

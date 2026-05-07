@@ -69,6 +69,12 @@
         $monthlySalaryDisplay = is_numeric($salaryValue)
             ? 'PHP ' . number_format((float) $salaryValue, 2)
             : ((string) ($salaryValue ?: 'Not specified'));
+        $salaryGradeDisplay = $vacancy->salary_grade ?: 'Not specified';
+        $jobTypeDisplay = $typeIsCos
+            ? 'Contract of Service'
+            : ($typeIsPlantilla ? 'Permanent' : ($vacancy->vacancy_type ?: 'Not specified'));
+        $pcnDisplay = $vacancy->pcn_no ?: 'Not specified';
+        $plantillaItemDisplay = $vacancy->plantilla_item_no ?: 'Not specified';
         $qualificationChecksForPanel = is_array($qualificationChecks ?? null) ? $qualificationChecks : [];
         $missingQualificationLabelsForPanel = is_array($missingQualificationLabels ?? null)
             ? array_values(array_filter(array_map(fn($value) => trim((string) $value), $missingQualificationLabels)))
@@ -134,6 +140,38 @@
 
         <section class="grid grid-cols-1 xl:grid-cols-[minmax(0,1.7fr)_360px] gap-5 items-start">
             <div class="space-y-5">
+                <article class="rounded-2xl border border-amber-300 bg-[#FFF2C8] p-5 sm:p-6 shadow-sm">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <p class="text-sm font-extrabold text-[#D89400] uppercase tracking-wide">Position</p>
+                            <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold text-[#D89400] leading-tight">{{ $vacancy->position_title }}</h2>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 space-y-3 text-sm sm:text-base text-slate-700">
+                        <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-2">
+                            <span class="font-semibold text-slate-600">Location (Place of Assignment):</span>
+                            <span>{{ $vacancy->place_of_assignment ?: 'Not specified' }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-2">
+                            <span class="font-semibold text-slate-600">Salary (Salary Grade and Monthly Salary):</span>
+                            <span>{{ $salaryGradeDisplay }} - {{ $monthlySalaryDisplay }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-2">
+                            <span class="font-semibold text-slate-600">Job Type:</span>
+                            <span>{{ $jobTypeDisplay }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-2">
+                            <span class="font-semibold text-slate-600">Plantilla Item Number:</span>
+                            <span>{{ $plantillaItemDisplay }}</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-2">
+                            <span class="font-semibold text-slate-600">PCN:</span>
+                            <span>{{ $pcnDisplay }}</span>
+                        </div>
+                    </div>
+                </article>
+
                 <article class="rounded-2xl border border-[#0D2B70]/15 bg-white p-5 shadow-sm">
                     <div class="flex items-center gap-2 mb-4">
                         <div class="h-8 w-8 rounded-lg bg-[#0D2B70]/10 text-[#0D2B70] flex items-center justify-center">

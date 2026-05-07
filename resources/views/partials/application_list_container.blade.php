@@ -93,31 +93,42 @@
                             </button>
                             
                             @if($displayStatusNormalized === 'pending')
-                            <form
-                                id="cancel-application-form-{{ $application->vacancy_id }}"
-                                method="POST"
-                                action="{{ route('application_status.cancel', ['user' => $application->user_id, 'vacancy' => $application->vacancy_id]) }}"
-                            >
-                                @csrf
-                                <button type="button" onclick="window.dispatchEvent(new CustomEvent('open-cancel-application-modal-{{ $application->vacancy_id }}'))" class="w-full lg:w-auto justify-center text-red-600 border border-red-500 font-bold py-2.5 lg:py-1 px-4 rounded-md text-sm transition-all duration-300 hover:scale-105 hover:bg-red-500 hover:text-white hover:shadow-md inline-flex items-center gap-2">
-                                    <i data-feather="x-circle" class="w-4 h-4"></i>
-                                    <span>Cancel</span>
-                                </button>
-                            </form>
-                            <x-confirm-modal
-                                title="Cancel Application"
-                                message="Cancel this application? This action cannot be undone."
-                                event="open-cancel-application-modal-{{ $application->vacancy_id }}"
-                                confirm="confirm-cancel-application-{{ $application->vacancy_id }}"
-                                confirmText="Yes, Cancel"
-                                cancelText="Keep Application"
-                                tone="danger"
-                            />
-                            <script>
-                                window.addEventListener('confirm-cancel-application-{{ $application->vacancy_id }}', function () {
-                                    document.getElementById('cancel-application-form-{{ $application->vacancy_id }}')?.submit();
-                                });
-                            </script>
+                            <button type="button" onclick="openCancelApplicationModal('{{ $application->vacancy_id }}')" class="w-full lg:w-auto justify-center text-red-600 border border-red-500 font-bold py-2.5 lg:py-1 px-4 rounded-md text-sm transition-all duration-300 hover:scale-105 hover:bg-red-500 hover:text-white hover:shadow-md inline-flex items-center gap-2">
+                                <i data-feather="x-circle" class="w-4 h-4"></i>
+                                <span>Cancel</span>
+                            </button>
+
+                            <div id="cancel-application-modal-{{ $application->vacancy_id }}" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/60 backdrop-blur-md px-4 py-6">
+                                <div class="absolute inset-0" onclick="closeCancelApplicationModal('{{ $application->vacancy_id }}')"></div>
+                                <form method="POST" action="{{ route('application_status.cancel', ['user' => $application->user_id, 'vacancy' => $application->vacancy_id]) }}" class="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+                                    @csrf
+                                    <div class="flex items-start gap-3 border-b border-slate-100 px-5 py-4">
+                                        <div class="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700">
+                                            <i data-feather="alert-triangle" class="h-5 w-5"></i>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <h2 class="text-base font-bold text-slate-900">Cancel Application</h2>
+                                            <p class="mt-0.5 text-xs text-slate-500">Please confirm this action before proceeding.</p>
+                                        </div>
+                                        <button type="button" onclick="closeCancelApplicationModal('{{ $application->vacancy_id }}')" class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" aria-label="Close">
+                                            <i data-feather="x" class="h-5 w-5"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="px-5 py-4">
+                                        <p class="text-sm leading-relaxed text-slate-700">Cancel this application? This action cannot be undone.</p>
+                                    </div>
+
+                                    <div class="flex justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-4">
+                                        <button type="button" onclick="closeCancelApplicationModal('{{ $application->vacancy_id }}')" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                                            Keep Application
+                                        </button>
+                                        <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700">
+                                            Yes, Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                             @endif
                         @endif
                     </div>
@@ -138,3 +149,19 @@
         @endif
     </div>
 @endif
+
+<script>
+    function openCancelApplicationModal(vacancyId) {
+        const modal = document.getElementById(`cancel-application-modal-${vacancyId}`);
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeCancelApplicationModal(vacancyId) {
+        const modal = document.getElementById(`cancel-application-modal-${vacancyId}`);
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>

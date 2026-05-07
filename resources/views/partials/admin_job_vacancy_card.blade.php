@@ -80,24 +80,8 @@
       </div>
 
       <button
-        onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this vacancy? This action cannot be undone.')) { 
-          fetch('{{ route('vacancies.destroy', $vacancy->vacancy_id) }}', { 
-            method: 'DELETE', 
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' } 
-          })
-          .then(response => response.json())
-          .then(data => { 
-            if(data.success) { 
-                window.location.reload(); 
-            } else { 
-                alert(data.message || 'Failed to delete vacancy'); 
-            } 
-          })
-          .catch(err => { 
-            console.error(err);
-            alert('An error occurred while deleting the vacancy.'); 
-          });
-        }"
+        type="button"
+        onclick="event.stopPropagation(); openDeleteVacancyModal('{{ $vacancy->vacancy_id }}', '{{ route('vacancies.destroy', $vacancy->vacancy_id) }}')"
         class="rounded-md border border-red-600 px-2.5 py-1 text-xs font-bold text-red-600 transition-all duration-300 hover:scale-105 hover:bg-red-600 hover:text-white hover:shadow-md"
         aria-label="Delete Vacancy"
         title="Delete Vacancy"

@@ -326,6 +326,32 @@
 
       <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div class="mb-6 border-b border-slate-200 pb-5">
+          <h2 class="{{ $sectionTitle }}">Expected Output / Deliverables</h2>
+          <p class="mt-1 text-sm text-slate-600">
+            Describe deliverables, scope of work, and engagement duration.
+          </p>
+        </div>
+
+        <div class="space-y-5">
+          <div>
+            <label class="{{ $fieldLabel }}">Expected Output / Deliverables and Schedule of Submission <span class="text-red-600">*</span></label>
+            <textarea name="expected_output" rows="3" class="{{ $fieldTextarea }}">{{ old('expected_output', $formSource?->expected_output ?? '') }}</textarea>
+          </div>
+          <div>
+            <label class="{{ $fieldLabel }}">Scope of Work or Duties and Responsibilities<span class="text-red-600">*</span></label>
+            <textarea name="scope_of_work" rows="3" class="{{ $fieldTextarea }}">{{ old('scope_of_work', $formSource?->scope_of_work ?? '') }}</textarea>
+          </div>
+          <div>
+            <label class="{{ $fieldLabel }}">Duration of Work <span class="text-red-600">*</span></label>
+            <textarea name="duration_of_work" rows="2" class="{{ $fieldTextarea }}">{{ old('duration_of_work', $formSource?->duration_of_work ?? '') }}</textarea>
+          </div>
+        </div>
+      </section>
+
+
+
+      <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="mb-6 border-b border-slate-200 pb-5">
           <h2 class="{{ $sectionTitle }}">Supporting Documents</h2>
           <p class="mt-1 text-sm text-slate-600">
             Mark documents as required for this vacancy. Unchecked documents are optional (if any).
@@ -348,30 +374,6 @@
               <span class="text-sm text-slate-700">{{ $documentLabel }}</span>
             </label>
           @endforeach
-        </div>
-      </section>
-
-      <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div class="mb-6 border-b border-slate-200 pb-5">
-          <h2 class="{{ $sectionTitle }}">Expected Output / Deliverables</h2>
-          <p class="mt-1 text-sm text-slate-600">
-            Describe deliverables, scope of work, and engagement duration.
-          </p>
-        </div>
-
-        <div class="space-y-5">
-          <div>
-            <label class="{{ $fieldLabel }}">Expected Output / Deliverables and Schedule of Submission <span class="text-red-600">*</span></label>
-            <textarea name="expected_output" rows="3" class="{{ $fieldTextarea }}">{{ old('expected_output', $formSource?->expected_output ?? '') }}</textarea>
-          </div>
-          <div>
-            <label class="{{ $fieldLabel }}">Scope of Work or Duties and Responsibilities<span class="text-red-600">*</span></label>
-            <textarea name="scope_of_work" rows="3" class="{{ $fieldTextarea }}">{{ old('scope_of_work', $formSource?->scope_of_work ?? '') }}</textarea>
-          </div>
-          <div>
-            <label class="{{ $fieldLabel }}">Duration of Work <span class="text-red-600">*</span></label>
-            <textarea name="duration_of_work" rows="2" class="{{ $fieldTextarea }}">{{ old('duration_of_work', $formSource?->duration_of_work ?? '') }}</textarea>
-          </div>
         </div>
       </section>
 

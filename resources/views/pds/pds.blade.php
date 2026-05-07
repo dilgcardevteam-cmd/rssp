@@ -1468,9 +1468,33 @@ function addPdsEducationDays(date, days) {
         const form = document.querySelector('#myForm');
         if (form) {
             form.addEventListener('submit', (event) => {
+                // Check custom DOB validation
+                const dobPicker = typeof getDobPicker === 'function' ? getDobPicker() : null;
                 if (!validateDobAge(true, true, dobPicker)) {
                     event.preventDefault();
                     event.stopPropagation();
+                    return;
+                }
+
+                // Check for any visible error messages (like educational date ranges)
+                // We find the first visible .error-message that is not empty
+                const visibleErrors = Array.from(document.querySelectorAll('.error-message')).filter(el => {
+                    return el.offsetWidth > 0 && el.offsetHeight > 0 && el.textContent.trim() !== '';
+                });
+
+                if (visibleErrors.length > 0) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    const firstError = visibleErrors[0];
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
+                    // Try to focus the associated input
+                    const container = firstError.closest('div, section');
+                    if (container) {
+                        const input = container.querySelector('input, select, textarea');
+                        if (input) input.focus();
+                    }
                     return;
                 }
 

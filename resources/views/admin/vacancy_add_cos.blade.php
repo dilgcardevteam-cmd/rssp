@@ -442,7 +442,7 @@
               Discard
             </button>
 
-            <button id="vacancy-save-btn" type="button" disabled class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 opacity-50 cursor-not-allowed">
+            <button id="vacancy-save-btn" type="button" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
               <span id="save-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -1104,7 +1104,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('vacancy-save-btn');
     if (!saveBtn) return;
     saveBtn.addEventListener('click', () => {
-        if (saveBtn.disabled) return;
         window.dispatchEvent(new CustomEvent('open-cos-save-confirm'));
     });
 });
@@ -1168,10 +1167,16 @@ window.addEventListener('confirm-cos-save', () => {
         
         form.submit();
     } else {
-        // Auto-scroll to the first visible error
-        const firstError = document.querySelector('.text-red-500:not(.hidden), .text-red-600:not(.hidden)');
-        if (firstError) {
-            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Auto-scroll and focus the first field with an error
+        const firstErrorMsg = document.querySelector('.text-red-500:not(.hidden), .text-red-600:not(.hidden)');
+        if (firstErrorMsg) {
+            firstErrorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Try to find the associated input to focus it
+            const container = firstErrorMsg.closest('div, section');
+            if (container) {
+                const input = container.querySelector('input, select, textarea');
+                if (input) input.focus();
+            }
         }
     }
 });

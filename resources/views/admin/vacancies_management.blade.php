@@ -565,6 +565,17 @@
 </script>
 </main>
 
+<!-- Delete Vacancy Confirmation Modal -->
+<x-confirm-modal
+    title="Delete Vacancy"
+    message="Are you sure you want to delete this vacancy? This action cannot be undone."
+    event="open-delete-vacancy-confirm"
+    confirm="confirm-delete-vacancy"
+    confirmText="Delete"
+    cancelText="Cancel"
+    tone="danger"
+/>
+
 @push('scripts')
 <script>
     const loader_ = document.getElementById('loader');

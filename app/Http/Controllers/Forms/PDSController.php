@@ -5241,6 +5241,26 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
         return array_values(array_unique($requiredDocs));
     }
 
+    private function normalizePqeRequirementSelection($value): string
+    {
+        return strtolower(trim((string) $value)) === 'none' ? 'none' : 'taken_passed';
+    }
+
+    private function applyPqeRequirementSelection(array $requiredDocs, string $pqeRequirement): array
+    {
+        $requiredDocs = array_values(array_unique($requiredDocs));
+
+        if ($pqeRequirement === 'none') {
+            return array_values(array_filter($requiredDocs, fn (string $docType) => $docType !== 'pqe_result'));
+        }
+
+        if (!in_array('pqe_result', $requiredDocs, true)) {
+            $requiredDocs[] = 'pqe_result';
+        }
+
+        return array_values(array_unique($requiredDocs));
+    }
+
 
     /**
      * Displays the C5 page for PDS.
@@ -5303,8 +5323,15 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
             $defaultDocTrack = 'Plantilla';
         }
 
+        $pqeRequirement = $this->normalizePqeRequirementSelection(
+            old('pqe_result_status', request('pqe_result_status', in_array('pqe_result', $this->getRequiredDocumentIdsForVacancy($vacancyForApplication, $defaultDocTrack), true) ? 'taken_passed' : 'none'))
+        );
+
         $requiredDocsByTrack = $this->getRequiredDocsByTrack();
-        $vacancyRequiredDocumentIds = $this->getRequiredDocumentIdsForVacancy($vacancyForApplication, $defaultDocTrack);
+        $vacancyRequiredDocumentIds = $this->applyPqeRequirementSelection(
+            $this->getRequiredDocumentIdsForVacancy($vacancyForApplication, $defaultDocTrack),
+            $pqeRequirement
+        );
         $documentLabels = $this->getDocumentLabelMap();
         $isFreshUpload = in_array(request('fresh_upload'), [1, '1', true, 'true'], true) || !empty($applicationVacancyId);
         $hasFreshUploadForVacancy = false;
@@ -5336,7 +5363,8 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
             'applicationLetterPreviewUrl',
             'applicationVacancyId',
             'isFreshUpload',
-            'hasFreshUploadForVacancy'
+            'hasFreshUploadForVacancy',
+            'pqeRequirement'
         ));
     }
 
@@ -5402,6 +5430,8 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
         $requiredDocs = !empty($applicationVacancyId)
             ? $this->getRequiredDocumentIdsForVacancy($vacancyForApplication, $docTrack)
             : ($requiredDocsByTrack[$docTrack] ?? []);
+        $pqeRequirement = $this->normalizePqeRequirementSelection($request->input('pqe_result_status'));
+        $requiredDocs = $this->applyPqeRequirementSelection($requiredDocs, $pqeRequirement);
         $documentLabels = $this->getDocumentLabelMap();
         $uploadedFilesPayload = $request->file('cert_uploads', []);
         if (!is_array($uploadedFilesPayload)) {
@@ -5417,6 +5447,7 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
         $request->validate([
             'cert_uploads.application_letter' => 'nullable|file|mimes:pdf|max:10240',
             'cert_uploads.pqe_result' => 'nullable|file|mimes:pdf|max:10240',
+            'pqe_result_status' => 'nullable|in:taken_passed,none',
             'cert_uploads.cert_eligibility' => 'nullable|file|mimes:pdf|max:10240',
             'cert_uploads.cert_elegibility' => 'nullable|file|mimes:pdf|max:10240',
             'cert_uploads.ipcr' => 'nullable|file|mimes:pdf|max:10240',

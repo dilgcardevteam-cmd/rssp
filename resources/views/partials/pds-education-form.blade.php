@@ -25,8 +25,8 @@
             transition: all 0.2s ease-out;
         }
 
-        .floating-label-input:focus + .floating-label,
-        .floating-label-input:not(:placeholder-shown) + .floating-label {
+        .floating-label-input:focus ~ .floating-label,
+        .floating-label-input:not(:placeholder-shown) ~ .floating-label {
             transform: translateY(-1.25rem) scale(0.85);
             color: #6B7280;
             background-color: white;
@@ -133,6 +133,10 @@
         .program-combobox[data-program-open="1"] .program-combobox-icon {
             transform: translateY(-50%) rotate(180deg);
         }
+
+        .program-other-field[hidden] {
+            display: none !important;
+        }
     </style>
     <!-- add-btn w-full sm:w-auto justify-center sm:justify-start -->
      
@@ -229,11 +233,17 @@
 
                             @if (in_array($education_type, ['college', 'grad'], true))
                                 <div class="relative md:col-span-2 program-combobox" data-program-combobox data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}" data-program-open="0">
+                                    <input
+                                        type="hidden"
+                                        name="{{ $education_type }}[{{ $index }}][basic]"
+                                        value="{{ old($education_type.'.'.$index.'.basic', $data['basic'] ?? '') }}"
+                                        data-program-value-input
+                                        data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
+                                    >
                                     <input type="text"
-                                           name="{{ $education_type }}[{{ $index }}][basic]"
                                            value="{{ old($education_type.'.'.$index.'.basic', $data['basic'] ?? '') }}"
-                                           placeholder=""
-                                           data-program-input
+                                           placeholder=" "
+                                           data-program-display-input
                                            data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
                                            readonly
                                            class="floating-label-input program-combobox-input w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer text-sm sm:text-base"
@@ -261,6 +271,19 @@
                                             </div>
                                         </div>
                                         <div class="max-h-56 overflow-auto py-1" data-program-role="options" data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"></div>
+                                    </div>
+                                    <div class="relative mt-3 program-other-field" data-program-other-wrap data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}" hidden>
+                                        <input
+                                            type="text"
+                                            value=""
+                                            placeholder=" "
+                                            data-program-other-input
+                                            data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
+                                            class="floating-label-input w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer text-sm sm:text-base"
+                                        >
+                                        <label class="floating-label absolute left-3 sm:left-4 top-2 sm:top-3 text-gray-500 pointer-events-none text-sm sm:text-base">
+                                            Please specify other degree/course
+                                        </label>
                                     </div>
                                     <p class="mt-1 text-xs text-gray-500">Search and select from the list of available degree/course options.</p>
                                 </div>
@@ -385,11 +408,17 @@
 
                         @if (in_array($education_type, ['college', 'grad'], true))
                             <div class="relative md:col-span-2 program-combobox" data-program-combobox data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}" data-program-open="0">
+                                <input
+                                    type="hidden"
+                                    name="{{ $education_type }}[__INDEX__][basic]"
+                                    value=""
+                                    data-program-value-input
+                                    data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
+                                >
                                 <input type="text"
-                                       name="{{ $education_type }}[__INDEX__][basic]"
                                        value=""
-                                       placeholder=""
-                                       data-program-input
+                                       placeholder=" "
+                                       data-program-display-input
                                        data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
                                        readonly
                                        class="floating-label-input program-combobox-input w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer text-sm sm:text-base"
@@ -417,6 +446,19 @@
                                         </div>
                                     </div>
                                     <div class="max-h-56 overflow-auto py-1" data-program-role="options" data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"></div>
+                                </div>
+                                <div class="relative mt-3 program-other-field" data-program-other-wrap data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}" hidden>
+                                    <input
+                                        type="text"
+                                        value=""
+                                        placeholder=" "
+                                        data-program-other-input
+                                        data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
+                                        class="floating-label-input w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer text-sm sm:text-base"
+                                    >
+                                    <label class="floating-label absolute left-3 sm:left-4 top-2 sm:top-3 text-gray-500 pointer-events-none text-sm sm:text-base">
+                                        Please specify other degree/course
+                                    </label>
                                 </div>
                                 <p class="mt-1 text-xs text-gray-500">Search and select from the list of available degree/course options.</p>
                             </div>
@@ -524,6 +566,10 @@
                 return normalized === 'grad' ? 'grad' : 'college';
             }
 
+            function programOthersLabel() {
+                return 'Others';
+            }
+
             function sourceLevels(source) {
                 const normalized = normalizeProgramSource(source);
                 return normalized === 'grad'
@@ -579,12 +625,88 @@
 
             function rowProgramInput(row, source) {
                 const normalizedSource = normalizeProgramSource(source);
-                return row?.querySelector(`input[data-program-input][data-program-source="${normalizedSource}"]`) || null;
+                return row?.querySelector(`input[data-program-display-input][data-program-source="${normalizedSource}"]`) || null;
+            }
+
+            function rowProgramValueInput(row, source) {
+                const normalizedSource = normalizeProgramSource(source);
+                return row?.querySelector(`input[data-program-value-input][data-program-source="${normalizedSource}"]`) || null;
             }
 
             function rowProgramSearchInput(row, source) {
                 const normalizedSource = normalizeProgramSource(source);
                 return row?.querySelector(`input[data-program-role="search"][data-program-source="${normalizedSource}"]`) || null;
+            }
+
+            function rowProgramOtherWrap(row, source) {
+                const normalizedSource = normalizeProgramSource(source);
+                return row?.querySelector(`[data-program-other-wrap][data-program-source="${normalizedSource}"]`) || null;
+            }
+
+            function rowProgramOtherInput(row, source) {
+                const normalizedSource = normalizeProgramSource(source);
+                return row?.querySelector(`input[data-program-other-input][data-program-source="${normalizedSource}"]`) || null;
+            }
+
+            function isKnownProgramOption(value, source) {
+                const normalizedValue = normalizeProgramValue(value).toLowerCase();
+                if (!normalizedValue) {
+                    return false;
+                }
+
+                return currentProgramOptions(source).some((name) => name.toLowerCase() === normalizedValue);
+            }
+
+            function setProgramOtherVisibility(row, source, visible) {
+                const otherWrap = rowProgramOtherWrap(row, source);
+                const otherInput = rowProgramOtherInput(row, source);
+                if (!otherWrap || !otherInput) {
+                    return;
+                }
+
+                if (visible) {
+                    otherWrap.hidden = false;
+                    otherInput.required = normalizeProgramSource(source) === 'college';
+                } else {
+                    otherWrap.hidden = true;
+                    otherInput.required = false;
+                    otherInput.value = '';
+                }
+            }
+
+            function syncProgramRowState(row, source) {
+                const normalizedSource = normalizeProgramSource(source);
+                const displayInput = rowProgramInput(row, normalizedSource);
+                const valueInput = rowProgramValueInput(row, normalizedSource);
+                const otherInput = rowProgramOtherInput(row, normalizedSource);
+                if (!displayInput || !valueInput) {
+                    return;
+                }
+
+                const actualValue = normalizeProgramValue(valueInput.value);
+                if (!actualValue) {
+                    displayInput.value = '';
+                    setProgramOtherVisibility(row, normalizedSource, false);
+                    return;
+                }
+
+                if (currentProgramOptions(normalizedSource).length === 0) {
+                    displayInput.value = actualValue;
+                    setProgramOtherVisibility(row, normalizedSource, false);
+                    return;
+                }
+
+                if (isKnownProgramOption(actualValue, normalizedSource) || actualValue.toLowerCase() === 'n/a') {
+                    displayInput.value = actualValue;
+                    setProgramOtherVisibility(row, normalizedSource, false);
+                    return;
+                }
+
+                displayInput.value = programOthersLabel();
+                setProgramOtherVisibility(row, normalizedSource, true);
+                if (otherInput) {
+                    otherInput.value = actualValue;
+                }
             }
 
             function closeProgramMenuForRow(row, source) {
@@ -630,13 +752,15 @@
 
                 const searchQuery = searchInput ? searchInput.value : '';
                 const filtered = filterProgramOptions(searchQuery, normalizedSource).slice(0, 300);
-                if (filtered.length === 0) {
+                const optionsWithOthers = [...filtered, programOthersLabel()];
+
+                if (optionsWithOthers.length === 0) {
                     optionsWrap.innerHTML = '<div class="px-3 py-2 text-sm text-slate-500">No matching degree/course found.</div>';
                     return;
                 }
 
                 const selectedValue = normalizeProgramValue(input.value).toLowerCase();
-                optionsWrap.innerHTML = filtered.map((name) => {
+                optionsWrap.innerHTML = optionsWithOthers.map((name) => {
                     const selectedClass = selectedValue === name.toLowerCase() ? ' bg-slate-100 font-medium' : '';
                     const safeAttr = name
                         .replace(/&/g, '&amp;')
@@ -678,11 +802,13 @@
             function bindProgramDropdownRow(row, source) {
                 const normalizedSource = normalizeProgramSource(source);
                 const input = rowProgramInput(row, normalizedSource);
+                const valueInput = rowProgramValueInput(row, normalizedSource);
                 const searchInput = rowProgramSearchInput(row, normalizedSource);
+                const otherInput = rowProgramOtherInput(row, normalizedSource);
                 const optionsWrap = rowOptionsWrap(row, normalizedSource);
                 const boundKey = normalizedSource === 'grad' ? 'gradProgramBound' : 'collegeProgramBound';
 
-                if (!input || !searchInput || !optionsWrap || row.dataset[boundKey] === '1') {
+                if (!input || !valueInput || !searchInput || !optionsWrap || row.dataset[boundKey] === '1') {
                     return;
                 }
 
@@ -709,6 +835,12 @@
                 searchInput.addEventListener('input', () => {
                     renderProgramOptionsList(row, normalizedSource);
                 });
+
+                if (otherInput) {
+                    otherInput.addEventListener('input', () => {
+                        valueInput.value = normalizeProgramValue(otherInput.value);
+                    });
+                }
 
                 searchInput.addEventListener('keydown', (event) => {
                     if (event.key === 'Escape') {
@@ -743,7 +875,22 @@
                         return;
                     }
 
+                    if (label === programOthersLabel()) {
+                        input.value = label;
+                        valueInput.value = '';
+                        setProgramOtherVisibility(row, normalizedSource, true);
+                        closeProgramMenuForRow(row, normalizedSource);
+                        if (otherInput) {
+                            otherInput.value = '';
+                            window.setTimeout(() => otherInput.focus(), 0);
+                        }
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                        return;
+                    }
+
                     input.value = label;
+                    valueInput.value = label;
+                    setProgramOtherVisibility(row, normalizedSource, false);
                     closeProgramMenuForRow(row, normalizedSource);
                     input.dispatchEvent(new Event('change', { bubbles: true }));
                 });
@@ -761,7 +908,10 @@
                 const root = scopeEl || document;
                 const normalizedSource = normalizeProgramSource(source);
                 const rows = Array.from(root.querySelectorAll('.education-entry'));
-                rows.forEach((row) => bindProgramDropdownRow(row, normalizedSource));
+                rows.forEach((row) => {
+                    bindProgramDropdownRow(row, normalizedSource);
+                    syncProgramRowState(row, normalizedSource);
+                });
             }
 
             function mapProgramRowsFromPayload(payload) {
@@ -835,6 +985,7 @@
                 await window.__pdsProgramsMasterLoadingPromise;
                 setProgramOptions(normalizedSource, deriveOptionsFromMasterRows(normalizedSource));
                 window.__pdsProgramLoadedBySource[normalizedSource] = true;
+                bindProgramDropdownRows(document, normalizedSource);
             }
 
             function syncCollegeEarnedRequired(type) {
@@ -915,6 +1066,16 @@
                     }
                 });
 
+                const displayInput = rowProgramInput(row, type === 'grad' ? 'grad' : 'college');
+                const otherInput = rowProgramOtherInput(row, type === 'grad' ? 'grad' : 'college');
+                if (displayInput) {
+                    displayInput.value = 'N/A';
+                }
+                if (otherInput) {
+                    otherInput.value = '';
+                }
+                setProgramOtherVisibility(row, type === 'grad' ? 'grad' : 'college', false);
+
                 row.querySelectorAll('input[type="date"][name*="[' + type + ']"], .edu-date[name*="[' + type + ']"]').forEach((field) => {
                     field.value = '';
                 });
@@ -923,14 +1084,23 @@
             function clearCollegeRowValues(row) {
                 if (!row) return;
                 row.querySelectorAll('input, select, textarea').forEach((field) => {
-                    if (field.type === 'hidden') {
-                        return;
-                    }
                     if (field.type === 'checkbox' || field.type === 'radio') {
                         field.checked = false;
                         return;
                     }
                     field.value = '';
+                });
+
+                ['college', 'grad'].forEach((source) => {
+                    const displayInput = rowProgramInput(row, source);
+                    const valueInput = rowProgramValueInput(row, source);
+                    if (displayInput) {
+                        displayInput.value = '';
+                    }
+                    if (valueInput) {
+                        valueInput.value = '';
+                    }
+                    setProgramOtherVisibility(row, source, false);
                 });
             }
 

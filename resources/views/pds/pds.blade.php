@@ -1509,8 +1509,8 @@ function addPdsEducationDays(date, days) {
     const resProvince = document.querySelector('#res_province');
     const resCity = document.querySelector('#res_city');
     const resBrgy = document.querySelector('#res_brgy');
-    const PSGC_CACHE_KEY = 'psgc:c1:v2';
-    const PSGC_LEGACY_CACHE_KEYS = ['psgc:c1:v1'];
+    const PSGC_CACHE_KEY = 'psgc:c1:v3';
+    const PSGC_LEGACY_CACHE_KEYS = ['psgc:c1:v2', 'psgc:c1:v1'];
     const PSGC_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
     const PSGC_MIN_PROVINCE_COUNT = 50;
     const psgcClientCache = {

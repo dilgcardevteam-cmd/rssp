@@ -7,4 +7,7 @@ return [
     'provinces_sheet' => env('PSGC_PROVINCES_SHEET', 'Provinces'),
     'cities_file' => env('PSGC_CITIES_FILE', 'PSGC_City_Municipality.xlsx'),
     'cities_sheet' => env('PSGC_CITIES_SHEET', 'City-Municipality'),
+    'city_parent_overrides' => [
+        '1430300000' => '1401100000', // City of Baguio -> Benguet
+    ],
 ];

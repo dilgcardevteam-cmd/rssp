@@ -526,22 +526,22 @@
     <div class="flex-1 flex flex-col min-h-0 max-h-[calc(98vh-12rem)] overflow-hidden border border-[#0D2B70] rounded-xl">
         <!-- Table Header -->
         <div class="bg-[#0D2B70] text-white text-left rounded-t-xl">
-            <table class="w-full border-collapse table-fixed">
+            <table class="min-w-[1100px] w-full border-collapse table-fixed">
                 <thead class="bg-[#0D2B70] text-white sticky top-0 z-10"> 
                     <tr>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[10%]">Plantilla Item No.</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[25%]">Job Title</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[15%]">Monthly Salary</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[15%]">Closing Date</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[20%]">Place of Assignment</th>
-                        <th class="px-3 py-2 text-[11px] font-semibold text-center w-[15%]">Actions</th>
+                        <th class="w-[16%] px-3 py-2 text-[11px] font-semibold text-center">Plantilla Item No.</th>
+                        <th class="w-[24%] px-3 py-2 text-[11px] font-semibold text-center">Job Title</th>
+                        <th class="w-[14%] px-3 py-2 text-[11px] font-semibold text-center">Monthly Salary</th>
+                        <th class="w-[14%] px-3 py-2 text-[11px] font-semibold text-center">Closing Date</th>
+                        <th class="w-[18%] px-3 py-2 text-[11px] font-semibold text-center">Place of Assignment</th>
+                        <th class="w-[14%] px-3 py-2 text-[11px] font-semibold text-center">Actions</th>
                     </tr>
                 </thead>
             </table>
         </div>
 
         <div class="flex-1 overflow-auto min-h-0">
-            <table class="w-full text-left border-collapse table-fixed">
+            <table class="min-w-[1100px] w-full text-left border-collapse table-fixed">
                 <tbody id="vacancy-list" class="divide-y divide-[#0D2B70]">
                     @forelse ($vacancies as $vacancy)
                         @include('partials.admin_job_vacancy_card', ['vacancy' => $vacancy, 'index' => $loop->index])
@@ -817,3 +817,4 @@
 </script>
 @endpush
 @endsection
+

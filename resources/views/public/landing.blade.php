@@ -332,7 +332,7 @@
                             })->filter()->toArray();
                         @endphp
                         <article
-                            class="vacancy-card bg-white rounded-xl border border-gray-200 hover:border-[#0D2B70]/40 hover:shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group"
+                            class="vacancy-card bg-white rounded-xl border border-gray-200 shadow-md hover:border-[#0D2B70]/40 hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden group"
                             data-type="{{ $filterType }}"
                             data-status="{{ $processStatus }}"
                             data-vacancy="{{ base64_encode(json_encode([
@@ -892,3 +892,4 @@
     </script>
  </body>
  </html>
+

@@ -801,7 +801,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     educationSelect.addEventListener('change', function () {
-        setDetailMode('');
+        const meta = currentMeta();
+        setDetailMode(meta?.detail ? 'ANY' : '');
         setSpecificRows([]);
         closeAllSpecificMenus();
         syncState();

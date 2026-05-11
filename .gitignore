@@ -1,6 +1,8 @@
-.env
-
 *.log
+.env
+.env.backup
+.env.production
+.env
 .DS_Store
 .env
 .env.backup
@@ -26,9 +28,6 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-.env
-.env.backup
-.env.production
 
 
 ~$ANNEX H-1 - CS Form No. 212 Revised 2025 - Personal Data Sheet.xlsx

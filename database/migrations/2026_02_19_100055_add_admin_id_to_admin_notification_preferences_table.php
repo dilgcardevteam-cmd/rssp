@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up()
     {
+        if (!Schema::hasTable('admin_notification_preferences') || Schema::hasColumn('admin_notification_preferences', 'admin_id')) {
+            return;
+        }
+
         Schema::table('admin_notification_preferences', function (Blueprint $table) {
             $table->foreignId('admin_id')
                 ->constrained('admins')
@@ -20,6 +24,10 @@ return new class extends Migration
 
     public function down()
     {
+        if (!Schema::hasTable('admin_notification_preferences') || !Schema::hasColumn('admin_notification_preferences', 'admin_id')) {
+            return;
+        }
+
         Schema::table('admin_notification_preferences', function (Blueprint $table) {
             $table->dropForeign(['admin_id']);
             $table->dropColumn('admin_id');

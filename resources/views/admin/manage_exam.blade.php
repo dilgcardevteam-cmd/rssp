@@ -32,7 +32,11 @@
             $lobbyCount = count($participants ?? []);
             $activeBatch = (int) ($selectedBatch ?? request('batch', 1));
             $showQualifiedWorkflow = $activeBatch === 1;
-            $questionsCount = \App\Models\ExamItems::where('vacancy_id', $vacancy->vacancy_id)->where('batch_no', $activeBatch)->count();
+            $questionsCountQuery = \App\Models\ExamItems::where('vacancy_id', $vacancy->vacancy_id);
+            if (\Illuminate\Support\Facades\Schema::hasTable('exam_items') && \Illuminate\Support\Facades\Schema::hasColumn('exam_items', 'batch_no')) {
+                $questionsCountQuery->where('batch_no', $activeBatch);
+            }
+            $questionsCount = $questionsCountQuery->count();
             $hasQuestions = $questionsCount > 0;
 
             if(isset($examDetails->date) && isset($examDetails->time)) {
@@ -187,7 +191,11 @@
                 <div class="flex flex-col gap-4 overflow-y-auto pr-2">
                     <h2 class="text-xl font-bold text-[#0D2B70] mb-2">Examination Questions</h2>
                     @php
-                        $examQuestions = \App\Models\ExamItems::where('vacancy_id', $vacancy->vacancy_id)->where('batch_no', $activeBatch)->orderBy('created_at', 'asc')->get();
+                        $examQuestionsQuery = \App\Models\ExamItems::where('vacancy_id', $vacancy->vacancy_id);
+                        if (\Illuminate\Support\Facades\Schema::hasTable('exam_items') && \Illuminate\Support\Facades\Schema::hasColumn('exam_items', 'batch_no')) {
+                            $examQuestionsQuery->where('batch_no', $activeBatch);
+                        }
+                        $examQuestions = $examQuestionsQuery->orderBy('created_at', 'asc')->get();
                     @endphp
                     @if($examQuestions->count() > 0)
                         <ol class="list-decimal pl-6 space-y-4">

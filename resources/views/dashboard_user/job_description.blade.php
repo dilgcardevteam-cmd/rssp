@@ -1305,6 +1305,11 @@
         openModal('initialAssessmentEducationModal');
     }
 
+    function goBackToInitialAssessmentEligibility() {
+        closeModal('initialAssessmentPqeModal');
+        openModal('initialAssessmentEligibilityModal');
+    }
+
     function goBackToInitialAssessmentPqeOrEligibility() {
         closeModal('initialAssessmentSubscribedPdsModal');
         if (typeof initialAssessmentState.hasPqe === 'boolean') {

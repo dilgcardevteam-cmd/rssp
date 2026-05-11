@@ -69,7 +69,7 @@
     $defaultRequiredSupportingDocuments = strtoupper((string) old('vacancy_type', $formSource?->vacancy_type ?? 'COS')) === 'COS'
       ? ['passport_photo', 'signed_pds', 'signed_work_exp_sheet', 'photocopy_diploma', 'application_letter', 'cert_training']
       : collect($allSupportingDocumentTypes)
-          ->reject(fn ($doc) => in_array($doc, ['tor_masteraldoctorate', 'grade_masteraldoctorate', 'cert_lgoo_induction', 'other_documents', 'pqe_result', 'ipcr', 'non_academic', 'designation_order', 'cert_employment'], true))
+          ->reject(fn ($doc) => in_array($doc, ['cert_lgoo_induction', 'other_documents', 'pqe_result', 'ipcr', 'non_academic', 'designation_order', 'cert_employment'], true))
           ->values()
           ->all();
     $persistedSupportingDocumentSelection = old('supporting_documents_required', $formSource?->supporting_documents_required);
@@ -83,22 +83,21 @@
       ? array_values(array_unique(array_values(array_filter($persistedSupportingDocumentSelection, fn ($doc) => in_array((string) $doc, $allSupportingDocumentTypes, true)))))
       : $defaultRequiredSupportingDocuments;
     $documentLabelMap = [
-      'application_letter' => 'Signed Application Letter indicating the position applying for',
-      'signed_pds' => 'Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
-      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned',
-      'photocopy_diploma' => 'Duly authenticated Diploma',
-      'cert_eligibility' => 'Certificate of Eligibility/Board Rating/License',
-      'cert_employment' => 'Certificate of Employment with duties and responsibilities',
-      'ipcr' => 'Performance Rating in the last rating period in the present position',
-      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
-      'non_academic' => 'Non-academic Awards received within the past 2 years',
+      'application_letter' => 'Signed Application letter indicating the position applying for',
+      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result',
+      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned',
+      'photocopy_diploma' => 'Duly Authenticated Diploma',
+      'signed_pds' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)',
+      'signed_work_exp_sheet' => 'Fully accomplished and subcribed/notarized Work Experience Sheet (for position/s requiring relevant Experience)',
       'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
-      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result, if available',
       'passport_photo' => 'Passport-Sized Picture',
-      'signed_work_exp_sheet' => 'Work Experience Sheet',
+      'cert_eligibility' => 'Certificate of Eligibility/Board Rating License',
+      'ipcr' => 'Performance Rating in the last rating period in the present position',
+      'non_academic' => 'Non-academic Awards received within the past 2 years',
+      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
       'designation_order' => 'Confirmed Designation Order/s',
-      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral Units Earned',
-      'tor_masteraldoctorate' => 'TOR with Masteral Degree',
+      'cert_employment' => 'Certificate of Employment with duties and functions',
+      'other_documents' => 'Other Documents Submitted',
     ];
   @endphp
 
@@ -189,7 +188,6 @@
           </div>
 
           <div class="grid gap-5 md:grid-cols-2">
-            @if(!$positionMode)
             <div>
               <label class="{{ $fieldLabel }}">Deadline of Application <span class="text-red-600">*</span></label>
               <input
@@ -208,7 +206,6 @@
                 <p class="{{ $helperText }}">Deadline is managed in Add Vacancy.</p>
               @endif
             </div>
-            @endif
 
             <div>
               <label class="{{ $fieldLabel }}">Place of Assignment <span class="text-red-600">*</span></label>
@@ -359,7 +356,7 @@
           </p>
         </div>
 
-        <div class="flex flex-col gap-3">
+        <div class="grid gap-3 md:grid-cols-2">
           @foreach($allSupportingDocumentTypes as $supportingDocType)
             @php
               $supportingDocKey = (string) $supportingDocType;
@@ -442,7 +439,7 @@
               Discard
             </button>
 
-            <button id="vacancy-save-btn" type="button" class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
+            <button id="vacancy-save-btn" type="button" disabled class="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 opacity-50 cursor-not-allowed">
               <span id="save-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -1104,6 +1101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('vacancy-save-btn');
     if (!saveBtn) return;
     saveBtn.addEventListener('click', () => {
+        if (saveBtn.disabled) return;
         window.dispatchEvent(new CustomEvent('open-cos-save-confirm'));
     });
 });
@@ -1166,18 +1164,6 @@ window.addEventListener('confirm-cos-save', () => {
         if (text) text.textContent = 'SAVING...';
         
         form.submit();
-    } else {
-        // Auto-scroll and focus the first field with an error
-        const firstErrorMsg = document.querySelector('.text-red-500:not(.hidden), .text-red-600:not(.hidden)');
-        if (firstErrorMsg) {
-            firstErrorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Try to find the associated input to focus it
-            const container = firstErrorMsg.closest('div, section');
-            if (container) {
-                const input = container.querySelector('input, select, textarea');
-                if (input) input.focus();
-            }
-        }
     }
 });
 

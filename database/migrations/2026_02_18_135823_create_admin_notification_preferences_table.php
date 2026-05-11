@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('admin_notification_preferences')) {
+            return;
+        }
+
         Schema::create('admin_notification_preferences', function (Blueprint $table) {
             $table->id();
             $table->timestamps();

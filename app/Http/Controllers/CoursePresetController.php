@@ -40,6 +40,115 @@ class CoursePresetController extends Controller
         ['code' => 'SJD', 'name' => 'Doctor of Juridical Science', 'level' => 'DOCTORATE'],
     ];
 
+    private function seedProgramsFromCsv(): Collection
+    {
+        static $cached = null;
+
+        if ($cached instanceof Collection) {
+            return $cached;
+        }
+
+        $path = base_path('philippines_academic_programs_seed_list.csv');
+        if (!is_file($path) || !is_readable($path)) {
+            $cached = collect();
+            return $cached;
+        }
+
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            $cached = collect();
+            return $cached;
+        }
+
+        $header = fgetcsv($handle);
+        if (!is_array($header)) {
+            fclose($handle);
+            $cached = collect();
+            return $cached;
+        }
+
+        $normalizedHeader = array_map(
+            static fn($column) => strtolower(trim((string) $column)),
+            $header
+        );
+
+        $rows = [];
+        while (($data = fgetcsv($handle)) !== false) {
+            if (!is_array($data) || count($data) === 0) {
+                continue;
+            }
+
+            $row = [];
+            foreach ($normalizedHeader as $index => $column) {
+                $row[$column] = isset($data[$index]) ? trim((string) $data[$index]) : '';
+            }
+
+            $name = trim((string) ($row['program_name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $rows[] = [
+                'id' => 0,
+                'code' => (string) ($row['program_code'] ?? ''),
+                'name' => $name,
+                'level' => $this->normalizeLevel((string) ($row['program_level'] ?? 'COLLEGE')),
+            ];
+        }
+
+        fclose($handle);
+
+        $cached = $this->sortedCourses(collect($rows));
+
+        return $cached;
+    }
+
+    private function mergedSeedPrograms(?string $levelFilter = null): Collection
+    {
+        $csvPrograms = $this->seedProgramsFromCsv();
+        $fallbackPrograms = $this->sortedCourses(collect(self::DEFAULT_PROGRAMS))
+            ->map(function (array $item) {
+                return [
+                    'id' => 0,
+                    'code' => (string) ($item['code'] ?? ''),
+                    'name' => (string) ($item['name'] ?? ''),
+                    'level' => $this->normalizeLevel((string) ($item['level'] ?? 'COLLEGE')),
+                ];
+            });
+
+        $merged = collect();
+        $seen = [];
+
+        foreach ($fallbackPrograms->concat($csvPrograms) as $item) {
+            $name = trim((string) ($item['name'] ?? ''));
+            $level = $this->normalizeLevel((string) ($item['level'] ?? 'COLLEGE'));
+            if ($name === '') {
+                continue;
+            }
+
+            $key = $level . '|' . mb_strtolower($name);
+            if (isset($seen[$key])) {
+                continue;
+            }
+
+            $seen[$key] = true;
+            $merged->push([
+                'id' => (int) ($item['id'] ?? 0),
+                'code' => (string) ($item['code'] ?? ''),
+                'name' => $name,
+                'level' => $level,
+            ]);
+        }
+
+        $merged = $this->sortedCourses($merged);
+
+        if ($levelFilter !== null) {
+            $merged = $merged->where('level', $levelFilter)->values();
+        }
+
+        return $merged->values();
+    }
+
     private function canManageCourses(): bool
     {
         $role = Auth::guard('admin')->user()->role ?? null;
@@ -135,26 +244,17 @@ class CoursePresetController extends Controller
 
     private function defaultPrograms(?string $levelFilter = null): Collection
     {
-        return $this->sortedCourses(collect(self::DEFAULT_PROGRAMS))
-            ->map(function (array $item) {
-                return [
-                    'id' => 0,
-                    'code' => (string) ($item['code'] ?? ''),
-                    'name' => (string) ($item['name'] ?? ''),
-                    'level' => $this->normalizeLevel((string) ($item['level'] ?? 'COLLEGE')),
-                ];
-            })
-            ->when($levelFilter !== null, function (Collection $collection) use ($levelFilter) {
-                return $collection->where('level', $levelFilter)->values();
-            });
+        return $this->mergedSeedPrograms($levelFilter);
     }
 
     private function programsPayload(?string $levelFilter = null): array
     {
+        $seedPrograms = $this->mergedSeedPrograms($levelFilter);
+
         if (!$this->hasCoursesTable()) {
             return [
                 'success' => true,
-                'data' => $this->defaultPrograms($levelFilter)->values(),
+                'data' => $seedPrograms->values(),
                 'levels' => self::PROGRAM_LEVEL_LABELS,
             ];
         }
@@ -165,7 +265,7 @@ class CoursePresetController extends Controller
             $select[] = 'program_level';
         }
 
-        $data = $this->sortedCourses(CoursePreset::query()->get($select))
+        $databasePrograms = $this->sortedCourses(CoursePreset::query()->get($select))
             ->map(function ($row) use ($hasLevel) {
                 return [
                     'id' => (int) ($row->id ?? 0),
@@ -176,10 +276,37 @@ class CoursePresetController extends Controller
                         : 'COLLEGE',
                 ];
             })
-            ->when($levelFilter !== null, function (Collection $collection) use ($levelFilter) {
-                return $collection->where('level', $levelFilter)->values();
-            })
             ->values();
+
+        $data = collect();
+        $seen = [];
+
+        foreach ($seedPrograms->concat($databasePrograms) as $row) {
+            $name = trim((string) ($row['name'] ?? ''));
+            $level = $this->normalizeLevel((string) ($row['level'] ?? 'COLLEGE'));
+            if ($name === '') {
+                continue;
+            }
+
+            if ($levelFilter !== null && $level !== $levelFilter) {
+                continue;
+            }
+
+            $key = $level . '|' . mb_strtolower($name);
+            if (isset($seen[$key])) {
+                continue;
+            }
+
+            $seen[$key] = true;
+            $data->push([
+                'id' => (int) ($row['id'] ?? 0),
+                'code' => (string) ($row['code'] ?? ''),
+                'name' => $name,
+                'level' => $level,
+            ]);
+        }
+
+        $data = $this->sortedCourses($data)->values();
 
         return [
             'success' => true,

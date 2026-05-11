@@ -109,6 +109,30 @@
         .required-asterisk {
             color: #f59e0b;
         }
+
+        .program-combobox-input {
+            cursor: pointer;
+            padding-right: 2.75rem;
+            background-color: #fff;
+        }
+
+        .program-combobox-input:focus {
+            outline: none;
+        }
+
+        .program-combobox-icon {
+            position: absolute;
+            right: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: #64748b;
+            transition: transform 0.2s ease;
+        }
+
+        .program-combobox[data-program-open="1"] .program-combobox-icon {
+            transform: translateY(-50%) rotate(180deg);
+        }
     </style>
     <!-- add-btn w-full sm:w-auto justify-center sm:justify-start -->
      
@@ -204,26 +228,41 @@
                             </div>
 
                             @if (in_array($education_type, ['college', 'grad'], true))
-                                <div class="relative md:col-span-2">
+                                <div class="relative md:col-span-2 program-combobox" data-program-combobox data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}" data-program-open="0">
                                     <input type="text"
                                            name="{{ $education_type }}[{{ $index }}][basic]"
                                            value="{{ old($education_type.'.'.$index.'.basic', $data['basic'] ?? '') }}"
-                                           placeholder=" "
+                                           placeholder=""
                                            data-program-input
                                            data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
-                                           class="floating-label-input w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer text-sm sm:text-base"
+                                           readonly
+                                           class="floating-label-input program-combobox-input w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer text-sm sm:text-base"
                                            {{ $education_type === 'college' ? 'required' : '' }}>
+                                    <span class="material-icons program-combobox-icon">expand_more</span>
                                     <label class="floating-label absolute left-3 sm:left-4 top-2 sm:top-3 text-gray-500 pointer-events-none text-sm sm:text-base">
                                         Degree/Course{!! $education_type === 'college' ? ' <span class="text-red-500">*</span>' : '' !!}
                                     </label>
                                     <div
-                                        class="absolute left-0 right-0 z-40 mt-1 hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+                                        class="absolute left-0 right-0 z-40 mt-1 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
                                         data-program-role="menu"
                                         data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
                                     >
+                                        <div class="border-b border-slate-200 px-3 py-2">
+                                            <div class="relative">
+                                                <span class="material-icons pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-400">search</span>
+                                                <input
+                                                    type="text"
+                                                    value=""
+                                                    placeholder="Search degree/course"
+                                                    data-program-role="search"
+                                                    data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
+                                                    class="w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                                >
+                                            </div>
+                                        </div>
                                         <div class="max-h-56 overflow-auto py-1" data-program-role="options" data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"></div>
                                     </div>
-                                    <p class="mt-1 text-xs text-gray-500">Search from the list or type if your degree/course is not available.</p>
+                                    <p class="mt-1 text-xs text-gray-500">Search and select from the list of available degree/course options.</p>
                                 </div>
                             @else
                                 <div class="relative md:col-span-2">
@@ -345,26 +384,41 @@
                         </div>
 
                         @if (in_array($education_type, ['college', 'grad'], true))
-                            <div class="relative md:col-span-2">
+                            <div class="relative md:col-span-2 program-combobox" data-program-combobox data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}" data-program-open="0">
                                 <input type="text"
                                        name="{{ $education_type }}[__INDEX__][basic]"
                                        value=""
-                                       placeholder=" "
+                                       placeholder=""
                                        data-program-input
                                        data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
-                                       class="floating-label-input w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer text-sm sm:text-base"
+                                       readonly
+                                       class="floating-label-input program-combobox-input w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer text-sm sm:text-base"
                                        {{ $education_type === 'college' ? 'required' : '' }}>
+                                <span class="material-icons program-combobox-icon">expand_more</span>
                                 <label class="floating-label absolute left-3 sm:left-4 top-2 sm:top-3 text-gray-500 pointer-events-none text-sm sm:text-base">
                                     Degree/Course{!! $education_type === 'college' ? ' <span class="text-red-500">*</span>' : '' !!}
                                 </label>
                                 <div
-                                    class="absolute left-0 right-0 z-40 mt-1 hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+                                    class="absolute left-0 right-0 z-40 mt-1 hidden overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
                                     data-program-role="menu"
                                     data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
                                 >
+                                    <div class="border-b border-slate-200 px-3 py-2">
+                                        <div class="relative">
+                                            <span class="material-icons pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-base text-slate-400">search</span>
+                                            <input
+                                                type="text"
+                                                value=""
+                                                placeholder="Search degree/course"
+                                                data-program-role="search"
+                                                data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"
+                                                class="w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                            >
+                                        </div>
+                                    </div>
                                     <div class="max-h-56 overflow-auto py-1" data-program-role="options" data-program-source="{{ $education_type === 'grad' ? 'grad' : 'college' }}"></div>
                                 </div>
-                                <p class="mt-1 text-xs text-gray-500">Search from the list or type if your degree/course is not available.</p>
+                                <p class="mt-1 text-xs text-gray-500">Search and select from the list of available degree/course options.</p>
                             </div>
                         @else
                             <div class="relative md:col-span-2">
@@ -528,15 +582,24 @@
                 return row?.querySelector(`input[data-program-input][data-program-source="${normalizedSource}"]`) || null;
             }
 
+            function rowProgramSearchInput(row, source) {
+                const normalizedSource = normalizeProgramSource(source);
+                return row?.querySelector(`input[data-program-role="search"][data-program-source="${normalizedSource}"]`) || null;
+            }
+
             function closeProgramMenuForRow(row, source) {
                 const input = rowProgramInput(row, source);
                 const menu = rowMenu(row, source);
+                const combobox = row?.querySelector(`[data-program-combobox][data-program-source="${normalizeProgramSource(source)}"]`) || null;
                 if (!menu) {
                     return;
                 }
                 menu.classList.add('hidden');
                 if (input) {
                     input.setAttribute('aria-expanded', 'false');
+                }
+                if (combobox) {
+                    combobox.dataset.programOpen = '0';
                 }
             }
 
@@ -558,15 +621,17 @@
 
             function renderProgramOptionsList(row, source) {
                 const input = rowProgramInput(row, source);
+                const searchInput = rowProgramSearchInput(row, source);
                 const optionsWrap = rowOptionsWrap(row, source);
                 const normalizedSource = normalizeProgramSource(source);
                 if (!input || !optionsWrap) {
                     return;
                 }
 
-                const filtered = filterProgramOptions(input.value, normalizedSource).slice(0, 200);
+                const searchQuery = searchInput ? searchInput.value : '';
+                const filtered = filterProgramOptions(searchQuery, normalizedSource).slice(0, 300);
                 if (filtered.length === 0) {
-                    optionsWrap.innerHTML = '<div class="px-3 py-2 text-sm text-slate-500">No matches found. Keep typing to use your degree/course.</div>';
+                    optionsWrap.innerHTML = '<div class="px-3 py-2 text-sm text-slate-500">No matching degree/course found.</div>';
                     return;
                 }
 
@@ -587,41 +652,69 @@
             function openProgramMenuForRow(row, source) {
                 const normalizedSource = normalizeProgramSource(source);
                 const input = rowProgramInput(row, normalizedSource);
+                const searchInput = rowProgramSearchInput(row, normalizedSource);
                 const menu = rowMenu(row, normalizedSource);
+                const combobox = row?.querySelector(`[data-program-combobox][data-program-source="${normalizedSource}"]`) || null;
                 if (!input || !menu || input.disabled) {
                     closeProgramMenuForRow(row, normalizedSource);
                     return;
                 }
 
                 closeAllProgramMenus();
+                if (searchInput) {
+                    searchInput.value = '';
+                }
                 renderProgramOptionsList(row, normalizedSource);
                 menu.classList.remove('hidden');
                 input.setAttribute('aria-expanded', 'true');
+                if (combobox) {
+                    combobox.dataset.programOpen = '1';
+                }
+                if (searchInput) {
+                    window.setTimeout(() => searchInput.focus(), 0);
+                }
             }
 
             function bindProgramDropdownRow(row, source) {
                 const normalizedSource = normalizeProgramSource(source);
                 const input = rowProgramInput(row, normalizedSource);
+                const searchInput = rowProgramSearchInput(row, normalizedSource);
                 const optionsWrap = rowOptionsWrap(row, normalizedSource);
                 const boundKey = normalizedSource === 'grad' ? 'gradProgramBound' : 'collegeProgramBound';
 
-                if (!input || !optionsWrap || row.dataset[boundKey] === '1') {
+                if (!input || !searchInput || !optionsWrap || row.dataset[boundKey] === '1') {
                     return;
                 }
 
                 row.dataset[boundKey] = '1';
                 input.setAttribute('autocomplete', 'off');
                 input.setAttribute('aria-expanded', 'false');
+                input.readOnly = true;
 
                 input.addEventListener('focus', () => openProgramMenuForRow(row, normalizedSource));
                 input.addEventListener('click', () => openProgramMenuForRow(row, normalizedSource));
-                input.addEventListener('input', () => {
-                    openProgramMenuForRow(row, normalizedSource);
-                });
 
                 input.addEventListener('keydown', (event) => {
                     if (event.key === 'Escape') {
                         closeProgramMenuForRow(row, normalizedSource);
+                        return;
+                    }
+
+                    if (event.key === 'Enter' || event.key === 'ArrowDown' || event.key === ' ') {
+                        event.preventDefault();
+                        openProgramMenuForRow(row, normalizedSource);
+                    }
+                });
+
+                searchInput.addEventListener('input', () => {
+                    renderProgramOptionsList(row, normalizedSource);
+                });
+
+                searchInput.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        event.preventDefault();
+                        closeProgramMenuForRow(row, normalizedSource);
+                        input.focus();
                         return;
                     }
 
@@ -652,9 +745,10 @@
 
                     input.value = label;
                     closeProgramMenuForRow(row, normalizedSource);
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
                 });
 
-                input.addEventListener('blur', () => {
+                row.addEventListener('focusout', () => {
                     window.setTimeout(() => {
                         if (!row.contains(document.activeElement)) {
                             closeProgramMenuForRow(row, normalizedSource);

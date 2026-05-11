@@ -724,6 +724,7 @@
                             <option value="Temporary" ${(!is_new && work_exp_status == 'Temporary') ? 'selected' : ''}>Temporary</option>
                             <option value="Casual" ${(!is_new && work_exp_status == 'Casual') ? 'selected' : ''}>Casual</option>
                             <option value="Contractual" ${(!is_new && work_exp_status == 'Contractual') ? 'selected' : ''}>Contractual</option>
+                            <option value="Contract of Service" ${(!is_new && work_exp_status == 'Contract of Service') ? 'selected' : ''}>Contract of Service</option>
                         </select>
                     </td>
                     <td>

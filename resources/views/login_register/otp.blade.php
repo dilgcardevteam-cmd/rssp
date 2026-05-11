@@ -42,7 +42,7 @@
                     </div>
 
                     <p class="max-w-lg text-sm leading-relaxed text-blue-100 sm:text-base">
-                        A verification code was sent to your email. Enter the 6-digit OTP to continue account verification.
+                        A verification code was sent to your email. Enter the 6-digit OTP to continue account verification. The code stays valid for 5 minutes.
                     </p>
 
                     <p class="mt-10 text-sm font-semibold tracking-[0.12em] text-yellow-300">
@@ -98,7 +98,7 @@
 
                         <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center">
                             <p id="timer" class="text-sm text-slate-700">
-                                Resend OTP in <span id="countdown" class="font-bold text-[#0D2B70]">00:30</span>
+                                Resend OTP in <span id="countdown" class="font-bold text-[#0D2B70]">05:00</span>
                             </p>
                             <a href="#" id="resend-link" class="hidden text-sm font-semibold text-[#0D2B70] hover:underline">
                                 Resend Code
@@ -124,7 +124,7 @@
         const countdownEl = document.getElementById('countdown');
         const resendLink = document.getElementById('resend-link');
         const timerEl = document.getElementById('timer');
-        const defaultCooldown = 30;
+        const defaultCooldown = 300;
         const storageKey = 'register_otp_resend_available_at';
         const serverNowMs = {{ (int) ($serverNowTs ?? now()->timestamp) }} * 1000;
         const bootPerfNowMs = performance.now();
@@ -235,3 +235,4 @@
     @include('partials.loader')
 </body>
 </html>
+

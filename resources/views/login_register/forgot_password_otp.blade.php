@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -86,7 +86,7 @@
         let countdownEl = document.getElementById('countdown');
         const resendLink = document.getElementById('resend-link');
         const timerSpan = document.getElementById('timer');
-        const defaultCooldown = 30;
+        const defaultCooldown = 300;
         const storageKey = 'forgot_password_otp_resend_available_at';
         const serverNowMs = {{ (int) ($serverNowTs ?? now()->timestamp) }} * 1000;
         const bootPerfNowMs = performance.now();
@@ -205,3 +205,4 @@
     @include('partials.loader')
 </body>
 </html>
+

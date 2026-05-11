@@ -284,7 +284,7 @@
                 </div>
                 
                 @php $fields = [
-                    'signed_pds' => '2. Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) with Work Experience Sheet, printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
+                    'signed_pds' => '2. Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
                     'transcript_records' => '3. Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned',
                     'photocopy_diploma' => '4. Duly authenticated Diploma',
                     'cert_eligibility' => '5. Certificate of Eligibility/Board Rating/License',

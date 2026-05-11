@@ -4,7 +4,7 @@
 @php
     $documentMeta = [
         'application_letter' => ['label' => '1. Signed Application Letter indicating the position applying for', 'accept' => 'application/pdf'],
-        'signed_pds' => ['label' => '2. Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) with Work Experience Sheet, printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)', 'accept' => 'application/pdf'],
+        'signed_pds' => ['label' => '2. Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)', 'accept' => 'application/pdf'],
         'transcript_records' => ['label' => '3. Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned', 'accept' => 'application/pdf'],
         'photocopy_diploma' => ['label' => '4. Duly authenticated Diploma', 'accept' => 'application/pdf'],
         'cert_eligibility' => ['label' => '5. Certificate of Eligibility/Board Rating/License', 'accept' => 'application/pdf'],

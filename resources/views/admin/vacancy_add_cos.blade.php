@@ -84,7 +84,7 @@
       : $defaultRequiredSupportingDocuments;
     $documentLabelMap = [
       'application_letter' => 'Signed Application Letter indicating the position applying for',
-      'signed_pds' => 'Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) with Work Experience Sheet, printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
+      'signed_pds' => 'Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
       'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned',
       'photocopy_diploma' => 'Duly authenticated Diploma',
       'cert_eligibility' => 'Certificate of Eligibility/Board Rating/License',

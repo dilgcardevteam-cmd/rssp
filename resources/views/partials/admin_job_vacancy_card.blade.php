@@ -5,40 +5,43 @@
     display: none !important;
   }
 </style>
-<tr class="text-sm text-[#0D2B70] select-none hover:bg-blue-50 transition-colors duration-200">
-  <td class="w-[10%] px-3 py-2 text-center font-semibold">
-    <div class="flex flex-col items-center justify-center">
-      <div class="flex items-center justify-center gap-1.5">
+<tr class="text-sm text-[#0D2B70] select-none transition-colors duration-200 hover:bg-blue-50">
+  <td class="w-[16%] px-3 py-3 text-center align-top font-semibold">
+    <div class="flex min-w-0 flex-col items-center justify-center">
+      <div class="flex min-w-0 w-full items-center justify-center gap-1.5">
         <div
           class="h-2.5 w-2.5 flex-shrink-0 rounded-full {{ $vacancy->status === 'OPEN' ? 'bg-green-500' : 'bg-red-500' }}">
         </div>
-        <span class="truncate"
+        <span class="block min-w-0 max-w-full break-words text-center leading-tight"
           title="{{ $vacancy->plantilla_item_no ?: 'N/A' }}">{{ $vacancy->plantilla_item_no ?: 'N/A' }}</span>
       </div>
-      <span class="text-[10px] text-gray-500 font-normal mt-0.5">ID: {{ $vacancy->vacancy_id }}</span>
+      <span class="mt-0.5 break-all text-[10px] font-normal text-gray-500">ID: {{ $vacancy->vacancy_id }}</span>
     </div>
   </td>
-  <td class="w-[30%] px-3 py-2 text-left">
-    <div class="flex flex-col items-center gap-1 leading-tight">
-      <p class="font-medium text-center">{{ $vacancy->position_title }}</p>
+  <td class="w-[24%] px-3 py-3 text-left align-top">
+    <div class="flex min-w-0 flex-col items-center gap-1 leading-tight">
+      <p class="w-full break-words text-center font-medium">{{ $vacancy->position_title }}</p>
       @php
         $vacancyTypeRaw = trim((string) ($vacancy->vacancy_type ?? ''));
         $vacancyTypeLabel = strcasecmp($vacancyTypeRaw, 'cos') === 0
           ? 'Contract of Service'
           : ($vacancyTypeRaw !== '' ? $vacancyTypeRaw : '');
       @endphp
-      <p class="text-xs italic text-[#0D2B70]/70">
+      <p class="w-full break-words text-center text-xs italic text-[#0D2B70]/70">
         {{ $vacancyTypeLabel }}
       </p>
+    </div>
   </td>
-  <td class="w-[10%] px-3 py-2 text-center">&#8369;{{ number_format($vacancy->monthly_salary, 2) }}</td>
-  <td class="w-[20%] px-5 py-2 text-center">{{ \Carbon\Carbon::parse($vacancy->closing_date)->format('F j, Y') }}</td>
-  <td class="w-[25%] px-3 py-2 text-center">{{ $vacancy->place_of_assignment }}</td>
-  <td class="w-[10%] px-3 py-2 text-center">
-    <div class="flex items-center justify-center gap-2">
+  <td class="w-[14%] px-3 py-3 text-center align-top whitespace-nowrap">&#8369;{{ number_format($vacancy->monthly_salary, 2) }}</td>
+  <td class="w-[14%] px-3 py-3 text-center align-top whitespace-nowrap">{{ \Carbon\Carbon::parse($vacancy->closing_date)->format('F j, Y') }}</td>
+  <td class="w-[18%] px-3 py-3 text-center align-top">
+    <span class="block break-words leading-tight">{{ $vacancy->place_of_assignment }}</span>
+  </td>
+  <td class="w-[14%] px-3 py-3 text-center align-top">
+    <div class="flex flex-wrap items-center justify-center gap-2">
       <button
         onclick="event.stopPropagation(); window.location.href='{{ route('vacancies.edit', $vacancy->vacancy_id) }}'"
-        class="use-loader rounded-md border border-[#0D2B70] px-2.5 py-1 text-xs font-bold text-[#0D2B70] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:bg-[#0D2B70] hover:text-white hover:shadow-md"
+        class="use-loader whitespace-nowrap rounded-md border border-[#0D2B70] px-2.5 py-1 text-xs font-bold text-[#0D2B70] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-105 hover:bg-[#0D2B70] hover:text-white hover:shadow-md"
         aria-label="Edit Vacancy" title="Edit Vacancy">
         Edit
       </button>
@@ -59,7 +62,7 @@
                } 
            })" class="relative inline-block">
         <button @click.stop="open = !open"
-          class="rounded-md border border-[#0D2B70] bg-[#0D2B70] px-2.5 py-1 text-xs font-bold text-white transition-all duration-300 hover:scale-105 hover:bg-[#0D2B70]/90 hover:shadow-md">
+          class="whitespace-nowrap rounded-md border border-[#0D2B70] bg-[#0D2B70] px-2.5 py-1 text-xs font-bold text-white transition-all duration-300 hover:scale-105 hover:bg-[#0D2B70]/90 hover:shadow-md">
           Reports
         </button>
         <div x-show="open" @click.away="open = false" x-cloak x-transition
@@ -70,7 +73,7 @@
             Final Selection Line-up
           </a>
           <a href="{{ route('preview.list_of_applicants', $vacancy->vacancy_id) }}" target="_blank"
-            class="block px-4 py-2 text-left text-[11px] font-semibold text-[#0D2B70] hover:bg-slate-100 border-t border-slate-100">
+            class="block border-t border-slate-100 px-4 py-2 text-left text-[11px] font-semibold text-[#0D2B70] hover:bg-slate-100">
             List of Applicants
           </a>
         </div>
@@ -78,7 +81,7 @@
 
       <button
         onclick="event.stopPropagation(); window._pendingDeleteUrl = '{{ route('vacancies.destroy', $vacancy->vacancy_id) }}'; window.dispatchEvent(new CustomEvent('open-delete-vacancy-confirm'));"
-        class="rounded-md border border-red-600 px-2.5 py-1 text-xs font-bold text-red-600 transition-all duration-300 hover:scale-105 hover:bg-red-600 hover:text-white hover:shadow-md"
+        class="whitespace-nowrap rounded-md border border-red-600 px-2.5 py-1 text-xs font-bold text-red-600 transition-all duration-300 hover:scale-105 hover:bg-red-600 hover:text-white hover:shadow-md"
         aria-label="Delete Vacancy" title="Delete Vacancy">
         Delete
       </button>

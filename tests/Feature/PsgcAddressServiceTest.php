@@ -38,6 +38,7 @@ class PsgcAddressServiceTest extends TestCase
         $this->writeWorkbook($cityFile, 'City-Municipality', [
             ['PSGC Code', 'Name', 'Correspondence Code', 'Geographic Level'],
             ['1380100000', 'City of Caloocan', '137501000', 'City'],
+            ['1430300000', 'City of Baguio', '143000000', 'City'],
             ['0100101000', 'Alpha City', '100101000', 'Mun'],
             ['1380601000', 'Tondo I/II', '133901000', 'SubMun'],
         ]);
@@ -48,6 +49,9 @@ class PsgcAddressServiceTest extends TestCase
         config()->set('psgc.provinces_sheet', 'Provinces');
         config()->set('psgc.cities_file', $cityFile);
         config()->set('psgc.cities_sheet', 'City-Municipality');
+        config()->set('psgc.city_parent_overrides', [
+            '1430300000' => '0100100000',
+        ]);
 
         $service = app(PsgcAddressService::class);
 
@@ -59,6 +63,7 @@ class PsgcAddressServiceTest extends TestCase
 
         $this->assertSame([
             ['code' => '0100101000', 'name' => 'Alpha City', 'zip_code' => null],
+            ['code' => '1430300000', 'name' => 'City of Baguio', 'zip_code' => null],
         ], $service->citiesByParent('0100100000'));
 
         $this->assertSame([

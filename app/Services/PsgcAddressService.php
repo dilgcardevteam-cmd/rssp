@@ -41,9 +41,10 @@ class PsgcAddressService
 
     private function loadData(): array
     {
-        $path = $this->resolveConfiguredPath((string) config('psgc.data_file', self::DEFAULT_SOURCE_FILE));
-        $provincePath = $this->resolveOptionalConfiguredPath((string) config('psgc.provinces_file', self::DEFAULT_PROVINCES_SOURCE_FILE));
-        $cityPath = $this->resolveOptionalConfiguredPath((string) config('psgc.cities_file', self::DEFAULT_CITIES_SOURCE_FILE));
+        $psgcConfig = config('psgc', []);
+        $path = $this->resolveConfiguredPath((string) ($psgcConfig['data_file'] ?? self::DEFAULT_SOURCE_FILE));
+        $provincePath = $this->resolveOptionalConfiguredPath((string) ($psgcConfig['provinces_file'] ?? self::DEFAULT_PROVINCES_SOURCE_FILE));
+        $cityPath = $this->resolveOptionalConfiguredPath((string) ($psgcConfig['cities_file'] ?? self::DEFAULT_CITIES_SOURCE_FILE));
 
         if (!is_file($path)) {
             throw new RuntimeException('PSGC dataset file not found: ' . $path);
@@ -66,6 +67,13 @@ class PsgcAddressService
             $fingerprintParts[] = (string) @filesize($cityPath);
             $fingerprintParts[] = $cityPath;
         }
+
+        $fingerprintParts[] = md5(json_encode([
+            'data_sheet' => $psgcConfig['data_sheet'] ?? self::DEFAULT_PSGC_SHEET,
+            'provinces_sheet' => $psgcConfig['provinces_sheet'] ?? self::DEFAULT_PROVINCES_SHEET,
+            'cities_sheet' => $psgcConfig['cities_sheet'] ?? self::DEFAULT_CITIES_SHEET,
+            'city_parent_overrides' => $psgcConfig['city_parent_overrides'] ?? [],
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '');
 
         $fingerprint = implode('|', $fingerprintParts);
         $cacheKey = 'psgc.address.data.' . md5($fingerprint);
@@ -286,11 +294,13 @@ class PsgcAddressService
             return [$defaultCitiesByParent, $defaultCityIndex];
         }
 
+        $configuredParentOverrides = $this->normalizedParentOverrideMap();
+
         $citiesByParent = [];
         $cityIndex = [];
 
         foreach ($cityOverrides as $cityCode => $cityPayload) {
-            $parentCode = $parentByCity[$cityCode] ?? null;
+            $parentCode = $configuredParentOverrides[$cityCode] ?? ($parentByCity[$cityCode] ?? null);
             if ($parentCode === null) {
                 continue;
             }
@@ -390,6 +400,29 @@ class PsgcAddressService
         }
 
         return $indexed;
+    }
+
+    private function normalizedParentOverrideMap(): array
+    {
+        $normalized = [];
+        $overrides = config('psgc.city_parent_overrides', []);
+
+        if (!is_array($overrides)) {
+            return $normalized;
+        }
+
+        foreach ($overrides as $cityCode => $parentCode) {
+            $normalizedCityCode = $this->normalizeCode((string) $cityCode);
+            $normalizedParentCode = $this->normalizeCode((string) $parentCode);
+
+            if ($normalizedCityCode === '' || $normalizedParentCode === '') {
+                continue;
+            }
+
+            $normalized[$normalizedCityCode] = $normalizedParentCode;
+        }
+
+        return $normalized;
     }
 
     private function sortEntries(array $entries): array

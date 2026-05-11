@@ -1190,7 +1190,10 @@
                             if (!(event.target instanceof Node)) {
                                 return;
                             }
-                            if (!event.target.closest('[data-program-input]') && !event.target.closest('[data-program-role="menu"]')) {
+                            if (
+                                !event.target.closest('[data-program-combobox]') &&
+                                !event.target.closest('[data-program-role="menu"]')
+                            ) {
                                 closeAllProgramMenus();
                             }
                         });

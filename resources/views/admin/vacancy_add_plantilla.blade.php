@@ -153,7 +153,6 @@
         <input type="hidden" id="supporting_documents_required" name="supporting_documents_required"
           value='@json($selectedSupportingDocuments)'>
 
-        @if(!$positionMode)
         <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="mb-6 border-b border-slate-200 pb-5">
             <h2 class="{{ $sectionTitle }}">Job Information</h2>
@@ -201,19 +200,16 @@
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
-              <div>
+              <div class="{{ $disablePositionFields ? 'hidden' : '' }}">
                 <label class="{{ $fieldLabel }}">Deadline of Application <span class="text-red-600">*</span></label>
                 <input id="closing_date" type="date" name="closing_date" value="{{ $displayClosingDate }}"
-                  placeholder="Select deadline" {{ $disablePositionFields ? 'disabled' : '' }} class="{{ $fieldInput }}">
-                @if($disablePositionFields)
-                  <input type="hidden" name="closing_date" value="{{ $defaultClosingDate }}">
-                @endif
+                  placeholder="Select deadline" class="{{ $fieldInput }}">
                 <p id="closing_date_error" class="mt-1 hidden text-sm text-red-600">Deadline of application is required.
                 </p>
-                @if($disablePositionFields)
-                  <p class="mt-1 text-xs leading-5 text-slate-500">Deadline is managed in Add Vacancy.</p>
-                @endif
               </div>
+              @if($disablePositionFields)
+                <input type="hidden" name="closing_date" value="{{ $defaultClosingDate }}">
+              @endif
 
               <div>
                 <label class="{{ $fieldLabel }}">Place of Assignment <span class="text-red-600">*</span></label>
@@ -237,6 +233,14 @@
                 <p id="place_of_assignment_error" class="mt-1 hidden text-sm text-red-600">Place of assignment is
                   required.</p>
               </div>
+
+              @if($disablePositionFields)
+                <div>
+                  <label class="{{ $fieldLabel }}">Plantilla Item No.</label>
+                  <input type="text" name="plantilla_item_no"
+                    value="{{ old('plantilla_item_no', $formSource?->plantilla_item_no ?? '') }}" class="{{ $fieldInput }}">
+                </div>
+              @endif
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
@@ -245,15 +249,17 @@
                   <input type="text" id="pcn_no" name="pcn_no" value="{{ old('pcn_no', $formSource?->pcn_no ?? '') }}"
                     class="{{ $fieldInput }}" autocomplete="off">
               </div>
-              <div>
-                <label class="{{ $fieldLabel }}">Plantilla Item No.</label>
-                <input type="text" name="plantilla_item_no"
-                  value="{{ old('plantilla_item_no', $formSource?->plantilla_item_no ?? '') }}" class="{{ $fieldInput }}">
-              </div>
+
+              @if(!$disablePositionFields)
+                <div>
+                  <label class="{{ $fieldLabel }}">Plantilla Item No.</label>
+                  <input type="text" name="plantilla_item_no"
+                    value="{{ old('plantilla_item_no', $formSource?->plantilla_item_no ?? '') }}" class="{{ $fieldInput }}">
+                </div>
+              @endif
             </div>
           </div>
         </section>
-        @endif
 
         <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="mb-6 border-b border-slate-200 pb-5">
@@ -422,45 +428,6 @@
           </section>
         @endif
 
-        <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div class="mb-6 border-b border-slate-200 pb-5">
-            <h2 class="{{ $sectionTitle }}">CSC Form Attachment <span class="text-red-600">*</span></h2>
-            <p class="mt-1 text-sm text-slate-600">
-              Attach CSC form files (PDF, DOC, DOCX - max 10MB). Required for Plantilla.
-            </p>
-          </div>
-
-          <label for="csc_form_upload_plantilla"
-            class="inline-flex w-full cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-slate-300 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0 text-slate-500" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            <span id="csc_form_filename_plantilla" class="truncate">
-              @if(!empty($formSource?->csc_form_path))
-                {{ basename($formSource->csc_form_path) }}
-              @else
-                Choose a file to upload...
-              @endif
-            </span>
-          </label>
-          <input id="csc_form_upload_plantilla" type="file" name="csc_form" accept=".pdf,.doc,.docx" class="sr-only"
-            data-has-existing="{{ !empty($formSource?->csc_form_path) ? '1' : '0' }}"
-            data-existing-filename="{{ !empty($formSource?->csc_form_path) ? basename($formSource->csc_form_path) : '' }}"
-            {{ !empty($formSource?->csc_form_path) ? '' : 'required' }}
-            onchange="document.getElementById('csc_form_filename_plantilla').textContent = this.files[0] ? this.files[0].name : ((this.dataset.hasExisting === '1' && this.dataset.existingFilename) ? this.dataset.existingFilename : 'Choose a file to upload...'); if (typeof checkAllFieldsFilled === 'function') { checkAllFieldsFilled(); }">
-          <p id="csc_form_error" class="mt-2 hidden text-sm text-red-600">CSC form attachment is required for Plantilla.
-          </p>
-          @if(!empty($formSource?->csc_form_path))
-            <p class="mt-2 text-xs text-slate-500">
-              Current file:
-              <a href="{{ \App\Support\PreviewUrl::forPath($formSource->csc_form_path) }}" target="_blank"
-                class="text-[#0D2B70] underline">{{ basename($formSource->csc_form_path) }}</a>
-              - Upload a new file to replace it.
-            </p>
-          @endif
-        </section>
       </form>
 
       <div
@@ -726,43 +693,8 @@
       }
 
       const isCreateMode = @json($isCreateMode);
-      const cscInputField = document.getElementById('csc_form_upload_plantilla');
-      const cscFilenameField = document.getElementById('csc_form_filename_plantilla');
       const positionLookup = new Map();
       const normalizeText = (value) => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
-      const extractFileName = (path) => {
-        const raw = String(path || '').trim();
-        if (!raw) return '';
-        const parts = raw.split(/[\\/]/);
-        return parts[parts.length - 1] || '';
-      };
-      const defaultCscLabel = 'Choose a file to upload...';
-      const initialHasExistingCsc = cscInputField?.dataset?.hasExisting === '1';
-      const initialCscFilename = String(cscInputField?.dataset?.existingFilename || '').trim();
-      const initialCscLabel = cscFilenameField
-        ? String(cscFilenameField.textContent || '').trim() || defaultCscLabel
-        : defaultCscLabel;
-      const setCscTemplateState = (path, restoreInitial = false) => {
-        if (!cscInputField || !cscFilenameField) return;
-
-        if (restoreInitial) {
-          cscInputField.dataset.hasExisting = initialHasExistingCsc ? '1' : '0';
-          cscInputField.dataset.existingFilename = initialCscFilename;
-          cscInputField.required = !initialHasExistingCsc;
-          cscInputField.value = '';
-          cscFilenameField.textContent = initialHasExistingCsc && initialCscFilename ? initialCscLabel : defaultCscLabel;
-          return;
-        }
-
-        const templatePath = String(path || '').trim();
-        const templateFilename = extractFileName(templatePath);
-        const hasExisting = templateFilename !== '';
-        cscInputField.dataset.hasExisting = hasExisting ? '1' : '0';
-        cscInputField.dataset.existingFilename = templateFilename;
-        cscInputField.required = !hasExisting;
-        cscInputField.value = '';
-        cscFilenameField.textContent = hasExisting ? templateFilename : defaultCscLabel;
-      };
       const extractSalaryGradeDigits = (value) => String(value || '').replace(/\D/g, '').slice(0, 2);
       const formatSalaryGrade = (value, padToTwoDigits = true) => {
         const digits = extractSalaryGradeDigits(value);
@@ -883,8 +815,6 @@
           }
         }
 
-        setCscTemplateState(hasProp('csc_form_path') ? record.csc_form_path : '');
-
         if (hasProp('supporting_documents_required')) {
           let reqDocs = record.supporting_documents_required;
           if (typeof reqDocs === 'string') {
@@ -978,7 +908,6 @@
             salField.value = '';
             triggerFieldEvents(salField);
           }
-          setCscTemplateState('', true);
           if (typeof checkAllFieldsFilled === 'function') {
             checkAllFieldsFilled();
           }
@@ -1460,12 +1389,6 @@
         }
       }
 
-      // Defer strict CSC validation to confirm handler to avoid false disabled states
-      // caused by browser file input state timing.
-      if (!document.getElementById('csc_form_upload_plantilla')) {
-        allFilled = false;
-      }
-
       const errorMsg = document.getElementById('form-error-msg');
       if (allFilled) {
         errorMsg.classList.add('hidden');
@@ -1527,9 +1450,7 @@
       const eEducation = document.getElementById('qualification_education_error');
       const eEligibility = document.getElementById('qualification_eligibility_error');
       const eSalary = document.getElementById('monthly_salary_error');
-      const eCsc = document.getElementById('csc_form_error');
-
-      [eTitle, eSalaryGrade, eClosing, ePlace, eEducation, eEligibility, eSalary, eCsc].forEach(hide);
+      [eTitle, eSalaryGrade, eClosing, ePlace, eEducation, eEligibility, eSalary].forEach(hide);
 
       if (!positionTitle || !positionTitle.value.trim()) { errors.push('Position title is required.'); show(eTitle, 'Position title is required.'); }
       if (!salaryGrade || !/^SG-\d{2}$/.test(String(salaryGrade.value || '').trim())) { errors.push('Salary grade must be in SG-00 format.'); show(eSalaryGrade, 'Salary grade must be in SG-00 format (example: SG-23).'); }
@@ -1571,16 +1492,6 @@
         hasEligibilityValue = true;
       }
       if (!hasEligibilityValue) { errors.push('At least one eligibility is required.'); show(eEligibility, 'At least one eligibility is required.'); }
-
-      const cscInput = document.getElementById('csc_form_upload_plantilla');
-      if (cscInput) {
-        const hasExistingCsc = cscInput?.dataset?.hasExisting === '1';
-        const hasSelectedCsc = Boolean(cscInput?.files && cscInput.files.length > 0);
-        if (!(hasExistingCsc || hasSelectedCsc)) {
-          errors.push('CSC form attachment is required for Plantilla.');
-          show(eCsc, 'CSC form attachment is required for Plantilla.');
-        }
-      }
 
       const MAX = 1000000;
       const MIN = 0;

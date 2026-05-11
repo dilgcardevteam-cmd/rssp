@@ -77,7 +77,7 @@
       $defaultRequiredSupportingDocuments = strtoupper((string) old('vacancy_type', $formSource?->vacancy_type ?? 'Plantilla')) === 'COS'
         ? ['passport_photo', 'signed_pds', 'signed_work_exp_sheet', 'photocopy_diploma', 'application_letter', 'cert_training']
         : collect($allSupportingDocumentTypes)
-          ->reject(fn($doc) => in_array($doc, ['tor_masteraldoctorate', 'grade_masteraldoctorate', 'cert_lgoo_induction', 'other_documents', 'pqe_result', 'ipcr', 'non_academic', 'designation_order', 'cert_employment'], true))
+          ->reject(fn($doc) => in_array($doc, ['cert_lgoo_induction', 'other_documents', 'pqe_result', 'ipcr', 'non_academic', 'designation_order', 'cert_employment'], true))
           ->values()
           ->all();
       $persistedSupportingDocumentSelection = old('supporting_documents_required', $formSource?->supporting_documents_required);
@@ -91,22 +91,21 @@
         ? array_values(array_unique(array_values(array_filter($persistedSupportingDocumentSelection, fn($doc) => in_array((string) $doc, $allSupportingDocumentTypes, true)))))
         : $defaultRequiredSupportingDocuments;
       $documentLabelMap = [
-      'application_letter' => 'Signed Application Letter indicating the position applying for',
-      'signed_pds' => 'Fully accomplished and subscribed/notarized Personal Data Sheet (PDS) printed in long bond paper, with recent passport-sized picture (CS Form No. 212, Revised 2025)',
-      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral units earned',
-      'photocopy_diploma' => 'Duly authenticated Diploma',
-      'cert_eligibility' => 'Certificate of Eligibility/Board Rating/License',
-      'cert_employment' => 'Certificate of Employment with duties and responsibilities',
-      'ipcr' => 'Performance Rating in the last rating period in the present position',
-      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
-      'non_academic' => 'Non-academic Awards received within the past 2 years',
+      'application_letter' => 'Signed Application letter indicating the position applying for',
+      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result',
+      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned',
+      'photocopy_diploma' => 'Duly Authenticated Diploma',
+      'signed_pds' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)',
+      'signed_work_exp_sheet' => 'Fully accomplished and subcribed/notarized Work Experience Sheet (for position/s requiring relevant Experience)',
       'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
-      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result, if available',
       'passport_photo' => 'Passport-Sized Picture',
-      'signed_work_exp_sheet' => 'Work Experience Sheet',
+      'cert_eligibility' => 'Certificate of Eligibility/Board Rating License',
+      'ipcr' => 'Performance Rating in the last rating period in the present position',
+      'non_academic' => 'Non-academic Awards received within the past 2 years',
+      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
       'designation_order' => 'Confirmed Designation Order/s',
-      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral Units Earned',
-      'tor_masteraldoctorate' => 'TOR with Masteral Degree',
+      'cert_employment' => 'Certificate of Employment with duties and functions',
+      'other_documents' => 'Other Documents Submitted',
       ];
     @endphp
 
@@ -154,7 +153,6 @@
         <input type="hidden" id="supporting_documents_required" name="supporting_documents_required"
           value='@json($selectedSupportingDocuments)'>
 
-        @if(!$positionMode)
         <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="mb-6 border-b border-slate-200 pb-5">
             <h2 class="{{ $sectionTitle }}">Job Information</h2>
@@ -202,6 +200,17 @@
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
+              <div class="{{ $disablePositionFields ? 'hidden' : '' }}">
+                <label class="{{ $fieldLabel }}">Deadline of Application <span class="text-red-600">*</span></label>
+                <input id="closing_date" type="date" name="closing_date" value="{{ $displayClosingDate }}"
+                  placeholder="Select deadline" class="{{ $fieldInput }}">
+                <p id="closing_date_error" class="mt-1 hidden text-sm text-red-600">Deadline of application is required.
+                </p>
+              </div>
+              @if($disablePositionFields)
+                <input type="hidden" name="closing_date" value="{{ $defaultClosingDate }}">
+              @endif
+
               <div>
                 <label class="{{ $fieldLabel }}">Place of Assignment <span class="text-red-600">*</span></label>
                 @php
@@ -225,39 +234,32 @@
                   required.</p>
               </div>
 
-              <div>
-                <label class="{{ $fieldLabel }}">Plantilla Item No.</label>
-                <input type="text" name="plantilla_item_no"
-                  value="{{ old('plantilla_item_no', $formSource?->plantilla_item_no ?? '') }}" class="{{ $fieldInput }}">
-              </div>
+              @if($disablePositionFields)
+                <div>
+                  <label class="{{ $fieldLabel }}">Plantilla Item No.</label>
+                  <input type="text" name="plantilla_item_no"
+                    value="{{ old('plantilla_item_no', $formSource?->plantilla_item_no ?? '') }}" class="{{ $fieldInput }}">
+                </div>
+              @endif
             </div>
 
             <div class="grid gap-5 md:grid-cols-2">
-              @if(!$positionMode)
-              <div>
-                <label class="{{ $fieldLabel }}">Deadline of Application <span class="text-red-600">*</span></label>
-                <input id="closing_date" type="date" name="closing_date" value="{{ $displayClosingDate }}"
-                  placeholder="Select deadline" {{ $disablePositionFields ? 'disabled' : '' }} class="{{ $fieldInput }}">
-                @if($disablePositionFields)
-                  <input type="hidden" name="closing_date" value="{{ $defaultClosingDate }}">
-                @endif
-                <p id="closing_date_error" class="mt-1 hidden text-sm text-red-600">Deadline of application is required.
-                </p>
-                @if($disablePositionFields)
-                  <p class="mt-1 text-xs leading-5 text-slate-500">Deadline is managed in Add Vacancy.</p>
-                @endif
-              </div>
-              @endif
-              
               <div>
                 <label class="{{ $fieldLabel }}">Position Control Number</label>
                   <input type="text" id="pcn_no" name="pcn_no" value="{{ old('pcn_no', $formSource?->pcn_no ?? '') }}"
                     class="{{ $fieldInput }}" autocomplete="off">
               </div>
+
+              @if(!$disablePositionFields)
+                <div>
+                  <label class="{{ $fieldLabel }}">Plantilla Item No.</label>
+                  <input type="text" name="plantilla_item_no"
+                    value="{{ old('plantilla_item_no', $formSource?->plantilla_item_no ?? '') }}" class="{{ $fieldInput }}">
+                </div>
+              @endif
             </div>
           </div>
         </section>
-        @endif
 
         <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <div class="mb-6 border-b border-slate-200 pb-5">
@@ -358,7 +360,7 @@
             </p>
           </div>
 
-          <div class="flex flex-col gap-3">
+          <div class="grid gap-3 md:grid-cols-2">
             @foreach($allSupportingDocumentTypes as $supportingDocType)
               @php
                 $supportingDocKey = (string) $supportingDocType;
@@ -426,47 +428,6 @@
           </section>
         @endif
 
-        @if(!$positionMode)
-        <section class="w-full overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div class="mb-6 border-b border-slate-200 pb-5">
-            <h2 class="{{ $sectionTitle }}">CSC Form Attachment <span class="text-red-600">*</span></h2>
-            <p class="mt-1 text-sm text-slate-600">
-              Attach CSC form files (PDF, DOC, DOCX - max 10MB). Required for Plantilla.
-            </p>
-          </div>
-
-          <label for="csc_form_upload_plantilla"
-            class="inline-flex w-full cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-slate-300 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0 text-slate-500" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-            <span id="csc_form_filename_plantilla" class="truncate">
-              @if(!empty($formSource?->csc_form_path))
-                {{ basename($formSource->csc_form_path) }}
-              @else
-                Choose a file to upload...
-              @endif
-            </span>
-          </label>
-          <input id="csc_form_upload_plantilla" type="file" name="csc_form" accept=".pdf,.doc,.docx" class="sr-only"
-            data-has-existing="{{ !empty($formSource?->csc_form_path) ? '1' : '0' }}"
-            data-existing-filename="{{ !empty($formSource?->csc_form_path) ? basename($formSource->csc_form_path) : '' }}"
-            {{ !empty($formSource?->csc_form_path) ? '' : 'required' }}
-            onchange="document.getElementById('csc_form_filename_plantilla').textContent = this.files[0] ? this.files[0].name : ((this.dataset.hasExisting === '1' && this.dataset.existingFilename) ? this.dataset.existingFilename : 'Choose a file to upload...'); if (typeof checkAllFieldsFilled === 'function') { checkAllFieldsFilled(); }">
-          <p id="csc_form_error" class="mt-2 hidden text-sm text-red-600">CSC form attachment is required for Plantilla.
-          </p>
-          @if(!empty($formSource?->csc_form_path))
-            <p class="mt-2 text-xs text-slate-500">
-              Current file:
-              <a href="{{ \App\Support\PreviewUrl::forPath($formSource->csc_form_path) }}" target="_blank"
-                class="text-[#0D2B70] underline">{{ basename($formSource->csc_form_path) }}</a>
-              - Upload a new file to replace it.
-            </p>
-          @endif
-        </section>
-        @endif
       </form>
 
       <div
@@ -732,43 +693,8 @@
       }
 
       const isCreateMode = @json($isCreateMode);
-      const cscInputField = document.getElementById('csc_form_upload_plantilla');
-      const cscFilenameField = document.getElementById('csc_form_filename_plantilla');
       const positionLookup = new Map();
       const normalizeText = (value) => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
-      const extractFileName = (path) => {
-        const raw = String(path || '').trim();
-        if (!raw) return '';
-        const parts = raw.split(/[\\/]/);
-        return parts[parts.length - 1] || '';
-      };
-      const defaultCscLabel = 'Choose a file to upload...';
-      const initialHasExistingCsc = cscInputField?.dataset?.hasExisting === '1';
-      const initialCscFilename = String(cscInputField?.dataset?.existingFilename || '').trim();
-      const initialCscLabel = cscFilenameField
-        ? String(cscFilenameField.textContent || '').trim() || defaultCscLabel
-        : defaultCscLabel;
-      const setCscTemplateState = (path, restoreInitial = false) => {
-        if (!cscInputField || !cscFilenameField) return;
-
-        if (restoreInitial) {
-          cscInputField.dataset.hasExisting = initialHasExistingCsc ? '1' : '0';
-          cscInputField.dataset.existingFilename = initialCscFilename;
-          cscInputField.required = !initialHasExistingCsc;
-          cscInputField.value = '';
-          cscFilenameField.textContent = initialHasExistingCsc && initialCscFilename ? initialCscLabel : defaultCscLabel;
-          return;
-        }
-
-        const templatePath = String(path || '').trim();
-        const templateFilename = extractFileName(templatePath);
-        const hasExisting = templateFilename !== '';
-        cscInputField.dataset.hasExisting = hasExisting ? '1' : '0';
-        cscInputField.dataset.existingFilename = templateFilename;
-        cscInputField.required = !hasExisting;
-        cscInputField.value = '';
-        cscFilenameField.textContent = hasExisting ? templateFilename : defaultCscLabel;
-      };
       const extractSalaryGradeDigits = (value) => String(value || '').replace(/\D/g, '').slice(0, 2);
       const formatSalaryGrade = (value, padToTwoDigits = true) => {
         const digits = extractSalaryGradeDigits(value);
@@ -889,8 +815,6 @@
           }
         }
 
-        setCscTemplateState(hasProp('csc_form_path') ? record.csc_form_path : '');
-
         if (hasProp('supporting_documents_required')) {
           let reqDocs = record.supporting_documents_required;
           if (typeof reqDocs === 'string') {
@@ -984,7 +908,6 @@
             salField.value = '';
             triggerFieldEvents(salField);
           }
-          setCscTemplateState('', true);
           if (typeof checkAllFieldsFilled === 'function') {
             checkAllFieldsFilled();
           }
@@ -1466,21 +1389,10 @@
         }
       }
 
-      // Only block if CSC form input exists in DOM and is empty (and has no existing file)
-      const cscInput = document.getElementById('csc_form_upload_plantilla');
-      if (cscInput) {
-        if (!cscInput.value && !cscInput.dataset.existing) {
-          allFilled = false;
-        }
-      }
-
-      const saveBtn = document.getElementById('vacancy-save-btn');
       const errorMsg = document.getElementById('form-error-msg');
-
       if (allFilled) {
         errorMsg.classList.add('hidden');
       } else {
-        // We keep the button enabled so they can click and see where the errors are
         errorMsg.classList.remove('hidden');
       }
     }
@@ -1497,35 +1409,8 @@
       checkAllFieldsFilled();
     });
 
-    // Open save confirmation modal from save button click.
-    document.addEventListener('DOMContentLoaded', () => {
-      const saveBtn = document.getElementById('vacancy-save-btn');
-      if (!saveBtn) return;
-      saveBtn.addEventListener('click', () => {
-        if (saveBtn.disabled) return;
-        console.log('[Save] Clicked. Running validatePlantillaForm...');
-        let result;
-        try {
-          result = validatePlantillaForm();
-        } catch (err) {
-          console.error('[Save] Validation threw an error:', err);
-          alert('Validation error: ' + err.message + ' (see console for details)');
-          return;
-        }
-        console.log('[Save] Validation result:', result);
-        if (!result.valid) {
-          console.log('[Save] Invalid. Scrolling to first error...');
-          scrollToFirstError();
-          return;
-        }
-        window.dispatchEvent(new CustomEvent('open-plantilla-save-confirm'));
-      });
-    });
-
     function scrollToFirstError() {
-      // Only target actual inline error messages (id ends in _error or _msg),
-      // not the red asterisks on required labels.
-      const errorEls = document.querySelectorAll('p[id$="_error"], span[id$="_msg"], p[id$="_error"], div[id$="_error"]');
+      const errorEls = document.querySelectorAll('#plantillaForm p[id$="_error"], #plantillaForm span[id$="_msg"], #plantillaForm div[id$="_error"]');
       let firstErrorMsg = null;
       for (const el of errorEls) {
         if (!el.classList.contains('hidden')) {
@@ -1534,22 +1419,15 @@
         }
       }
       if (!firstErrorMsg) {
-        // Fallback: any visible red text inside the form that is an error-like element
         firstErrorMsg = document.querySelector('#plantillaForm .text-red-500:not(.hidden), #plantillaForm .text-red-600:not(.hidden)');
       }
       if (firstErrorMsg) {
-        console.log('[scrollToFirstError] Found:', firstErrorMsg.id || firstErrorMsg);
         firstErrorMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
         const container = firstErrorMsg.closest('div, section');
         if (container) {
           const input = container.querySelector('input:not([type="hidden"]), select, textarea');
-          if (input) {
-            console.log('[scrollToFirstError] Focusing input:', input.id || input.name || input);
-            input.focus();
-          }
+          if (input) input.focus();
         }
-      } else {
-        console.warn('[scrollToFirstError] No visible error element found.');
       }
     }
 
@@ -1559,14 +1437,12 @@
       const show = (el, msg) => { if (el) { el.textContent = msg; el.classList.remove('hidden'); } };
       const hide = (el) => { if (el) { el.textContent = ''; el.classList.add('hidden'); } };
 
-      // Fields
       const positionTitle = document.getElementById('position_title_select');
       const salaryGrade = document.getElementById('salary_grade');
       const closingDate = document.getElementById('closing_date');
       const place = document.getElementById('place_of_assignment');
       const monthlySalary = document.getElementById('monthly_salary');
 
-      // Errors
       const eTitle = document.getElementById('position_title_error');
       const eSalaryGrade = document.getElementById('salary_grade_error');
       const eClosing = document.getElementById('closing_date_error');
@@ -1574,15 +1450,11 @@
       const eEducation = document.getElementById('qualification_education_error');
       const eEligibility = document.getElementById('qualification_eligibility_error');
       const eSalary = document.getElementById('monthly_salary_error');
-      const eCsc = document.getElementById('csc_form_error');
+      [eTitle, eSalaryGrade, eClosing, ePlace, eEducation, eEligibility, eSalary].forEach(hide);
 
-      // Reset
-      [eTitle, eSalaryGrade, eClosing, ePlace, eEducation, eEligibility, eSalary, eCsc].forEach(hide);
-
-      // Validate basics
       if (!positionTitle || !positionTitle.value.trim()) { errors.push('Position title is required.'); show(eTitle, 'Position title is required.'); }
       if (!salaryGrade || !/^SG-\d{2}$/.test(String(salaryGrade.value || '').trim())) { errors.push('Salary grade must be in SG-00 format.'); show(eSalaryGrade, 'Salary grade must be in SG-00 format (example: SG-23).'); }
-      if (closingDate && !closingDate.value) { errors.push('Deadline is required.'); show(eClosing, 'Deadline of application is required.'); }
+      if (!disablePositionFields && closingDate && !closingDate.value) { errors.push('Deadline is required.'); show(eClosing, 'Deadline of application is required.'); }
       if (place && !place.value) { errors.push('Place of assignment is required.'); show(ePlace, 'Place of assignment is required.'); }
 
       const educationCode = document.getElementById('minimum_education_code');
@@ -1608,8 +1480,6 @@
         hasEligibilityValue = true;
       }
       if (!hasEligibilityValue && String(eligibilitySelect?.value || '').trim() !== '') {
-        // If admin selected one from dropdown but skipped "Add Selected",
-        // convert it into a valid hidden payload on save.
         const selectedName = String(eligibilitySelect.value || '').trim();
         if (eligibilityHidden) {
           eligibilityHidden.value = JSON.stringify([{
@@ -1623,18 +1493,6 @@
       }
       if (!hasEligibilityValue) { errors.push('At least one eligibility is required.'); show(eEligibility, 'At least one eligibility is required.'); }
 
-      // CSC form is required if not in position mode (input will exist in DOM)
-      const cscInput = document.getElementById('csc_form_upload_plantilla');
-      if (cscInput) {
-        const hasExistingCsc = cscInput?.dataset?.hasExisting === '1';
-        const hasSelectedCsc = Boolean(cscInput?.files && cscInput.files.length > 0);
-        if (!(hasExistingCsc || hasSelectedCsc)) {
-          errors.push('CSC form attachment is required for Plantilla.');
-          show(eCsc, 'CSC form attachment is required for Plantilla.');
-        }
-      }
-
-      // Salary checks
       const MAX = 1000000;
       const MIN = 0;
       if (monthlySalary) {
@@ -1647,6 +1505,20 @@
       return { valid: errors.length === 0, errors };
     }
 
+    // Open save confirmation modal from save button click.
+    document.addEventListener('DOMContentLoaded', () => {
+      const saveBtn = document.getElementById('vacancy-save-btn');
+      if (!saveBtn) return;
+      saveBtn.addEventListener('click', () => {
+        const result = validatePlantillaForm();
+        if (!result.valid) {
+          scrollToFirstError();
+          return;
+        }
+        window.dispatchEvent(new CustomEvent('open-plantilla-save-confirm'));
+      });
+    });
+
     // Validate and submit on confirm
     window.addEventListener('confirm-plantilla-save', () => {
       const result = validatePlantillaForm();
@@ -1655,12 +1527,11 @@
         return;
       }
 
-      // Disable button and show loader
+      const form = document.getElementById('plantillaForm');
       const btn = document.getElementById('vacancy-save-btn');
       const icon = document.getElementById('save-icon');
       const loader = document.getElementById('save-loader');
       const text = document.getElementById('save-text');
-      const form = document.getElementById('plantillaForm');
 
       btn.disabled = true;
       btn.classList.add('opacity-75', 'cursor-not-allowed');

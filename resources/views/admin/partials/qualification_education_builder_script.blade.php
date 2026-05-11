@@ -789,7 +789,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function setFromRaw(rawValue, treatAsInitial) {
         const parsed = parseExisting(rawValue);
         educationSelect.value = parsed.code || '';
-        setDetailMode(parsed.mode || '');
+        const parsedMeta = parsed.code ? (educationMeta[parsed.code] || null) : null;
+        const defaultMode = parsedMeta && parsedMeta.detail ? 'ANY' : '';
+        setDetailMode(parsed.mode || defaultMode);
         setSpecificRows(parsed.specificList || []);
         syncState();
 
@@ -802,7 +804,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     educationSelect.addEventListener('change', function () {
         const meta = currentMeta();
-        setDetailMode(meta?.detail ? 'ANY' : '');
+        setDetailMode(meta && meta.detail ? 'ANY' : '');
         setSpecificRows([]);
         closeAllSpecificMenus();
         syncState();

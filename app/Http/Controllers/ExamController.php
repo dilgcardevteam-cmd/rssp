@@ -45,15 +45,65 @@ class ExamController extends Controller
         return $batch;
     }
 
+    private function applicationExamAttemptsTableExists(): bool
+    {
+        return Schema::hasTable('application_exam_attempts');
+    }
+
+    private function examDetailsHasBatchNo(): bool
+    {
+        static $hasBatchNo = null;
+
+        if ($hasBatchNo === null) {
+            $hasBatchNo = Schema::hasTable('exam_details') && Schema::hasColumn('exam_details', 'batch_no');
+        }
+
+        return $hasBatchNo;
+    }
+
+    private function makeAttemptSnapshot(Applications $application, int $batchNo): ApplicationExamAttempt
+    {
+        $attempt = new ApplicationExamAttempt();
+        $attempt->forceFill([
+            'application_id' => $application->id,
+            'user_id' => $application->user_id,
+            'vacancy_id' => $application->vacancy_id,
+            'batch_no' => $batchNo,
+            'status' => $application->status ?? ApplicationStatus::PENDING->value,
+            'result' => $application->result,
+            'answers' => $application->answers ?? [],
+            'scores' => $application->scores ?? [],
+            'exam_started_at' => $application->exam_started_at,
+            'exam_end_time' => $application->exam_end_time,
+            'exam_submitted_at' => $application->exam_submitted_at,
+            'exam_paused_at' => $application->exam_paused_at,
+            'exam_paused_by_admin_id' => $application->exam_paused_by_admin_id,
+            'exam_pause_seconds' => $application->exam_pause_seconds ?? 0,
+            'tab_violations' => $application->tab_violations ?? 0,
+            'last_tab_violation_at' => $application->last_tab_violation_at,
+        ]);
+        $attempt->exists = false;
+
+        return $attempt;
+    }
+
     private function getExamDetailForBatch(string $vacancyId, int $batchNo): ?ExamDetail
     {
-        return ExamDetail::where('vacancy_id', $vacancyId)
-            ->where('batch_no', $batchNo)
-            ->first();
+        $query = ExamDetail::where('vacancy_id', $vacancyId);
+
+        if ($this->examDetailsHasBatchNo()) {
+            $query->where('batch_no', $batchNo);
+        }
+
+        return $query->first();
     }
 
     private function getOrCreateAttempt(Applications $application, int $batchNo): ApplicationExamAttempt
     {
+        if (!$this->applicationExamAttemptsTableExists()) {
+            return $this->makeAttemptSnapshot($application, $batchNo);
+        }
+
         return ApplicationExamAttempt::firstOrCreate(
             [
                 'application_id' => $application->id,
@@ -87,6 +137,10 @@ class ExamController extends Controller
             ->where('batch_no', $batchNo)
             ->first();
         if (!$examDetail || !$examDetail->is_started) {
+            return;
+        }
+
+        if (!$this->applicationExamAttemptsTableExists()) {
             return;
         }
 
@@ -1301,31 +1355,35 @@ class ExamController extends Controller
             ->with('user:id,name')
             ->get();
 
-        $attemptsByApplication = ApplicationExamAttempt::where('vacancy_id', $vacancy_id)
-            ->where('batch_no', $batchNo)
-            ->whereIn('application_id', $baseParticipants->pluck('id')->all())
-            ->get()
-            ->keyBy('application_id');
+        $attemptsByApplication = collect();
+        if ($this->applicationExamAttemptsTableExists()) {
+            $attemptsByApplication = ApplicationExamAttempt::where('vacancy_id', $vacancy_id)
+                ->where('batch_no', $batchNo)
+                ->whereIn('application_id', $baseParticipants->pluck('id')->all())
+                ->get()
+                ->keyBy('application_id');
+        }
 
         $participants = $baseParticipants->map(function (Applications $app) use ($attemptsByApplication, $batchNo) {
-            $attempt = $attemptsByApplication->get($app->id) ?? $this->getOrCreateAttempt($app, $batchNo);
-            $app->status = $attempt->status;
-            $app->scores = $attempt->scores;
-            $app->answers = $attempt->answers;
-            $app->result = $attempt->result;
-            $app->exam_end_time = $attempt->exam_end_time;
-            $app->exam_submitted_at = $attempt->exam_submitted_at;
-            $app->tab_violations = $attempt->tab_violations;
-            $app->exam_started_at = $attempt->exam_started_at;
-            $app->exam_paused_at = $attempt->exam_paused_at;
-            $app->exam_paused_by_admin_id = $attempt->exam_paused_by_admin_id;
-            $app->exam_pause_seconds = $attempt->exam_pause_seconds;
-            return $app;
+            $attempt = $attemptsByApplication->get($app->id) ?? $this->makeAttemptSnapshot($app, $batchNo);
+            $participant = clone $app;
+            $participant->setAttribute('status', $attempt->status);
+            $participant->setAttribute('scores', $attempt->scores);
+            $participant->setAttribute('answers', $attempt->answers);
+            $participant->setAttribute('result', $attempt->result);
+            $participant->setAttribute('exam_end_time', $attempt->exam_end_time);
+            $participant->setAttribute('exam_submitted_at', $attempt->exam_submitted_at);
+            $participant->setAttribute('tab_violations', $attempt->tab_violations);
+            $participant->setAttribute('exam_started_at', $attempt->exam_started_at);
+            $participant->setAttribute('exam_paused_at', $attempt->exam_paused_at);
+            $participant->setAttribute('exam_paused_by_admin_id', $attempt->exam_paused_by_admin_id);
+            $participant->setAttribute('exam_pause_seconds', $attempt->exam_pause_seconds);
+            return $participant;
         });
 
         $tamperCountsByUser = $this->examTamperCountsByUser((string) $vacancy_id, $participants->pluck('user_id')->all());
 
-        $examDetails = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+        $examDetails = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
 
         if ($isViewer) {
             $viewerExamStatus = $examDetails ? $this->getExamStatus($examDetails) : 'Unscheduled';
@@ -1716,7 +1774,7 @@ class ExamController extends Controller
     {
         $batchNo = $this->resolveBatchNo($request);
         if ($this->isViewerRole()) {
-            $viewerExamDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+            $viewerExamDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
             $viewerExamStatus = $viewerExamDetail ? $this->getExamStatus($viewerExamDetail) : 'Unscheduled';
             if ($viewerExamStatus !== 'Ongoing') {
                 return response()->json([
@@ -1733,25 +1791,29 @@ class ExamController extends Controller
             ->with('user')
             ->get();
 
-        $attemptsByApplication = ApplicationExamAttempt::where('vacancy_id', $vacancy_id)
-            ->where('batch_no', $batchNo)
-            ->whereIn('application_id', $baseParticipants->pluck('id')->all())
-            ->get()
-            ->keyBy('application_id');
+        $attemptsByApplication = collect();
+        if ($this->applicationExamAttemptsTableExists()) {
+            $attemptsByApplication = ApplicationExamAttempt::where('vacancy_id', $vacancy_id)
+                ->where('batch_no', $batchNo)
+                ->whereIn('application_id', $baseParticipants->pluck('id')->all())
+                ->get()
+                ->keyBy('application_id');
+        }
 
         $participants = $baseParticipants->map(function (Applications $app) use ($attemptsByApplication, $batchNo) {
-            $attempt = $attemptsByApplication->get($app->id) ?? $this->getOrCreateAttempt($app, $batchNo);
-            $app->status = $attempt->status;
-            $app->scores = $attempt->scores;
-            $app->answers = $attempt->answers;
-            $app->result = $attempt->result;
-            $app->tab_violations = $attempt->tab_violations;
-            $app->exam_paused_at = $attempt->exam_paused_at;
-            $app->exam_pause_seconds = $attempt->exam_pause_seconds;
-            $app->exam_started_at = $attempt->exam_started_at;
-            $app->exam_submitted_at = $attempt->exam_submitted_at;
-            $app->exam_end_time = $attempt->exam_end_time;
-            return $app;
+            $attempt = $attemptsByApplication->get($app->id) ?? $this->makeAttemptSnapshot($app, $batchNo);
+            $participant = clone $app;
+            $participant->setAttribute('status', $attempt->status);
+            $participant->setAttribute('scores', $attempt->scores);
+            $participant->setAttribute('answers', $attempt->answers);
+            $participant->setAttribute('result', $attempt->result);
+            $participant->setAttribute('tab_violations', $attempt->tab_violations);
+            $participant->setAttribute('exam_paused_at', $attempt->exam_paused_at);
+            $participant->setAttribute('exam_pause_seconds', $attempt->exam_pause_seconds);
+            $participant->setAttribute('exam_started_at', $attempt->exam_started_at);
+            $participant->setAttribute('exam_submitted_at', $attempt->exam_submitted_at);
+            $participant->setAttribute('exam_end_time', $attempt->exam_end_time);
+            return $participant;
         });
 
         $tamperCountsByUser = $this->examTamperCountsByUser((string) $vacancy_id, $participants->pluck('user_id')->all());
@@ -1761,7 +1823,7 @@ class ExamController extends Controller
         $mcItemIds = $examItems->where('is_essay', 0)->pluck('id')->toArray();
         $essayItemIds = $examItems->where('is_essay', 1)->pluck('id')->toArray();
 
-        $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+        $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
         $isExamExpired = false;
         if ($examDetail && $examDetail->date && $examDetail->time) {
              $startDateTime = \Carbon\Carbon::parse($examDetail->date . ' ' . $examDetail->time);
@@ -2018,7 +2080,7 @@ class ExamController extends Controller
             $enteredLobby = true;
         }
 
-        $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+        $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
         $vacancy = JobVacancy::select('position_title')->where('vacancy_id', $vacancy_id)->first();
         $examPauseState = $this->resolvePauseState($attempt, $examDetail);
         $remainingSeconds = $this->resolveExamRemainingSeconds($attempt, $examDetail);
@@ -2085,7 +2147,10 @@ class ExamController extends Controller
             return redirect()->route('user.exam_thankyou', ['vacancy_id' => $vacancy_id, 'batch' => $batchNo]);
         }
 
-        $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->firstOrFail();
+        $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
+        if (!$examDetail) {
+            abort(404);
+        }
 
         // If admin hasn't started the exam yet, redirect back to lobby
         if (!$examDetail->is_started) {
@@ -2176,10 +2241,14 @@ class ExamController extends Controller
             ->where('vacancy_id', $vacancy_id)
             ->where('batch_no', $batchNo)
             ->get();
-        $examDetail = ExamDetail::select('vacancy_id', 'max_violations', 'batch_no')
-            ->where('vacancy_id', $vacancy_id)
-            ->where('batch_no', $batchNo)
-            ->first();
+        $examDetailQuery = ExamDetail::where('vacancy_id', $vacancy_id);
+        if ($this->examDetailsHasBatchNo()) {
+            $examDetailQuery->select('vacancy_id', 'max_violations', 'batch_no')
+                ->where('batch_no', $batchNo);
+        } else {
+            $examDetailQuery->select('vacancy_id', 'max_violations');
+        }
+        $examDetail = $examDetailQuery->first();
         $positionTitle = JobVacancy::select('position_title')->where('vacancy_id', $vacancy_id)->firstOrFail();
         $userName = User::select('name')->find($user_id);
 
@@ -2265,7 +2334,7 @@ class ExamController extends Controller
             ->firstOrFail();
         $attempt = $this->getOrCreateAttempt($application, $batchNo);
 
-        $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+        $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
         $resumeAction = $this->resolveResumeExamState($attempt, $examDetail);
 
         if (!($resumeAction['can_resume'] ?? false)) {
@@ -2473,7 +2542,7 @@ class ExamController extends Controller
         $examItems = ExamItems::select('id', 'question', 'is_essay', 'choices', 'essay_max_score', 'ans')
             ->where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->get();
         $positionTitle = JobVacancy::select('position_title')->where('vacancy_id', $vacancy_id)->firstOrFail();
-        $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+        $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
 
         $examineeCode = strtoupper('EXM-' . substr(hash('sha256', $vacancy_id . '-' . $user_id), 0, 8));
         $answers = $attempt->answers ?? [];
@@ -2735,7 +2804,7 @@ class ExamController extends Controller
 
             $publicBaseUrl = $this->resolvePublicBaseUrl($request);
             // Check if details have been saved first
-            $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+            $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
 
             if (!$examDetail || !$examDetail->details_saved) {
                 return response()->json([
@@ -2831,7 +2900,7 @@ class ExamController extends Controller
             $batchNo = $this->resolveBatchNo($request);
             $publicBaseUrl = $this->resolvePublicBaseUrl($request);
             $senderName = $this->resolveNotificationSenderName();
-            $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+            $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
             if (!$examDetail || !$examDetail->details_saved) {
                 return response()->json([
                     'success' => false,
@@ -2951,7 +3020,10 @@ class ExamController extends Controller
                 ->unique()
                 ->values();
             $batchNo = $this->resolveBatchNo($request);
-            $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->firstOrFail();
+            $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
+            if (!$examDetail) {
+                abort(404);
+            }
 
             if (!$examDetail->details_saved) {
                 return response()->json([
@@ -3124,7 +3196,7 @@ class ExamController extends Controller
                 $validated
             );
 
-            $examDetails = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+            $examDetails = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
 
             $notified = false;
             $notified_at = null;
@@ -3203,7 +3275,7 @@ class ExamController extends Controller
 
         try {
             $batchNo = $this->resolveBatchNo($request);
-            $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+            $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
 
             if (!$examDetail) {
                 return response()->json([
@@ -3257,7 +3329,7 @@ class ExamController extends Controller
         }
 
         $batchNo = $this->resolveBatchNo($request);
-        $examDetail = ExamDetail::where('vacancy_id', $vacancy_id)->where('batch_no', $batchNo)->first();
+        $examDetail = $this->getExamDetailForBatch((string) $vacancy_id, $batchNo);
 
         if (!$examDetail) {
             return response()->json(['started' => false]);
@@ -3271,7 +3343,7 @@ class ExamController extends Controller
 
         return response()->json([
             'started' => (bool) $examDetail->is_started,
-            'paused' => $this->isExamGloballyPaused($examDetail) || $this->isApplicationPaused($attempt),
+            'paused' => $this->isExamGloballyPaused($examDetail) || $this->isApplicationPaused($application),
             'remaining_seconds' => $application ? $this->resolveExamRemainingSeconds($attempt, $examDetail) : null,
         ]);
     }

@@ -100,22 +100,6 @@ class JobStatusController extends Controller
                 "remarks" => $documents && $documents->diploma ? "Uploaded" : "No document uploaded",
             ],
             [
-                "id" => "cert-grades",
-                "name" => "certificate_grades",
-                "text" => "Certified Photocopy of Certificate of Grades with Masteral/Doctorate Units Earned",
-                "status" => $documents && $documents->certificate_grades ? "valid" : "invalid",
-                "preview" => $documents && $documents->certificate_grades ? PreviewUrl::forPath($documents->certificate_grades) : "",
-                "remarks" => $documents && $documents->certificate_grades ? "Uploaded" : "No document uploaded",
-            ],
-            [
-                "id" => "cert-tor",
-                "name" => "certified_tor",
-                "text" => "Certified Photocopy of TOR with Masteral/Doctorate Degree",
-                "status" => $documents && $documents->certified_tor ? "valid" : "invalid",
-                "preview" => $documents && $documents->certified_tor ? PreviewUrl::forPath($documents->certified_tor) : "",
-                "remarks" => $documents && $documents->certified_tor ? "Uploaded" : "No document uploaded",
-            ],
-            [
                 "id" => "cert-employment",
                 "name" => "certificate_employment",
                 "text" => "Certificate of Employment (If Any)",

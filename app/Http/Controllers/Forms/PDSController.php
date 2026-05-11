@@ -57,8 +57,6 @@ class PDSController extends Controller
     private const DOCUMENT_TYPE_ALIASES = [
         'cert_eligibility' => ['cert_elegibility'],
         'cert_employment' => ['certificate_employment'],
-        'grade_masteraldoctorate' => ['certificate_grades'],
-        'tor_masteraldoctorate' => ['certified_tor'],
         'ipcr' => ['performance_rating'],
         'non_academic' => ['non_academic_awards'],
         'cert_training' => ['certificates_participation'],
@@ -5456,8 +5454,6 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
             'cert_uploads.designation_order' => 'nullable|file|mimes:pdf|max:10240',
             'cert_uploads.transcript_records' => 'nullable|file|mimes:pdf|max:10240',
             'cert_uploads.photocopy_diploma' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.grade_masteraldoctorate' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.tor_masteraldoctorate' => 'nullable|file|mimes:pdf|max:10240',
             'cert_uploads.cert_employment' => 'nullable|file|mimes:pdf|max:10240',
             'cert_uploads.other_documents' => 'nullable|file|mimes:pdf|max:10240',
             'cert_uploads.signed_pds' => 'nullable|file|mimes:pdf|max:10240',
@@ -6553,8 +6549,6 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
             'Plantilla' => array_values(array_diff(
                 $allDocumentTypes,
                 [
-                    'tor_masteraldoctorate',
-                    'grade_masteraldoctorate',
                     'cert_lgoo_induction',
                     'other_documents',
                     'pqe_result',
@@ -6583,8 +6577,6 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
             'non_academic' => 'Non-Academic Awards Received (If Any)',
             'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
             'designation_order' => 'Confirmed Designation Order/s (If Any)',
-            'grade_masteraldoctorate' => 'Certificate of Grades with Masteral/Doctorate Units Earned',
-            'tor_masteraldoctorate' => 'TOR with Masteral/Doctorate Degree',
             'cert_employment' => 'Certificate of Employment (If Any)',
             'other_documents' => 'Other Documents Submitted',
         ];

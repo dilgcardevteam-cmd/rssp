@@ -41,8 +41,6 @@ class JobVacancyController extends Controller
     private const DOCUMENT_TYPE_ALIASES = [
         'cert_eligibility' => ['cert_elegibility'],
         'cert_employment' => ['certificate_employment'],
-        'grade_masteraldoctorate' => ['certificate_grades'],
-        'tor_masteraldoctorate' => ['certified_tor'],
         'ipcr' => ['performance_rating'],
         'non_academic' => ['non_academic_awards'],
         'cert_training' => ['certificates_participation'],
@@ -3058,8 +3056,6 @@ class JobVacancyController extends Controller
             'designation_order' => 'List with Certified Photocopy of Duly Confirmed Designation Order/s',
             'transcript_records' => 'Transcript of Records (Baccalaureate Degree)',
             'photocopy_diploma' => 'Diploma',
-            'grade_masteraldoctorate' => 'Certified Photocopy of Certificate of Grades with Masteral/Doctorate Units Earned',
-            'tor_masteraldoctorate' => 'Certified Photocopy of TOR with Masteral/Doctorate Degree',
             'cert_employment' => 'Certificate of Employment (If Any)',
             'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training',
             'passport_photo' => '2" x 2" or Passport Size Picture',
@@ -3350,8 +3346,6 @@ class JobVacancyController extends Controller
             'designation_order' => 'List with Certified Photocopy of Duly Confirmed Designation Order/s',
             'transcript_records' => 'Transcript of Records (Baccalaureate Degree)',
             'photocopy_diploma' => 'Diploma',
-            'grade_masteraldoctorate' => 'Certified Photocopy of Certificate of Grades with Masteral/Doctorate Units Earned',
-            'tor_masteraldoctorate' => 'Certified Photocopy of TOR with Masteral/Doctorate Degree',
             'cert_employment' => 'Certificate of Employment (If Any)',
             'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training',
             'passport_photo' => '2" x 2" or Passport Size Picture',
@@ -3823,9 +3817,7 @@ class JobVacancyController extends Controller
       'non_academic' => 'Non-academic Awards received within the past 2 years',
       'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
       'designation_order' => 'Confirmed Designation Order/s',
-      'grade_masteraldoctorate' => 'Certificate of Grades with Masteral/Doctorate Units Earned',
-      'tor_masteraldoctorate' => 'TOR with Masteral/Doctorate Degree',
-      'cert_employment' => 'Certificate of Employment with duties and responsibilities',
+      'cert_employment' => 'Certificate of Employment with duties and functions',
       'other_documents' => 'Other Documents Submitted',
         ];
     }
@@ -3842,8 +3834,6 @@ class JobVacancyController extends Controller
             'Plantilla' => array_values(array_diff(
                 $allDocumentTypes,
                 [
-                    'tor_masteraldoctorate',
-                    'grade_masteraldoctorate',
                     'cert_lgoo_induction',
                     'other_documents',
                     'pqe_result',

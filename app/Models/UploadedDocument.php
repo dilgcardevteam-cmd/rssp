@@ -21,8 +21,6 @@ class UploadedDocument extends Model
         'designation_order',
         'transcript_records',
         'photocopy_diploma',
-        'grade_masteraldoctorate',
-        'tor_masteraldoctorate',
         'cert_employment',
         'cert_lgoo_induction',
         'passport_photo',

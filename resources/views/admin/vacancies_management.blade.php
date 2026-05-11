@@ -557,6 +557,36 @@
             </table>
         </div>
     </div>
+    <div id="delete-vacancy-modal" class="fixed inset-0 z-[10000] hidden items-center justify-center bg-slate-900/60 backdrop-blur-md px-4 py-6">
+        <div class="absolute inset-0" onclick="closeDeleteVacancyModal()"></div>
+        <div class="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div class="flex items-start gap-3 border-b border-slate-100 px-5 py-4">
+                <div class="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-700">
+                    <i data-feather="alert-triangle" class="h-5 w-5"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                    <h2 class="text-base font-bold text-slate-900">Delete Vacancy</h2>
+                    <p class="mt-0.5 text-xs text-slate-500">Please confirm this action before proceeding.</p>
+                </div>
+                <button type="button" onclick="closeDeleteVacancyModal()" class="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" aria-label="Close">
+                    <i data-feather="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+
+            <div class="px-5 py-4">
+                <p class="text-sm leading-relaxed text-slate-700">Are you sure you want to delete this vacancy? This action cannot be undone.</p>
+            </div>
+
+            <div class="flex justify-end gap-2 border-t border-slate-100 bg-slate-50 px-5 py-4">
+                <button type="button" onclick="closeDeleteVacancyModal()" class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
+                    Keep Vacancy
+                </button>
+                <button id="delete-vacancy-confirm-btn" type="button" class="inline-flex items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700">
+                    Yes, Delete
+                </button>
+            </div>
+        </div>
+    </div>
 <script>
     // Re-initialize Feather icons
     if (typeof feather !== 'undefined') {
@@ -583,6 +613,52 @@
     const loaderLive_ = document.getElementById('loader-live');
     const filterLoadingIndicator = document.getElementById('filterLoadingIndicator');
     const filterLoadingStatus = document.getElementById('filterLoadingStatus');
+    const deleteVacancyModal = document.getElementById('delete-vacancy-modal');
+    const deleteVacancyConfirmBtn = document.getElementById('delete-vacancy-confirm-btn');
+
+    let pendingDeleteVacancyUrl = '';
+
+    function openDeleteVacancyModal(vacancyId, deleteUrl) {
+        pendingDeleteVacancyUrl = deleteUrl || '';
+        if (!deleteVacancyModal) return;
+        deleteVacancyModal.classList.remove('hidden');
+        deleteVacancyModal.classList.add('flex');
+        deleteVacancyConfirmBtn?.focus();
+    }
+
+    function closeDeleteVacancyModal() {
+        if (!deleteVacancyModal) return;
+        deleteVacancyModal.classList.add('hidden');
+        deleteVacancyModal.classList.remove('flex');
+        pendingDeleteVacancyUrl = '';
+    }
+
+    window.openDeleteVacancyModal = openDeleteVacancyModal;
+    window.closeDeleteVacancyModal = closeDeleteVacancyModal;
+
+    deleteVacancyConfirmBtn?.addEventListener('click', function () {
+        if (!pendingDeleteVacancyUrl) return;
+
+        fetch(pendingDeleteVacancyUrl, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Failed to delete vacancy');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('An error occurred while deleting the vacancy.');
+        });
+    });
 
     function setFilterLoadingState(isLoading) {
         filterLoadingIndicator?.classList.toggle('hidden', !isLoading);

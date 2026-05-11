@@ -27,7 +27,7 @@ class AdminAuthController extends Controller
     ];
 
     private const ADMIN_DIVISION_SECTIONS = [
-        'ORD' => ['PDMU', 'ORD', 'OARD'],
+        'ORD' => ['PDMU', 'ORD', 'OARD', 'RICTT'],
         'LGMED' => ['LGCO', 'LGPCRDM', 'LGPOPS'],
         'LGCDD' => ['LGEGS', 'LGEPDRR', 'LGPSCS', 'LGRIS'],
         'FAD' => ['Accounting Section', 'Budget Section', 'Cash Section', 'HRRS', 'GSS'],

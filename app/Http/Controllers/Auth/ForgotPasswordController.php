@@ -15,7 +15,8 @@ use Spatie\Activitylog\Models\Activity;
 
 class ForgotPasswordController extends Controller
 {
-    private const RESEND_COOLDOWN_SECONDS = 30;
+    private const OTP_EXPIRY_MINUTES = 5;
+    private const RESEND_COOLDOWN_SECONDS = 300;
 
     private function getOtpMailFailureMessage(\Throwable $e): string
     {
@@ -89,7 +90,7 @@ class ForgotPasswordController extends Controller
         // Generate OTP
         $otp = (string) random_int(100000, 999999);
         $user->otp = $otp;
-        $user->otp_expires_at = Carbon::now()->addMinutes(5);
+        $user->otp_expires_at = Carbon::now()->addMinutes(self::OTP_EXPIRY_MINUTES);
         $user->save();
 
         try {
@@ -298,7 +299,7 @@ class ForgotPasswordController extends Controller
         // Re-send the same unexpired OTP to avoid invalid-code confusion from multiple emails.
         $otp = $isCurrentOtpUsable ? $currentOtp : (string) random_int(100000, 999999);
         $user->otp = $otp;
-        $user->otp_expires_at = Carbon::now()->addMinutes(5);
+        $user->otp_expires_at = Carbon::now()->addMinutes(self::OTP_EXPIRY_MINUTES);
         $user->save();
 
         try {
@@ -334,3 +335,4 @@ class ForgotPasswordController extends Controller
         ]);
     }
 }
+

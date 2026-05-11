@@ -17,6 +17,8 @@ use Spatie\Activitylog\Models\Activity;
 
 class RegisterController extends Controller
 {
+    private const OTP_EXPIRY_MINUTES = 5;
+    private const RESEND_COOLDOWN_SECONDS = 300;
     private function canUseLocalOtpFallback(): bool
     {
         return filter_var((string) env('OTP_LOCAL_FALLBACK', 'false'), FILTER_VALIDATE_BOOLEAN);
@@ -93,8 +95,8 @@ class RegisterController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'otp' => (string) $otp,
-                'expires_at' => now()->addMinutes(5), //
-                'resend_available_at_ts' => now()->addSeconds(30)->timestamp,
+                'expires_at' => now()->addMinutes(self::OTP_EXPIRY_MINUTES), //
+                'resend_available_at_ts' => now()->addSeconds(self::RESEND_COOLDOWN_SECONDS)->timestamp,
             ]
         ]);
 
@@ -292,8 +294,8 @@ class RegisterController extends Controller
         // Re-send the same unexpired OTP to avoid invalid-code confusion from multiple emails.
         $newOtp = $isCurrentOtpUsable ? $currentOtp : (string) random_int(100000, 999999);
         $data['otp'] = (string) $newOtp;
-        $data['expires_at'] = now()->addMinutes(5);
-        $data['resend_available_at_ts'] = now()->addSeconds(30)->timestamp;
+        $data['expires_at'] = now()->addMinutes(self::OTP_EXPIRY_MINUTES);
+        $data['resend_available_at_ts'] = now()->addSeconds(self::RESEND_COOLDOWN_SECONDS)->timestamp;
         session(['pending_registration' => $data]);
 
         try {
@@ -326,7 +328,7 @@ class RegisterController extends Controller
                 return $wantsJson
                     ? response()->json([
                         'message' => 'Email delivery failed. Local fallback OTP is available.',
-                        'retry_after' => 30,
+                        'retry_after' => self::RESEND_COOLDOWN_SECONDS,
                         'resend_available_at' => (int) $data['resend_available_at_ts'],
                         'server_now' => now()->timestamp,
                         'fallback_otp' => (string) $newOtp,
@@ -350,7 +352,7 @@ class RegisterController extends Controller
         return $wantsJson
             ? response()->json([
                 'message' => 'OTP resent.',
-                'retry_after' => 30,
+                'retry_after' => self::RESEND_COOLDOWN_SECONDS,
                 'resend_available_at' => (int) $data['resend_available_at_ts'],
                 'server_now' => now()->timestamp,
             ])
@@ -360,3 +362,4 @@ class RegisterController extends Controller
 
 
 }
+

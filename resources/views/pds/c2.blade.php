@@ -686,7 +686,7 @@
                     toInput.required = false;
                     setWorkDateErrorState(toInput, '');
                 } else {
-                    const restoreDate = toInput.dataset.lastDate || '';
+                    const restoreDate = toInput.dataset.lastDate || toInput.value || '';
                     toInput.type = 'date';
                     toInput.readOnly = false;
                     toInput.required = true;

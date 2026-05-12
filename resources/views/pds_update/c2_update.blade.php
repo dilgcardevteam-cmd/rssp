@@ -417,6 +417,7 @@
                             <option value="Temporary">Temporary</option>
                             <option value="Casual">Casual</option>
                             <option value="Contractual">Contractual</option>
+                            <option value="Contract of Service">Contract of Service</option>
                         </select>
                     </td>
                     <td>

@@ -34,3 +34,4 @@ Thumbs.db
 ~$ANNEX H-1 - CS Form No. 212 Revised 2025 - Personal Data Sheet.xlsx
 
 storage/logs/laravel.log
+.env

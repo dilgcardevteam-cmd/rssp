@@ -407,7 +407,7 @@ class ExportPDSController
                 ->causedBy($user)
                 ->event('export')
                 ->withProperties([
-                    'exported_file' => $excelExport['filename'],
+                        'exported_file' => $excelExport['filename'],
                     'section' => 'Export'
                 ])
                 ->log('Exported Personal Data Sheet (PDS) via Excel template.');
@@ -1029,20 +1029,44 @@ class ExportPDSController
         $this->writeFittedAt($pdf, $csIdNo, 165, 35.5, 35);
 
         // Names
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->surname), 41.5, 45.5, 78);
+        // Names: write user values or personal N/A placeholder separately
+        if ($this->hasMeaningfulValue($info?->surname ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->surname ?? ''), 41.5, 45.5, 78);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 41.5, 45.5, 78);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->first_name), 41.5, 52, 78);
+        if ($this->hasMeaningfulValue($info?->first_name ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->first_name ?? ''), 41.5, 52, 78);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 41.5, 52, 78);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->middle_name), 41.5, 58, 78);
+        if ($this->hasMeaningfulValue($info?->middle_name ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->middle_name ?? ''), 41.5, 58, 78);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 41.5, 58, 78);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->name_extension), 161, 52.5, 40);
+        if ($this->hasMeaningfulValue($info?->name_extension ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->name_extension ?? ''), 161, 52.5, 40);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 161, 52.5, 40);
+        }
 
         // Birth
-        $this->writeFittedAt(
-            $pdf,
-            $this->dateOrNa($info?->date_of_birth), 41.5, 65, 34, 8.0, 5.0);
+        // Date of birth
+        if ($this->hasMeaningfulValue($info?->date_of_birth ?? null)) {
+            $this->writeUserValueAt($pdf, $this->dateOrNa($info?->date_of_birth), 50, 65, 34, 8.0, 5.0);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 41.5, 65, 34, 8.0, 5.0);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->place_of_birth), 41.5, 74, 65);
+        if ($this->hasMeaningfulValue($info?->place_of_birth ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->place_of_birth ?? ''), 41.5, 74, 65);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 41.5, 74, 65);
+        }
 
         // Sex
         $sex = $this->normalizedValue($info?->sex);
@@ -1055,7 +1079,7 @@ class ExportPDSController
         // Civil Status
         $civilStatus = $this->normalizedValue($info?->civil_status);
         $civilStatusCoords = [
-            'single' => [43.5, 85],
+            'single' => [43.3, 84.5],
             'married' => [72.8, 85],
             'widowed' => [43.5, 89],
             'widower' => [43.5, 89],
@@ -1070,24 +1094,40 @@ class ExportPDSController
         }
 
         // Physical
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->height), 41.5, 101.5, 30, 8.0, 5.0);
+        if ($this->hasMeaningfulValue($info?->height ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->height ?? ''), 41.5, 101.5, 30, 8.0, 5.0);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 41.5, 101.5, 30, 8.0, 5.0);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->weight), 41.5, 107.5, 30, 8.0, 5.0);
+        if ($this->hasMeaningfulValue($info?->weight ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->weight ?? ''), 41.5, 107.5, 30, 8.0, 5.0);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 41.5, 107.5, 30, 8.0, 5.0);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->blood_type), 41.5, 114.5, 30, 8.0, 5.0);
+        if ($this->hasMeaningfulValue($info?->blood_type ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->blood_type ?? ''), 41.5, 114.5, 30, 8.0, 5.0);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 41.5, 114.5, 30, 8.0, 5.0);
+        }
 
         // IDs
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->gsis_id_no), 41.5, 121.5, 78);
-
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->pagibig_id_no), 41.5, 128.5, 78);
-
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->philhealth_no), 41.5, 135, 78);
-
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->sss_id_no), 41.5, 142, 78);
-
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->tin_no), 41.5, 149, 78);
-
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->agency_employee_no), 41.5, 155.5, 78);
+        $idFields = [
+            ['val' => $info?->gsis_id_no ?? null, 'x' => 41.5, 'y' => 121.5, 'w' => 78],
+            ['val' => $info?->pagibig_id_no ?? null, 'x' => 41.5, 'y' => 128.5, 'w' => 78],
+            ['val' => $info?->philhealth_no ?? null, 'x' => 41.5, 'y' => 135, 'w' => 78],
+            ['val' => $info?->sss_id_no ?? null, 'x' => 41.5, 'y' => 142, 'w' => 78],
+            ['val' => $info?->tin_no ?? null, 'x' => 41.5, 'y' => 149, 'w' => 78],
+            ['val' => $info?->agency_employee_no ?? null, 'x' => 41.5, 'y' => 155.5, 'w' => 78],
+        ];
+        foreach ($idFields as $f) {
+            if ($this->hasMeaningfulValue($f['val'])) {
+                $this->writeUserValueAt($pdf, $this->normalizeScalarText($f['val']), $f['x'], $f['y'], $f['w']);
+            } else {
+                $this->writeNaValueAtPersonal($pdf, $f['x'], $f['y'], $f['w']);
+            }
+        }
 
         // Citizenship
         if ($this->valueMatches($info?->citizenship, 'Filipino')) {
@@ -1102,21 +1142,38 @@ class ExportPDSController
             $this->markCheckbox($pdf, 178.5, 68.2);
         }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->dual_country), 138, 81, 52);
+        if ($this->hasMeaningfulValue($info?->dual_country ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->dual_country ?? ''), 138, 81, 52);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 138, 81, 52);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->telephone_no), 122, 142, 74);
+        if ($this->hasMeaningfulValue($info?->telephone_no ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->telephone_no ?? ''), 122, 142, 74);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 122, 142, 74);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->mobile_no), 122.4, 148.5, 74);
+        if ($this->hasMeaningfulValue($info?->mobile_no ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->mobile_no ?? ''), 122.4, 148.5, 74);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 122.4, 148.5, 74);
+        }
 
-        $this->writeFittedAt($pdf, $this->valueOrNa($info?->email_address), 122.5, 154.5, 74, 7.5, 5.0);
+        if ($this->hasMeaningfulValue($info?->email_address ?? null)) {
+            $this->writeUserValueAt($pdf, $this->normalizeScalarText($info?->email_address ?? ''), 122.5, 154.5, 74, 7.5, 5.0);
+        } else {
+            $this->writeNaValueAtPersonal($pdf, 122.5, 154.5, 74, 7.5, 5.0);
+        }
 
 }
 
+// Residential
 private function writeAddresses($pdf, $residential, $permanent)
 {
     $residentialFields = [
         0 => ['x' => 136.0, 'y' => 86.0, 'w' => 48.0],   // House Number
-        1 => ['x' => 182.5, 'y' => 86.0, 'w' => 65.0],   // Street
+        1 => ['x' => 165.0, 'y' => 86.0, 'w' => 65.0],   // Street
         2 => ['x' => 136.0, 'y' => 92.5, 'w' => 23.0],   // Village/Subdivision
         3 => ['x' => 179.5, 'y' => 92.5, 'w' => 48.0],   // Barangay
         4 => ['x' => 130.0, 'y' => 99.0, 'w' => 50.0],   // City/Municipality
@@ -1126,7 +1183,7 @@ private function writeAddresses($pdf, $residential, $permanent)
 
     $permanentFields = [
         0 => ['x' => 136.0, 'y' => 112.0, 'w' => 35.0],  // House Number
-        1 => ['x' => 182.5, 'y' => 112.0, 'w' => 65.0],  // Street
+        1 => ['x' => 165.0, 'y' => 112.0, 'w' => 65.0],  // Street
         2 => ['x' => 136.0, 'y' => 119.0, 'w' => 23.0],  // Village/Subdivision
         3 => ['x' => 179.5, 'y' => 118.5, 'w' => 48.0],  // Barangay
         4 => ['x' => 130.0, 'y' => 125.5, 'w' => 50.0],  // City/Municipality
@@ -1134,34 +1191,109 @@ private function writeAddresses($pdf, $residential, $permanent)
         6 => ['x' => 130.0, 'y' => 133.5, 'w' => 60.0],  // ZIP Code
     ];
 
-    $renderAddress = function (array $parts, array $fieldMap) use ($pdf): void {
-        $withValue = false;
-        for ($i = 0; $i <= 6; $i++) {
-            if ($this->hasMeaningfulValue($parts[$i] ?? null)) {
-                $withValue = true;
-                break;
-            }
+    // Residential (format mirrors: if no data -> write N/A; else -> write values)
+    $hasResidentialData = false;
+    for ($i = 0; $i <= 6; $i++) {
+        if ($this->hasMeaningfulValue($residential[$i] ?? null)) {
+            $hasResidentialData = true;
+            break;
         }
+    }
 
+    if (!$hasResidentialData) {
         for ($i = 0; $i <= 6; $i++) {
-            $field = $fieldMap[$i];
-            $value = $withValue ? $this->valueOrNa($parts[$i] ?? null) : 'N/A';
+            $field = $residentialFields[$i];
+            $this->writeNaValueAtPersonal(
+                $pdf,
+                (float) $field['x'],
+                (float) $field['y'],
+                (float) $field['w'],
+                7.0,
+                4.0
+            );
+        }
+    } else {
+        for ($i = 0; $i <= 6; $i++) {
+            $field = $residentialFields[$i];
+            $raw = $residential[$i] ?? null;
+
+            if (!$this->hasMeaningfulValue($raw)) {
+                $this->writeNaValueAtPersonal(
+                    $pdf,
+                    (float) $field['x'],
+                    (float) $field['y'],
+                    (float) $field['w'],
+                    7.0,
+                    4.0
+                );
+                continue;
+            }
 
             $this->writeWrappedAt(
                 $pdf,
-                $value,
+                $this->normalizeScalarText($raw),
                 (float) $field['x'],
                 (float) $field['y'],
                 (float) $field['w'],
                 8.0,
                 2.2,
-                1.0
+                1.0,
+                3
             );
         }
-    };
+    }
 
-    $renderAddress((array) $residential, $residentialFields);
-    $renderAddress((array) $permanent, $permanentFields);
+    // Permanent (format mirrors: if no data -> write N/A; else -> write values)
+    $hasPermanentData = false;
+    for ($i = 0; $i <= 6; $i++) {
+        if ($this->hasMeaningfulValue($permanent[$i] ?? null)) {
+            $hasPermanentData = true;
+            break;
+        }
+    }
+
+    if (!$hasPermanentData) {
+        for ($i = 0; $i <= 6; $i++) {
+            $field = $permanentFields[$i];
+            $this->writeNaValueAtPersonal(
+                $pdf,
+                (float) $field['x'],
+                (float) $field['y'],
+                (float) $field['w'],
+                7.0,
+                4.0
+            );
+        }
+    } else {
+        for ($i = 0; $i <= 6; $i++) {
+            $field = $permanentFields[$i];
+            $raw = $permanent[$i] ?? null;
+
+            if (!$this->hasMeaningfulValue($raw)) {
+                $this->writeNaValueAtPersonal(
+                    $pdf,
+                    (float) $field['x'],
+                    (float) $field['y'],
+                    (float) $field['w'],
+                    7.0,
+                    4.0
+                );
+                continue;
+            }
+
+            $this->writeWrappedAt(
+                $pdf,
+                $this->normalizeScalarText($raw),
+                (float) $field['x'],
+                (float) $field['y'],
+                (float) $field['w'],
+                8.0,
+                2.2,
+                1.0,
+                3
+            );
+        }
+    }
 
 }
 
@@ -1338,7 +1470,7 @@ private function writeEducationalBackground($pdf, $education)
             $pdf,
             $this->valueOrNa($education?->elem_school),
             $elemXSchool,
-            265,
+            263,
             $elemWidthSchool,
             6.5,
             2.0,
@@ -1828,7 +1960,8 @@ private function writeCivilServiceEligibilityChunk($pdf, $chunk)
         $this->writeTightSingleLine($pdf, 'N/A', 7, 26.5, $careerWidth, 8.0, 5.0); // Career
         $this->writeTightSingleLine($pdf, 'N/A', 80, 26.5, $ratingWidth, 8.0, 5.0); // Rating
         $this->writeTightSingleLine($pdf, 'N/A', 105, 26.5, $dateWidth, 8.0, 5.0); // Date
-        $this->writeTightSingleLine($pdf, 'N/A', 127, 26.5, $placeWidth, 7.0, 4.8); // Place
+        // Place should allow wrapping so the examination place/address is fully visible.
+        $this->writeWrappedAt($pdf, 'N/A', 127, 26.5, $placeWidth, 7.0, 1.8, 0.8, 2); // Place
         $this->writeTightSingleLine($pdf, 'N/A', 158, 26.5, $licenseWidth, 8.0, 5.0); // License
         $this->writeTightSingleLine($pdf, 'N/A', 188, 26.5, $validityWidth, 8.0, 5.0); // Validity
         return;
@@ -1841,7 +1974,8 @@ private function writeCivilServiceEligibilityChunk($pdf, $chunk)
         $this->writeTightSingleLine($pdf, $this->valueOrNa($cse['cs_eligibility_career'] ?? null), 5, $rowY, $careerWidth, 7.0, 5.0);
         $this->writeTightSingleLine($pdf, $this->valueOrNa($cse['cs_eligibility_rating'] ?? null), 88, $rowY, $ratingWidth, 8.0, 5.0);
         $this->writeTightSingleLine($pdf, $this->dateOrNa($cse['cs_eligibility_date'] ?? null), 105, $rowY, $dateWidth, 8.0, 5.0);
-        $this->writeTightSingleLine($pdf, $this->valueOrNa($cse['cs_eligibility_place'] ?? null), 126.5, $rowY, $placeWidth, 5.8, 4.6);
+        // Allow place of examination to wrap so long addresses are readable.
+        $this->writeWrappedAt($pdf, $this->valueOrNa($cse['cs_eligibility_place'] ?? null), 126.5, $rowY, $placeWidth, 6.0, 1.8, 0.8, 2);
         $this->writeTightSingleLine($pdf, $this->valueOrNa($cse['cs_eligibility_license'] ?? null), 163, $rowY, $licenseWidth, 8.0, 5.0);
         $this->writeTightSingleLine($pdf, $this->dateOrNa($cse['cs_eligibility_validity'] ?? null), 190, $rowY, $validityWidth, 8.0, 5.0);
     }
@@ -2316,32 +2450,39 @@ private function getWriteCentered()
 
 private function markCheckbox($pdf, float $x, float $y): void
 {
-    // Use a vector-drawn mark so checkboxes stay centered regardless of font/renderer.
+    // Draw a green filled box with a white check mark. Bigger size for better visibility.
     $isPage4 = $this->currentTemplatePage === 4;
-    $insetX = $isPage4 ? -0.05 : 0.30;
-    $insetY = $isPage4 ? 0.45 : 0.22;
-    $size = $isPage4 ? 1.05 : 1.00;
+    $insetX = $isPage4 ? -0.15 : 0.10;
+    $insetY = $isPage4 ? 0.35 : 0.10;
+    $size = $isPage4 ? 1.8 : 1.6;
 
+    // Determine box coordinates
     $this->setXY($pdf, $x + $insetX, $y + $insetY);
-    $x1 = $pdf->GetX();
-    $y1 = $pdf->GetY();
+    $bx = $pdf->GetX();
+    $by = $pdf->GetY();
 
-    $this->setXY($pdf, $x + $insetX + $size, $y + $insetY + $size);
-    $x2 = $pdf->GetX();
-    $y2 = $pdf->GetY();
+    $bw = $size;
+    $bh = $size;
 
-    $this->setXY($pdf, $x + $insetX + $size, $y + $insetY);
-    $x3 = $pdf->GetX();
-    $y3 = $pdf->GetY();
+    // Fill box with green
+    $pdf->SetFillColor(76, 175, 80);
+    $pdf->Rect($bx, $by, $bw, $bh, 'F');
 
-    $this->setXY($pdf, $x + $insetX, $y + $insetY + $size);
-    $x4 = $pdf->GetX();
-    $y4 = $pdf->GetY();
+    // Draw white check mark (two lines) inside the box
+    $pdf->SetDrawColor(255, 255, 255);
+    // Scale stroke/geometry to the box size so the check visually matches the box.
+    $pdf->SetLineWidth(max(0.32, $bw * 0.22));
 
-    $pdf->SetDrawColor(0, 0, 0);
-    $pdf->SetLineWidth(0.25);
-    $pdf->Line($x1, $y1, $x2, $y2);
-    $pdf->Line($x3, $y3, $x4, $y4);
+    // Slightly larger check (closer to edges) but still safely inside the box.
+    $xA = $bx + ($bw * 0.12);
+    $yA = $by + ($bh * 0.56);
+    $xB = $bx + ($bw * 0.40);
+    $yB = $by + ($bh * 0.84);
+    $xC = $bx + ($bw * 0.90);
+    $yC = $by + ($bh * 0.20);
+
+    $pdf->Line($xA, $yA, $xB, $yB);
+    $pdf->Line($xB, $yB, $xC, $yC);
 }
 
 private function getPageXScale(): float
@@ -2751,6 +2892,50 @@ private function writeWrappedAt(
         $lineHeight,
         $maxLines
     );
+}
+
+private function writeNaValueAtPersonal(
+    $pdf,
+    float $x,
+    float $y,
+    float $maxWidth,
+    float $baseSize = 7.0,
+    float $minSize = 4.0
+): void {
+    // Slightly smaller italic muted N/A for personal-info fields.
+    $pdf->SetTextColor(120, 120, 120);
+
+    [$lines, $size, $effectiveWidth] = $this->fitTextToLines($pdf, 'N/A', $maxWidth, $baseSize, $minSize, 2);
+    if (empty($lines)) {
+        $pdf->SetTextColor(0, 0, 0);
+        return;
+    }
+
+    // Use italic style for personal placeholder
+    $this->setFont($pdf, 'Arial', 'I', $size);
+    $lineHeight = count($lines) > 1 ? max(1.2, $size * 0.28) : 0.0;
+    $currentY = $y - ((count($lines) - 1) * $lineHeight * 0.45);
+    foreach ($lines as $line) {
+        $this->setXY($pdf, $x, $currentY);
+        $pdf->Cell($effectiveWidth, 0, $line, 0, 0, 'L');
+        $currentY += $lineHeight;
+    }
+
+    $pdf->SetTextColor(0, 0, 0);
+    $this->setFont($pdf, 'Arial', '', 8);
+}
+
+private function writeUserValueAt(
+    $pdf,
+    string $text,
+    float $x,
+    float $y,
+    float $maxWidth,
+    float $baseSize = 8.0,
+    float $minSize = 5.0
+): void {
+    // Use wrapped writer for user values so long values auto-wrap.
+    $this->writeWrappedAt($pdf, $text, $x, $y, $maxWidth, $baseSize, 2.2, 1.5, 3);
 }
 
 private function splitTextByWidth($pdf, string $text, float $maxWidth): array

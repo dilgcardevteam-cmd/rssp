@@ -102,6 +102,25 @@
         .removing {
             animation: slideOut 0.3s ease-out forwards;
         }
+
+        .entry-collapse-toggle {
+            width: 100%;
+            text-align: left;
+        }
+
+        .entry-collapse-toggle:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 2px;
+            border-radius: 0.75rem;
+        }
+
+        .collapse-icon {
+            transition: transform 0.2s ease;
+        }
+
+        .entry-card.is-collapsed .collapse-icon {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen">
@@ -393,18 +412,107 @@
                 });
                 document.getElementById('voluntary_work_count').value = voluntaryRows.length;
             }
+
+            function getLearningEntryFields(entry) {
+                return {
+                    title: entry.querySelector('input[name^="learning_title_"]'),
+                    type: entry.querySelector('select[name^="learning_type_"]'),
+                    from: entry.querySelector('input[name^="learning_from_"]'),
+                    to: entry.querySelector('input[name^="learning_to_"]'),
+                    hours: entry.querySelector('input[name^="learning_hours_"]'),
+                    conducted: entry.querySelector('input[name^="learning_conducted_"]'),
+                };
+            }
+
+            function buildLearningSummary(entry) {
+                const fields = getLearningEntryFields(entry);
+                const summaryParts = [];
+
+                const title = (fields.title?.value || '').trim();
+                const type = (fields.type?.value || '').trim();
+                const from = (fields.from?.value || '').trim();
+                const to = (fields.to?.value || '').trim();
+                const hours = (fields.hours?.value || '').trim();
+                const conducted = (fields.conducted?.value || '').trim();
+
+                if (title) summaryParts.push(title);
+                if (type) summaryParts.push(type);
+                if (from || to) summaryParts.push([from || 'No start date', to || 'No end date'].join(' to '));
+                if (hours) summaryParts.push(`${hours} hour${hours === '1' ? '' : 's'}`);
+                if (conducted) summaryParts.push(conducted);
+
+                return summaryParts.join(' | ') || 'Fill out this training entry.';
+            }
+
+            function isLearningEntryComplete(entry) {
+                const fields = getLearningEntryFields(entry);
+                return Object.values(fields).every((field) => field && String(field.value || '').trim() !== '');
+            }
+
+            function setLearningEntryCollapsed(entry, collapsed) {
+                const body = entry.querySelector('.entry-body');
+                const summary = entry.querySelector('.learning-summary');
+                const toggle = entry.querySelector('.entry-collapse-toggle');
+                const icon = entry.querySelector('.collapse-icon');
+                if (!body || !summary || !toggle || !icon) return;
+
+                summary.textContent = buildLearningSummary(entry);
+                entry.classList.toggle('is-collapsed', collapsed);
+                body.classList.toggle('hidden', collapsed);
+                toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                icon.textContent = collapsed ? 'expand_more' : 'expand_less';
+            }
+
+            function bindLearningEntryInteractions(entry, collapseIfComplete = false) {
+                if (!entry || entry.dataset.learningBound === '1') return;
+
+                const toggle = entry.querySelector('.entry-collapse-toggle');
+                const body = entry.querySelector('.entry-body');
+                if (!toggle || !body) return;
+
+                const refresh = (shouldCollapse = false) => {
+                    const collapse = shouldCollapse && isLearningEntryComplete(entry);
+                    setLearningEntryCollapsed(entry, collapse);
+                };
+
+                toggle.addEventListener('click', function() {
+                    const collapsed = entry.classList.contains('is-collapsed');
+                    setLearningEntryCollapsed(entry, !collapsed);
+                });
+
+                entry.querySelectorAll('input, select').forEach((field) => {
+                    field.addEventListener('input', () => setLearningEntryCollapsed(entry, false));
+                    field.addEventListener('change', () => refresh(false));
+                });
+
+                body.addEventListener('focusout', function(event) {
+                    if (body.contains(event.relatedTarget)) return;
+                    refresh(true);
+                });
+
+                entry.dataset.learningBound = '1';
+                refresh(collapseIfComplete);
+            }
             
             function addLearningEntry() {
                 const entryCount = document.getElementById('learning-container').children.length;
                 const entryHtml = `
                     <div class="entry-card bg-gray-50 rounded-lg p-6 card-hover animate-fade-in">
-                        <div class="flex justify-between items-start mb-4">
-                            <h4 class="text-lg font-medium text-gray-700">Training #${entryCount + 1}</h4>
+                        <div class="flex items-start gap-3 mb-4">
+                            <button type="button" class="entry-collapse-toggle flex-1">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <h4 class="text-lg font-medium text-gray-700">Training #${entryCount + 1}</h4>
+                                        <p class="learning-summary mt-1 text-sm text-gray-500">Fill out this training entry.</p>
+                                    </div>
+                                    <span class="collapse-icon material-icons text-gray-400">expand_less</span>
+                                </div>
+                            </button>
                             <button type="button" class="remove-entry text-red-500 hover:text-red-700 transition-colors duration-200">
                                 <span class="material-icons">close</span>
                             </button>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="entry-body grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="relative">
                                 <input type="text" name="learning_title_${entryCount + 1}" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Title of Learning/Training Program</label>
@@ -441,6 +549,7 @@
                     </div>
                 `;
                 learningContainer.insertAdjacentHTML('beforeend', entryHtml);
+                bindLearningEntryInteractions(learningContainer.lastElementChild, false);
                 learningEmpty.style.display = 'none';
                 updateIndices();
             }
@@ -514,6 +623,8 @@
                     voluntaryEmpty.style.display = 'none';
                 }
             }
+
+            learningContainer.querySelectorAll('.entry-card').forEach((entry) => bindLearningEntryInteractions(entry, true));
         });
     </script>
     @include('partials.pds_uppercase_inputs')

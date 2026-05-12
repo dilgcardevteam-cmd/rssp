@@ -344,6 +344,11 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Name <span class="text-red-500">*</span></label>
                             </div>
                             <div class="relative">
+                                <input required type="text" name="ref1_address" required value="{{ old('ref1_address', $data['ref1_address'] ?? '') }}"
+                                placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
+                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address <span class="text-red-500">*</span></label>
+                            </div>
+                            <div class="relative md:col-span-2">
                                 <input
                                     required
                                     type="text"
@@ -356,12 +361,6 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">CONTACT NO. AND/OR EMAIL <span class="text-red-500">*</span></label>
                                 <p class="mt-2 text-xs text-gray-500">Format: 09XX XXX XXXX or enter a valid email address.</p>
                                 <p class="error-message {{ $errors->has('ref1_tel') ? '' : 'hidden' }}" data-reference-contact-error aria-live="polite">{{ $errors->first('ref1_tel') }}</p>
-                                
-                            </div>
-                            <div class="relative md:col-span-2">
-                                <input required type="text" name="ref1_address" required value="{{ old('ref1_address', $data['ref1_address'] ?? '') }}"
-                                placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
-                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address <span class="text-red-500">*</span></label>
                             </div>
                         </div>
                     </div>
@@ -376,6 +375,11 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Name <span class="text-red-500">*</span></label>
                             </div>
                             <div class="relative">
+                                <input required type="text" name="ref2_address" required value="{{ old('ref2_address', $data['ref2_address'] ?? '') }}"
+                                placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
+                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address <span class="text-red-500">*</span></label>
+                            </div>
+                            <div class="relative md:col-span-2">
                                 <input
                                     required
                                     type="text"
@@ -388,11 +392,6 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">CONTACT NO. AND/OR EMAIL <span class="text-red-500">*</span></label>
                                 <p class="mt-2 text-xs text-gray-500">Format: 09XX XXX XXXX or enter a valid email address.</p>
                                 <p class="error-message {{ $errors->has('ref2_tel') ? '' : 'hidden' }}" data-reference-contact-error aria-live="polite">{{ $errors->first('ref2_tel') }}</p>
-                            </div>
-                            <div class="relative md:col-span-2">
-                                <input required type="text" name="ref2_address" required value="{{ old('ref2_address', $data['ref2_address'] ?? '') }}"
-                                placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
-                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address <span class="text-red-500">*</span></label>
                             </div>
                         </div>
                     </div>
@@ -407,6 +406,11 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none ">Name <span class="text-red-500">*</span></label>
                             </div>
                             <div class="relative">
+                                <input required type="text" name="ref3_address" required value="{{ old('ref3_address', $data['ref3_address'] ?? '') }}"
+                                placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
+                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address <span class="text-red-500">*</span></label>
+                            </div>
+                            <div class="relative md:col-span-2">
                                 <input
                                     required
                                     type="text"
@@ -419,11 +423,6 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">CONTACT NO. AND/OR EMAIL <span class="text-red-500">*</span></label>
                                 <p class="mt-2 text-xs text-gray-500">Format: 09XX XXX XXXX or enter a valid email address.</p>
                                 <p class="error-message {{ $errors->has('ref3_tel') ? '' : 'hidden' }}" data-reference-contact-error aria-live="polite">{{ $errors->first('ref3_tel') }}</p>
-                            </div>
-                            <div class="relative md:col-span-2">
-                                <input required type="text" name="ref3_address" required value="{{ old('ref3_address', $data['ref3_address'] ?? '') }}"
-                                placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
-                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address <span class="text-red-500">*</span></label>
                             </div>
                         </div>
                     </div>

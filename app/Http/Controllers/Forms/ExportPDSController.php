@@ -1988,7 +1988,7 @@ private function writeWorkExperienceChunk($pdf, $chunk)
     $x_to = 22;
     $x_position = 40.132;
     $x_agency = 94.488;
-    $x_status = 145;
+    $x_status = 143;
     $x_gov = 187.0;
     $x_gov_end = 199.5;
 
@@ -2038,7 +2038,23 @@ private function writeWorkExperienceChunk($pdf, $chunk)
         $this->writeTightSingleLine($pdf, $this->dateOrNa($we['work_exp_to'] ?? null), 26, $rowY, $toWidth, 7.0, 5.0);
         $this->writeTightSingleLine($pdf, $this->valueOrNa($we['work_exp_position'] ?? null), 45, $rowY, $positionWidth, 7.0, 4.5);
         $this->writeWrappedAt($pdf, $this->valueOrNa($we['work_exp_department'] ?? null), 103, $rowY, $agencyWidth, 6.0, 2.5, 1.5, 3);
-        $this->writeTightSingleLine($pdf, $this->valueOrNa($we['work_exp_status'] ?? null), 160, $rowY, $statusWidth, 7.0, 5.0);
+
+        // Status of appointment is a narrow column on short-bond templates.
+        // Use a slightly narrower width so multi-word statuses (e.g., CONTRACT OF SERVICE) wrap cleanly.
+        $statusWriteWidth = $this->isShortBondTemplate
+            ? max(1.0, $statusWidth - 6.0)
+            : max(1.0, $statusWidth - 2.0);
+        $this->writeWrappedAt(
+            $pdf,
+            $this->valueOrNa($we['work_exp_status'] ?? null),
+            157,
+            $rowY,
+            $statusWriteWidth,
+            6.0,
+            2.2,
+            1.2,
+            2
+        );
         $this->writeTightSingleLine($pdf, $this->normalizeGovServiceFlag($we['work_exp_govt_service'] ?? null, 'N/A'), 195, $rowY, $govWidth, 7.0, 5.0);
     }
 }
@@ -2450,7 +2466,7 @@ private function getWriteCentered()
 
 private function markCheckbox($pdf, float $x, float $y): void
 {
-    // Draw a green filled box with a white check mark. Bigger size for better visibility.
+    // Draw a check mark only (no fill), matching the old X-icon style but with a check.
     $isPage4 = $this->currentTemplatePage === 4;
     $insetX = $isPage4 ? -0.15 : 0.10;
     $insetY = $isPage4 ? 0.35 : 0.10;
@@ -2464,14 +2480,9 @@ private function markCheckbox($pdf, float $x, float $y): void
     $bw = $size;
     $bh = $size;
 
-    // Fill box with green
-    $pdf->SetFillColor(76, 175, 80);
-    $pdf->Rect($bx, $by, $bw, $bh, 'F');
-
-    // Draw white check mark (two lines) inside the box
-    $pdf->SetDrawColor(255, 255, 255);
-    // Scale stroke/geometry to the box size so the check visually matches the box.
-    $pdf->SetLineWidth(max(0.32, $bw * 0.22));
+    // Draw black check mark (two lines) inside the existing template box.
+    $pdf->SetDrawColor(0, 0, 0);
+    $pdf->SetLineWidth(max(0.25, $bw * 0.18));
 
     // Slightly larger check (closer to edges) but still safely inside the box.
     $xA = $bx + ($bw * 0.12);
@@ -2483,6 +2494,9 @@ private function markCheckbox($pdf, float $x, float $y): void
 
     $pdf->Line($xA, $yA, $xB, $yB);
     $pdf->Line($xB, $yB, $xC, $yC);
+
+    // Reset line width to a reasonable default for any subsequent drawing.
+    $pdf->SetLineWidth(0.2);
 }
 
 private function getPageXScale(): float

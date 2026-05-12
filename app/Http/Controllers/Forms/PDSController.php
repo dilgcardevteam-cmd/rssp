@@ -2723,6 +2723,7 @@ class PDSController extends Controller
             'temporary' => 'Temporary',
             'casual' => 'Casual',
             'contractual' => 'Contractual',
+            'contract of service' => 'Contract of Service',
             default => '',
         };
     }
@@ -3165,7 +3166,7 @@ class PDSController extends Controller
             'work_exp_department' => 'nullable|array',
             'work_exp_department.*' => 'nullable|string|max:255',
             'work_exp_status' => 'nullable|array',
-            'work_exp_status.*' => 'nullable|in:Permanent,Temporary,Casual,Contractual',
+            'work_exp_status.*' => 'nullable|in:Permanent,Temporary,Casual,Contractual,Contract of Service',
             'work_exp_govt_service' => 'nullable|array',
             'work_exp_govt_service.*' => 'nullable|in:Y,N',
 

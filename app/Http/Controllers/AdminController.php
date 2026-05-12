@@ -59,7 +59,7 @@ class AdminController extends Controller
       'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
       'designation_order' => 'Confirmed Designation Order/s',
       'cert_employment' => 'Certificate of Employment with duties and functions',
-      'other_documents' => 'Other Documents Submitted',
+      'other_documents' => 'Other Documents (If any)',
     ];
     private const DOCUMENT_TYPE_ALIASES = [
         'cert_eligibility' => ['cert_elegibility'],

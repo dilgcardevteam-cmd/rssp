@@ -10,6 +10,7 @@ use App\Models\UploadedDocument;
 use App\Observers\ApplicationObserver;
 use App\Observers\UploadedDocumentObserver;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -33,6 +34,10 @@ class AppServiceProvider extends ServiceProvider
         $this->ensureFrameworkRuntimeDirectories();
 
         date_default_timezone_set(config('app.timezone', 'Asia/Manila'));
+        Mail::alwaysFrom(
+            (string) config('mail.from.address'),
+            (string) config('mail.from.name', 'DILG-CAR Recruitment Team')
+        );
 
         Applications::observe(ApplicationObserver::class);
         UploadedDocument::observe(UploadedDocumentObserver::class);

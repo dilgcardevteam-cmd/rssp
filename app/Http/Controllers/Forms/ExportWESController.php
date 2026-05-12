@@ -106,9 +106,12 @@ class ExportWESController extends Controller
             $fullName = strtoupper($user->name ?? 'N/A');
         }
 
-        $experiences = WorkExpSheet::where('user_id', $userId)
-            ->where('isDisplayed', true)
-            ->get();
+        $allWesEntries = WorkExpSheet::where('user_id', $userId)->get();
+        $shownWesEntries = $allWesEntries->filter(static fn ($row): bool => (bool) data_get($row, 'isDisplayed'));
+
+        // If there are at least 2 shown entries, keep respecting the toggle.
+        // Otherwise, export all saved WES entries so the 2nd box gets filled when records exist.
+        $experiences = $shownWesEntries->count() >= 2 ? $shownWesEntries->values() : $allWesEntries;
 
         $experiences = $this->sortWesEntriesByStartDate($experiences, 'start_date');
 
@@ -205,63 +208,532 @@ class ExportWESController extends Controller
 
     private function buildWesPdf(string $fullName, Collection $experiences): \FPDF
     {
-        $allowPdfTemplateOverlay = filter_var(env('WES_ALLOW_PDF_TEMPLATE_OVERLAY', true), FILTER_VALIDATE_BOOL);
-        if ($allowPdfTemplateOverlay) {
-            $templatePdfCandidate = $this->resolveWesTemplatePdfCandidate();
-            if (is_array($templatePdfCandidate)) {
-                $templatePdfPath = (string) ($templatePdfCandidate['path'] ?? '');
-                $templatePdfSource = (string) ($templatePdfCandidate['source'] ?? '');
-                try {
-                    $this->wesRenderMeta = [
-                        'mode' => 'template_pdf_overlay',
-                        'templatePath' => $templatePdfPath,
-                        'templateSource' => $templatePdfSource !== '' ? $templatePdfSource : null,
-                    ];
-                    return $this->buildWesPdfFromTemplate($templatePdfPath, $fullName, $experiences);
-                } catch (\Throwable $e) {
-                    Log::warning('WES template-based export failed; falling back to legacy WES PDF renderer.', [
-                        'error' => $e->getMessage(),
-                        'template_pdf' => $templatePdfPath,
-                    ]);
-                }
-            }
-        } else {
-            Log::info('WES PDF template overlay disabled; using legacy renderer when responsive DOCX conversion is unavailable.');
-        }
-
-        foreach ($this->resolveResponsiveWesDocxCandidates() as $candidate) {
-            $responsiveDocxTemplatePath = $candidate['path'];
-            $responsiveDocxTemplateSource = $candidate['source'];
-
-            if (!$this->docxHasResponsiveWesPlaceholders($responsiveDocxTemplatePath)) {
-                Log::warning('Skipping WES DOCX template without required placeholders.', [
-                    'template_docx' => $responsiveDocxTemplatePath,
-                ]);
-                continue;
-            }
-
-            try {
-                $this->wesRenderMeta = [
-                    'mode' => 'responsive_docx',
-                    'templatePath' => $responsiveDocxTemplatePath,
-                    'templateSource' => $responsiveDocxTemplateSource,
-                ];
-                return $this->buildWesPdfFromResponsiveDocxTemplate($responsiveDocxTemplatePath, $fullName, $experiences);
-            } catch (\Throwable $e) {
-                Log::warning('Responsive WES DOCX template render failed; trying next fallback.', [
-                    'error' => $e->getMessage(),
-                    'template_docx' => $responsiveDocxTemplatePath,
-                ]);
-            }
-        }
-
-        // Fallback: legacy in-code renderer (kept for resilience when template conversion is unavailable).
         $this->wesRenderMeta = [
-            'mode' => 'legacy_renderer',
+            'mode' => 'drawn_form',
             'templatePath' => null,
             'templateSource' => null,
         ];
-        return $this->buildWesPdfLegacy($fullName, $experiences);
+
+        // Template-free renderer: draws the sheet layout directly (prevents template mismatch/overlay issues).
+        return $this->buildWesPdfDrawnForm($fullName, $experiences);
+    }
+
+    private function buildWesPdfDrawnForm(string $fullName, Collection $experiences): \FPDF
+    {
+        $pdf = new \FPDF('P', 'mm', 'A4');
+        $pdf->SetAutoPageBreak(false);
+
+        $entries = $experiences->values();
+        if ($entries->isEmpty()) {
+            $entries = collect([(object) [
+                'start_date' => null,
+                'end_date' => null,
+                'position' => 'N/A',
+                'office' => 'N/A',
+                'supervisor' => 'N/A',
+                'agency' => 'N/A',
+                'accomplishments' => ['N/A'],
+                'duties' => ['N/A'],
+            ]]);
+        }
+
+        // Avoid rendering completely blank rows (e.g., user added an entry but left it empty).
+        $entries = $entries
+            ->filter(fn ($row): bool => !$this->wesEntryIsBlank($row))
+            ->values();
+
+        if ($entries->isEmpty()) {
+            $entries = collect([(object) [
+                'start_date' => null,
+                'end_date' => null,
+                'position' => 'N/A',
+                'office' => 'N/A',
+                'supervisor' => 'N/A',
+                'agency' => 'N/A',
+                'accomplishments' => ['N/A'],
+                'duties' => ['N/A'],
+            ]]);
+        }
+
+        $chunks = $entries->chunk(2)->values();
+        foreach ($chunks as $chunk) {
+            $pageEntries = $chunk
+                ->values()
+                ->filter(fn ($row): bool => !$this->wesEntryIsBlank($row))
+                ->values();
+
+            if ($pageEntries->isEmpty()) {
+                continue;
+            }
+
+            $pdf->AddPage();
+            $this->drawWesStaticPage($pdf, (int) $pageEntries->count());
+
+            $this->overlayWesSignatureBlock($pdf, $fullName);
+
+            foreach ($pageEntries as $index => $exp) {
+                $this->overlayWesEntryIntoBox($pdf, $exp, (int) $index);
+            }
+        }
+
+        return $pdf;
+    }
+
+    private function wesEntryIsBlank($exp): bool
+    {
+        $startDate = data_get($exp, 'start_date');
+        $endDate = data_get($exp, 'end_date');
+
+        if ($startDate !== null && trim((string) $startDate) !== '') {
+            return false;
+        }
+        if ($endDate !== null && trim((string) $endDate) !== '') {
+            return false;
+        }
+
+        foreach (['position', 'office', 'supervisor', 'agency'] as $field) {
+            $value = trim((string) data_get($exp, $field, ''));
+            if ($value !== '') {
+                return false;
+            }
+        }
+
+        foreach (['accomplishments', 'duties'] as $listField) {
+            $items = data_get($exp, $listField);
+            if (is_array($items)) {
+                foreach ($items as $item) {
+                    if (trim((string) $item) !== '') {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private function drawWesStaticPage(\FPDF $pdf, int $boxCount = 2): void
+    {
+        $left = 10.0;
+        $width = 190.0;
+
+        // Header text.
+        $pdf->SetFont('Arial', 'I', 9);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->Text($left, 10.0, $this->toPdfText('Attachment to CS Form No. 212'));
+
+        // Title bar.
+        $titleY = 12.5;
+        $titleH = 12.0;
+        $pdf->SetFillColor(160, 160, 160);
+        $pdf->Rect($left, $titleY, $width, $titleH, 'DF');
+        $pdf->SetFont('Arial', 'B', 15);
+        $pdf->SetTextColor(255, 255, 255);
+        $pdf->SetXY($left, $titleY + 2.2);
+        $pdf->Cell($width, 7.0, $this->toPdfText('WORK EXPERIENCE SHEET'), 0, 0, 'C');
+        $pdf->SetTextColor(0, 0, 0);
+
+        // Instructions box.
+        $instY = $titleY + $titleH;
+        $instH = 30.0;
+        $pdf->SetFillColor(240, 240, 240);
+        $pdf->Rect($left, $instY, $width, $instH, 'DF');
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->Rect($left, $instY, $width, $instH);
+
+        $pdf->SetFont('Arial', 'BI', 10);
+        $pdf->SetXY($left + 2.5, $instY + 2.0);
+        $pdf->Cell(24, 5, $this->toPdfText('Instructions:'), 0, 0, 'L');
+        $pdf->SetFont('Arial', '', 9.2);
+
+        $bodyX = $left + 26.0;
+        $bodyY = $instY + 2.0;
+        $pdf->SetXY($bodyX, $bodyY);
+        $pdf->MultiCell(
+            $width - ($bodyX - $left) - 2.5,
+            4.2,
+            $this->toPdfText(
+                "1. Include only the work experiences relevant to the position being applied to.\n" .
+                "2. The duration should include start and finish dates, if known, month in abbreviated form, if known, and year in full. For the current position, use the word Present, e.g., 1998-Present. Work experience should be listed from most recent first."
+            ),
+            0,
+            'L'
+        );
+
+        $pdf->SetFont('Arial', 'BU', 8.8);
+        $pdf->SetXY($left + 2.5, $instY + $instH - 6.2);
+        $pdf->Cell(
+            $width - 5.0,
+            4.8,
+            $this->toPdfText('Sample: If applying to Supervising Administrative Officer (Human Resource Management Officer IV)'),
+            0,
+            0,
+            'L'
+        );
+
+        // Two entry boxes.
+        $boxTop = $instY + $instH + 2.0;
+        // Make boxes taller to better fit lists and avoid clipping.
+        $boxH = 96.0;
+        $this->drawWesEntryBox($pdf, $boxTop, $boxH);
+        if ($boxCount > 1) {
+            $this->drawWesEntryBox($pdf, $boxTop + $boxH + 6.0, $boxH);
+        }
+    }
+
+    private function drawWesEntryBox(\FPDF $pdf, float $y, float $h): void
+    {
+        $left = 10.0;
+        $width = 190.0;
+
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->Rect($left, $y, $width, $h);
+
+        $xBullet = $left + 12.0;
+        $xLabel = $xBullet + 6.0;
+
+        $pdf->SetFont('Arial', '', 10);
+        $lineY = $y + 10.0;
+        $rowGap = 6.2;
+
+        foreach ([
+            'Duration',
+            'Position',
+            'Name of Office/Unit',
+            'Immediate Supervisor',
+            'Name of Agency/Organization and Location',
+        ] as $label) {
+            $pdf->Text($xBullet, $lineY, $this->toPdfText('•'));
+            $pdf->Text($xLabel, $lineY, $this->toPdfText($label . ':'));
+            $lineY += $rowGap;
+        }
+
+        // Scale the accomplishments/duties sections to the available box height.
+        $listsTop = $y + 44.0;
+        $listsBottom = $y + $h - 7.0;
+        $halfH = max(12.0, ($listsBottom - $listsTop) / 2.0);
+
+        $title1Y = $listsTop;
+        $titleBulletX = $left + 52.0;
+        $titleTextX = $titleBulletX + 7.0;
+        $pdf->Text($titleBulletX, $title1Y, $this->toPdfText('•'));
+        $pdf->Text($titleTextX, $title1Y, $this->toPdfText('List of Accomplishments and Contributions (if any)'));
+
+        $title2Y = $listsTop + $halfH;
+        $pdf->Text($titleBulletX, $title2Y, $this->toPdfText('•'));
+        $pdf->Text($titleTextX, $title2Y, $this->toPdfText('Summary of Actual Duties'));
+    }
+
+    private function overlayWesEntryIntoBox(\FPDF $pdf, $exp, int $boxIndex): void
+    {
+        $left = 10.0;
+        $width = 190.0;
+        $instY = 24.5;
+        $instH = 30.0;
+        $boxTop = $instY + $instH + 2.0;
+        $boxH = 96.0;
+        $boxY = $boxIndex === 0 ? $boxTop : ($boxTop + $boxH + 6.0);
+
+        $xBullet = $left + 12.0;
+        $xLabel = $xBullet + 6.0;
+        $labels = [
+            'Duration',
+            'Position',
+            'Name of Office/Unit',
+            'Immediate Supervisor',
+            'Name of Agency/Organization and Location',
+        ];
+
+        // Place values after the widest label so long labels don't overlap.
+        $pdf->SetFont('Arial', '', 10);
+        $maxLabelW = 0.0;
+        foreach ($labels as $label) {
+            $w = $pdf->GetStringWidth($this->toPdfText($label . ':'));
+            if ($w > $maxLabelW) {
+                $maxLabelW = $w;
+            }
+        }
+
+        $valueX = $xLabel + $maxLabelW + 4.0;
+        $valueW = ($left + $width) - $valueX - 6.0;
+        // Keep value text aligned with the label baselines drawn in drawWesEntryBox().
+        $startBaselineY = $boxY + 10.0;
+        $rowGap = 6.2;
+
+        $durationFrom = $this->formatMonthYear($exp->start_date);
+        $durationTo = $exp->end_date ? $this->formatMonthYear($exp->end_date) : 'Present';
+        $duration = trim(($durationFrom !== '' ? $durationFrom : 'N/A') . ' to ' . ($durationTo !== '' ? $durationTo : 'N/A'));
+
+        $values = [
+            $duration,
+            trim((string) ($exp->position ?? '')) ?: 'N/A',
+            trim((string) ($exp->office ?? '')) ?: 'N/A',
+            trim((string) ($exp->supervisor ?? '')) ?: 'N/A',
+            trim((string) ($exp->agency ?? '')) ?: 'N/A',
+        ];
+
+        $pdf->SetTextColor(0, 0, 0);
+        foreach ($values as $i => $value) {
+            $this->writeFittedTextBaseline($pdf, mb_strtoupper($value), $valueX, $startBaselineY + ($i * $rowGap), $valueW, 10.0, 7.5);
+        }
+
+        // Accomplishments list (responsive: auto-fit within the box when possible).
+        $itemsX = $left + 60.0;
+        $itemsW = ($left + $width) - $itemsX - 6.0;
+        $baseItemsFont = 9.2;
+        $minItemsFont = 7.2;
+
+        $listsTop = $boxY + 44.0;
+        $listsBottom = $boxY + $boxH - 7.0;
+        $halfH = max(12.0, ($listsBottom - $listsTop) / 2.0);
+
+        $title1Y = $listsTop;
+        $accStartY = $title1Y + 4.8;
+        $title2Y = $listsTop + $halfH;
+        $dutyStartY = $title2Y + 4.8;
+
+        $accItems = $this->listItemsForPreview($exp->accomplishments ?? []);
+        $dutyItems = $this->listItemsForPreview($exp->duties ?? []);
+
+        $chosenFont = $baseItemsFont;
+        $chosenLineHeight = 4.2;
+        $accMaxLines = 3;
+        $dutyMaxLines = 3;
+
+        for ($tryFont = $baseItemsFont; $tryFont >= $minItemsFont; $tryFont -= 0.2) {
+            $tryLineHeight = max(3.6, $tryFont * 0.46);
+
+            $tryAccMaxLines = (int) floor(max(0.0, ($title2Y - 2.0 - $accStartY) / $tryLineHeight));
+            $tryDutyMaxLines = (int) floor(max(0.0, ($listsBottom - $dutyStartY) / $tryLineHeight));
+
+            $tryAccMaxLines = max(1, $tryAccMaxLines);
+            $tryDutyMaxLines = max(1, $tryDutyMaxLines);
+
+            $pdf->SetFont('Arial', '', $tryFont);
+            $accNeeded = $this->estimateBulletWrappedLineCount($pdf, $accItems, $itemsW);
+            $dutyNeeded = $this->estimateBulletWrappedLineCount($pdf, $dutyItems, $itemsW);
+
+            $chosenFont = $tryFont;
+            $chosenLineHeight = $tryLineHeight;
+            $accMaxLines = $tryAccMaxLines;
+            $dutyMaxLines = $tryDutyMaxLines;
+
+            if ($accNeeded <= $tryAccMaxLines && $dutyNeeded <= $tryDutyMaxLines) {
+                break;
+            }
+        }
+
+        $pdf->SetFont('Arial', '', $chosenFont);
+        $this->writeBulletItems($pdf, $accItems, $itemsX, $accStartY, $itemsW, $chosenLineHeight, $accMaxLines);
+        $this->writeBulletItems($pdf, $dutyItems, $itemsX, $dutyStartY, $itemsW, $chosenLineHeight, $dutyMaxLines);
+    }
+
+    private function estimateBulletWrappedLineCount(\FPDF $pdf, array $items, float $w): int
+    {
+        $count = 0;
+        foreach ($items as $item) {
+            $text = trim((string) $item);
+            if ($text === '') {
+                continue;
+            }
+
+            $wrapped = $this->splitTextByWidth($pdf, mb_strtoupper($text), $w - 6.0);
+            foreach ($wrapped as $line) {
+                if (trim((string) $line) === '') {
+                    continue;
+                }
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+
+    private function writeFittedTextBaseline(\FPDF $pdf, string $text, float $x, float $baselineY, float $w, float $baseSize, float $minSize): void
+    {
+        $raw = trim($text);
+        if ($raw === '') {
+            $raw = 'N/A';
+        }
+
+        $display = $raw;
+        $size = $baseSize;
+        for ($try = $baseSize; $try >= $minSize; $try -= 0.5) {
+            $pdf->SetFont('Arial', '', $try);
+            $width = $pdf->GetStringWidth($this->toPdfText($display));
+            if ($width <= $w) {
+                $size = $try;
+                break;
+            }
+            $size = $try;
+        }
+
+        $pdf->SetFont('Arial', '', $size);
+        if ($pdf->GetStringWidth($this->toPdfText($display)) > $w) {
+            $display = $this->truncateToWidth($pdf, $display, $w);
+        }
+
+        $pdf->Text($x, $baselineY, $this->toPdfText($display));
+    }
+
+    private function overlayWesSignatureBlock(\FPDF $pdf, string $fullName): void
+    {
+        $name = trim($fullName) !== '' ? trim($fullName) : 'N/A';
+        $dateText = Carbon::now()->format('m/d/Y');
+
+        // Signature area (bottom-right).
+        $sigLineX1 = 140.0;
+        $sigLineX2 = 198.0;
+        $sigLineY = 265.0;
+        $sigW = $sigLineX2 - $sigLineX1;
+
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->Line($sigLineX1, $sigLineY, $sigLineX2, $sigLineY);
+
+        // Printed name (fit to the signature line width).
+        $displayName = $name;
+        $chosen = 11.0;
+        for ($try = 11.0; $try >= 8.0; $try -= 0.5) {
+            $pdf->SetFont('Arial', '', $try);
+            if ($pdf->GetStringWidth($this->toPdfText($displayName)) <= $sigW) {
+                $chosen = $try;
+                break;
+            }
+            $chosen = $try;
+        }
+        $pdf->SetFont('Arial', '', $chosen);
+        if ($pdf->GetStringWidth($this->toPdfText($displayName)) > $sigW) {
+            $displayName = $this->truncateToWidth($pdf, $displayName, $sigW);
+        }
+        $pdf->SetXY($sigLineX1, $sigLineY - 8.0);
+        $pdf->Cell($sigW, 6.0, $this->toPdfText($displayName), 0, 0, 'C');
+
+        $pdf->SetFont('Arial', '', 8.0);
+        $pdf->SetXY($sigLineX1, $sigLineY + 1.5);
+        $pdf->MultiCell($sigW, 4.0, $this->toPdfText("(Signature over Printed Name\nof Employee/Applicant)"), 0, 'C');
+
+        $pdf->SetFont('Arial', '', 10.0);
+        $dateLabelX = 140.0;
+        $dateLabelY = 279.5;
+        $dateLineX1 = 153.0;
+        $dateLineX2 = 198.0;
+        $dateLineY = 279.7;
+        $pdf->Text($dateLabelX, $dateLabelY, $this->toPdfText('Date:'));
+        $pdf->Line($dateLineX1, $dateLineY, $dateLineX2, $dateLineY);
+        $pdf->SetXY($dateLineX1, $dateLineY - 5.2);
+        $pdf->Cell($dateLineX2 - $dateLineX1, 6.0, $this->toPdfText($dateText), 0, 0, 'C');
+    }
+
+    private function writeFittedTextCell(\FPDF $pdf, string $text, float $x, float $y, float $w, float $baseSize, float $minSize): void
+    {
+        $raw = trim($text);
+        if ($raw === '') {
+            $raw = 'N/A';
+        }
+
+        $display = $raw;
+        $size = $baseSize;
+        for ($try = $baseSize; $try >= $minSize; $try -= 0.5) {
+            $pdf->SetFont('Arial', '', $try);
+            $width = $pdf->GetStringWidth($this->toPdfText($display));
+            if ($width <= $w) {
+                $size = $try;
+                break;
+            }
+            $size = $try;
+        }
+
+        $pdf->SetFont('Arial', '', $size);
+        if ($pdf->GetStringWidth($this->toPdfText($display)) > $w) {
+            $display = $this->truncateToWidth($pdf, $display, $w);
+        }
+
+        $pdf->SetXY($x, $y);
+        $pdf->Cell($w, 5.0, $this->toPdfText($display), 0, 0, 'L');
+    }
+
+    private function truncateToWidth(\FPDF $pdf, string $text, float $maxWidth): string
+    {
+        $candidate = trim($text);
+        if ($candidate === '') {
+            return '';
+        }
+
+        if ($pdf->GetStringWidth($this->toPdfText($candidate)) <= $maxWidth) {
+            return $candidate;
+        }
+
+        $ellipsis = '...';
+        while (mb_strlen($candidate) > 1) {
+            $candidate = rtrim(mb_substr($candidate, 0, mb_strlen($candidate) - 1));
+            $trial = $candidate . $ellipsis;
+            if ($pdf->GetStringWidth($this->toPdfText($trial)) <= $maxWidth) {
+                return $trial;
+            }
+        }
+
+        return $ellipsis;
+    }
+
+    private function writeBulletItems(\FPDF $pdf, array $items, float $x, float $y, float $w, float $lineHeight, int $maxLines): void
+    {
+        $linesWritten = 0;
+        foreach ($items as $item) {
+            if ($linesWritten >= $maxLines) {
+                break;
+            }
+
+            $text = trim((string) $item);
+            if ($text === '') {
+                continue;
+            }
+
+            $wrapped = $this->splitTextByWidth($pdf, mb_strtoupper($text), $w - 6.0);
+            foreach ($wrapped as $wrappedLine) {
+                if ($linesWritten >= $maxLines) {
+                    break;
+                }
+                $pdf->SetXY($x, $y + ($linesWritten * $lineHeight));
+                $pdf->Cell(6.0, $lineHeight, $this->toPdfText('•'), 0, 0, 'L');
+                $pdf->Cell($w - 6.0, $lineHeight, $this->toPdfText($wrappedLine), 0, 0, 'L');
+                $linesWritten++;
+            }
+        }
+    }
+
+    private function splitTextByWidth(\FPDF $pdf, string $text, float $maxWidth): array
+    {
+        $text = trim($text);
+        if ($text === '') {
+            return [''];
+        }
+
+        $words = preg_split('/\s+/', $text) ?: [$text];
+        $lines = [];
+        $current = '';
+        foreach ($words as $word) {
+            $trial = $current === '' ? $word : ($current . ' ' . $word);
+            if ($pdf->GetStringWidth($this->toPdfText($trial)) <= $maxWidth) {
+                $current = $trial;
+                continue;
+            }
+
+            if ($current !== '') {
+                $lines[] = $current;
+                $current = $word;
+                continue;
+            }
+
+            // Single word longer than the width; hard-truncate.
+            $lines[] = $this->truncateToWidth($pdf, $word, $maxWidth);
+            $current = '';
+        }
+
+        if ($current !== '') {
+            $lines[] = $current;
+        }
+
+        return $lines;
     }
 
     private function buildWesPdfFromResponsiveDocxTemplate(

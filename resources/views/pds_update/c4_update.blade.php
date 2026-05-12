@@ -443,12 +443,12 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Name</label>
                             </div>
                             <div class="relative">
-                                <input type="tel" name="ref1_tel" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
-                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Telephone No.</label>
-                            </div>
-                            <div class="relative md:col-span-2">
                                 <input type="text" name="ref1_address" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address</label>
+                            </div>
+                            <div class="relative md:col-span-2">
+                                <input type="tel" name="ref1_tel" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
+                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Telephone No.</label>
                             </div>
                         </div>
                     </div>
@@ -462,12 +462,12 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Name</label>
                             </div>
                             <div class="relative">
-                                <input type="tel" name="ref2_tel" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
-                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Telephone No.</label>
-                            </div>
-                            <div class="relative md:col-span-2">
                                 <input type="text" name="ref2_address" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address</label>
+                            </div>
+                            <div class="relative md:col-span-2">
+                                <input type="tel" name="ref2_tel" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
+                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Telephone No.</label>
                             </div>
                         </div>
                     </div>
@@ -481,12 +481,12 @@
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Name</label>
                             </div>
                             <div class="relative">
-                                <input type="tel" name="ref3_tel" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
-                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Telephone No.</label>
-                            </div>
-                            <div class="relative md:col-span-2">
                                 <input type="text" name="ref3_address" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
                                 <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Address</label>
+                            </div>
+                            <div class="relative md:col-span-2">
+                                <input type="tel" name="ref3_tel" placeholder=" " class="floating-label-input w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all peer">
+                                <label class="floating-label absolute left-4 top-3 text-gray-500 pointer-events-none">Telephone No.</label>
                             </div>
                         </div>
                     </div>

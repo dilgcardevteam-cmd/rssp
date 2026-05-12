@@ -438,6 +438,7 @@
             const civilServiceTable = document.getElementById('civil-service-table');
             const workExpEmpty = document.getElementById('work-exp-empty');
             const civilServiceEmpty = document.getElementById('civil-service-empty');
+            let finalSubmitRequested = false;
 
             await loadCivilServiceEligibilityOptions();
 
@@ -558,7 +559,12 @@
                 }
             });
 
-            form.addEventListener('submit', function (event) {
+            form.addEventListener('submit', async function (event) {
+                if (finalSubmitRequested) {
+                    form.dataset.finalSubmit = '1';
+                    return;
+                }
+
                 const workRows = workExpTable.querySelectorAll('tbody tr');
                 let firstInvalidInput = null;
 
@@ -569,13 +575,26 @@
                     }
                 });
 
-                if (!firstInvalidInput) {
+                if (firstInvalidInput) {
+                    event.preventDefault();
+                    firstInvalidInput.reportValidity();
+                    firstInvalidInput.focus();
                     return;
                 }
 
                 event.preventDefault();
-                firstInvalidInput.reportValidity();
-                firstInvalidInput.focus();
+
+                if (typeof window.__pdsAutosaveNow === 'function') {
+                    try {
+                        await window.__pdsAutosaveNow({ force: true, maxWaitMs: 2500 });
+                    } catch (error) {
+                        // Ignore autosave flush failures; explicit submit should still proceed.
+                    }
+                }
+
+                finalSubmitRequested = true;
+                form.dataset.finalSubmit = '1';
+                form.requestSubmit();
             });
 
             // Functions
@@ -983,7 +1002,12 @@
                     markDirty();
                 }
             });
-            form.addEventListener('submit', () => { isSubmitting = true; });
+            form.dataset.finalSubmit = form.dataset.finalSubmit || '0';
+            form.addEventListener('submit', () => {
+                if (form.dataset.finalSubmit === '1') {
+                    isSubmitting = true;
+                }
+            });
 
             async function saveDraft(force = false) {
                 if (isSubmitting) return;

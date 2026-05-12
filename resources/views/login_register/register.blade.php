@@ -181,7 +181,7 @@
                       aria-describedby="email_feedback"
                       class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-900 focus:ring-2 focus:ring-blue-200">
                     <p id="email_feedback" class="hidden mt-1 text-sm text-red-600" aria-live="polite"></p>
-                    @error('email') <p id="email_server_error" class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                    @error('email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                   </div>
 
                   <div>
@@ -386,18 +386,6 @@
       return setFieldState(input, feedback, 'valid');
     }
 
-    function clearEmailServerError() {
-      const serverError = document.getElementById('email_server_error');
-      const input = document.getElementById('email');
-      if (serverError) {
-        serverError.classList.add('hidden');
-      }
-      if (input && input.dataset.touched !== 'true') {
-        applyFieldClasses(input, FIELD_BASE_CLASSES);
-        input.setCustomValidity('');
-      }
-    }
-
     function updatePasswordRequirements() {
       const input = document.getElementById('password');
       if (!input) return { length: false, mixedCase: false, number: false, symbol: false };
@@ -569,14 +557,7 @@
           phoneInput.value = formatPhoneNumber(phoneInput.value);
         },
       });
-      bindBlurValidation(emailInput, validateEmailAddress, {
-        onInput: () => {
-          clearEmailServerError();
-        },
-        onFocus: () => {
-          clearEmailServerError();
-        },
-      });
+      bindBlurValidation(emailInput, validateEmailAddress);
       bindBlurValidation(passwordInput, validatePassword, {
         onInput: () => {
           updatePasswordRequirements();

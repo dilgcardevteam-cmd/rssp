@@ -30,6 +30,7 @@ class WorkExpSheet extends Model
         'end_date' => 'date',
         'accomplishments' => 'array',
         'duties' => 'array',
+        'isDisplayed' => 'boolean',
     ];
 
     /**

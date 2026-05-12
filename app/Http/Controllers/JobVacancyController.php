@@ -2186,16 +2186,21 @@ class JobVacancyController extends Controller
 
         $validated = $request->validate([
             'degree' => ['required', 'string', 'max:255'],
-            'eligibility' => ['required', 'string', 'max:255'],
+            'eligibility' => ['nullable', 'string', 'max:255'],
             'has_pqe' => ['nullable', 'boolean'],
             'has_subscribed_pds' => ['nullable', 'boolean'],
         ]);
 
         $degree = trim((string) ($validated['degree'] ?? ''));
         $eligibility = trim((string) ($validated['eligibility'] ?? ''));
+        if ($eligibility === '' && Auth::check()) {
+            $eligibility = $this->resolvePrimaryEligibilityFromPds((int) Auth::id());
+        }
 
         $educationAligned = $this->isInitialAssessmentEducationAligned($vacancy, $degree);
-        $eligibilityAligned = $this->isInitialAssessmentEligibilityAligned($vacancy, $eligibility);
+        $eligibilityAligned = $eligibility === ''
+            ? true
+            : $this->isInitialAssessmentEligibilityAligned($vacancy, $eligibility);
 
         if (!$educationAligned || !$eligibilityAligned) {
             return response()->json([
@@ -4997,7 +5002,6 @@ class JobVacancyController extends Controller
         $vacancyId = trim((string) $vacancy->vacancy_id);
         $assessmentVacancyId = trim((string) ($assessment['vacancy_id'] ?? ''));
         $degree = trim((string) ($assessment['degree'] ?? ''));
-        $eligibility = trim((string) ($assessment['eligibility'] ?? ''));
         $q1Passed = array_key_exists('q1_passed', $assessment) ? (bool) $assessment['q1_passed'] : false;
         $q2Passed = array_key_exists('q2_passed', $assessment) ? (bool) $assessment['q2_passed'] : false;
         $hasSubscribedPdsAnswered = array_key_exists('has_subscribed_pds', $assessment);
@@ -5006,7 +5010,6 @@ class JobVacancyController extends Controller
             $vacancyId === ''
             || $assessmentVacancyId !== $vacancyId
             || $degree === ''
-            || $eligibility === ''
             || !$q1Passed
             || !$q2Passed
             || !$hasSubscribedPdsAnswered

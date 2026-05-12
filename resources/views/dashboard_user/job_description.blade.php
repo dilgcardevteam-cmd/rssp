@@ -563,44 +563,8 @@
                     <button type="button" onclick="closeInitialAssessmentEducationModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
                         Close
                     </button>
-                    <button type="button" onclick="goToInitialAssessmentEligibility()" class="px-4 py-2 bg-[#0D2B70] text-white rounded-lg hover:bg-[#0A245D]">
+                    <button type="button" onclick="completeInitialAssessmentEducation()" class="px-4 py-2 bg-[#0D2B70] text-white rounded-lg hover:bg-[#0A245D]">
                         Next
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="initialAssessmentEligibilityModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl p-6 border border-[#0D2B70]/10">
-                <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
-                <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 2</h2>
-                <p class="text-sm text-gray-700 mt-3 font-medium">What is your civil service eligibility?</p>
-                <div class="mt-4">
-                    <label for="initialAssessmentEligibilityInput" class="block text-xs uppercase tracking-wide text-slate-500 mb-2">Civil Service Eligibility</label>
-                    <div class="relative">
-                        <input
-                            id="initialAssessmentEligibilityInput"
-                            type="text"
-                            autocomplete="off"
-                            placeholder="Search from the list or type your eligibility"
-                            data-assessment-input="eligibility"
-                            class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-[#0D2B70] focus:ring-2 focus:ring-[#0D2B70]/20"
-                        >
-                        <div id="initialAssessmentEligibilityMenu" class="absolute left-0 right-0 z-40 mt-1 hidden rounded-xl border border-slate-200 bg-white shadow-lg" data-assessment-menu="eligibility">
-                            <div id="initialAssessmentEligibilityOptionsWrap" class="max-h-56 overflow-auto py-1" data-assessment-options="eligibility"></div>
-                        </div>
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500">Search from the list or type if your eligibility is not available.</p>
-                </div>
-                <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" onclick="closeInitialAssessmentEligibilityModal()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                        Close
-                    </button>
-                    <button type="button" onclick="goBackToInitialAssessmentEducation()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
-                        Back
-                    </button>
-                    <button type="button" onclick="completeInitialAssessmentEligibility()" class="px-4 py-2 bg-[#0D2B70] text-white rounded-lg hover:bg-[#0A245D]">
-                        Continue
                     </button>
                 </div>
             </div>
@@ -609,10 +573,10 @@
         <div id="initialAssessmentPqeModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-[#0D2B70]/10">
                 <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
-                <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 3</h2>
+                <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 2</h2>
                 <p class="text-sm text-gray-700 mt-3 font-medium">Have you taken and passed the PQE (Pre Qualifying Exam)?</p>
                 <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" onclick="goBackToInitialAssessmentEligibility()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                    <button type="button" onclick="goBackToInitialAssessmentEducation()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
                         Back
                     </button>
                     <button type="button" onclick="answerInitialAssessmentPqe(false)" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
@@ -628,7 +592,7 @@
         <div id="initialAssessmentSubscribedPdsModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-[#0D2B70]/10">
                 <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
-                <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 4</h2>
+                <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 3</h2>
                 <p class="text-sm text-gray-700 mt-3 font-medium">Do you have a subscribed PDS form?</p>
                 <div class="mt-6 flex justify-end gap-2">
                     <button type="button" onclick="goBackToInitialAssessmentPqeOrEligibility()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
@@ -702,7 +666,6 @@
     function closeRequiredDocsModal()      { closeModal('requiredDocsModal'); }
     function closeDocTrackMismatchModal()  { closeModal('docTrackMismatchModal'); }
     function closeInitialAssessmentEducationModal() { closeModal('initialAssessmentEducationModal'); }
-    function closeInitialAssessmentEligibilityModal() { closeModal('initialAssessmentEligibilityModal'); }
     function closeInitialAssessmentPqeModal() { closeModal('initialAssessmentPqeModal'); }
     function closeInitialAssessmentSubscribedPdsModal() { closeModal('initialAssessmentSubscribedPdsModal'); }
     function closeInitialAssessmentFeedbackModal() {
@@ -713,7 +676,6 @@
     const initialAssessmentState = {
         educationAttainment: '',
         degree: '',
-        eligibility: '',
         hasPqe: null,
         hasSubscribedPds: null,
     };
@@ -793,7 +755,6 @@
     };
     const initialAssessmentOptions = {
         degreeByLevel: @json($assessmentProgramOptions ?? ['COLLEGE' => [], 'MASTERAL' => [], 'DOCTORATE' => []]),
-        eligibility: @json($assessmentEligibilityOptions ?? []),
     };
 
     // Helper to format eligibility display text from structured data
@@ -991,7 +952,6 @@
 
     function closeAllAssessmentMenus() {
         closeAssessmentMenu('degree');
-        closeAssessmentMenu('eligibility');
     }
 
     function renderAssessmentOptions(type) {
@@ -1141,7 +1101,6 @@
 
     function closeInitialAssessmentFlowModals() {
         closeModal('initialAssessmentEducationModal');
-        closeModal('initialAssessmentEligibilityModal');
         closeModal('initialAssessmentPqeModal');
         closeModal('initialAssessmentSubscribedPdsModal');
     }
@@ -1205,7 +1164,6 @@
         const payload = {
             education_attainment: initialAssessmentState.educationAttainment,
             degree: initialAssessmentState.degree,
-            eligibility: initialAssessmentState.eligibility,
         };
 
         if (typeof options.hasPqe === 'boolean') {
@@ -1266,7 +1224,7 @@
         openModal('requiredDocsModal');
     }
 
-    function goToInitialAssessmentEligibility() {
+    async function completeInitialAssessmentEducation() {
         const educationLevelSelect = assessmentEducationLevelEl();
         const educationAttainment = normalizeAssessmentInput(educationLevelSelect ? educationLevelSelect.value : '').toUpperCase();
         const educationMeta = initialAssessmentEducationAttainmentMeta[educationAttainment] || null;
@@ -1296,18 +1254,20 @@
         initialAssessmentState.degree = degree;
         initialAssessmentState.hasPqe = null;
         initialAssessmentState.hasSubscribedPds = null;
+        const result = await submitInitialAssessment();
+        if (!result) {
+            return;
+        }
+
         closeModal('initialAssessmentEducationModal');
-        openModal('initialAssessmentEligibilityModal');
-    }
+        const isPlantilla = @json($typeIsPlantilla);
+        if (isPlantilla && result.requires_pqe) {
+            initialAssessmentState.hasPqe = null;
+            openModal('initialAssessmentPqeModal');
+            return;
+        }
 
-    function goBackToInitialAssessmentEducation() {
-        closeModal('initialAssessmentEligibilityModal');
-        openModal('initialAssessmentEducationModal');
-    }
-
-    function goBackToInitialAssessmentEligibility() {
-        closeModal('initialAssessmentPqeModal');
-        openModal('initialAssessmentEligibilityModal');
+        openModal('initialAssessmentSubscribedPdsModal');
     }
 
     function goBackToInitialAssessmentPqeOrEligibility() {
@@ -1317,48 +1277,12 @@
             return;
         }
 
-        openModal('initialAssessmentEligibilityModal');
+        openModal('initialAssessmentEducationModal');
     }
 
-    async function completeInitialAssessmentEligibility() {
-        const eligibilityInput = document.getElementById('initialAssessmentEligibilityInput');
-        let eligibility = normalizeAssessmentInput(eligibilityInput ? eligibilityInput.value : '');
-        if (eligibility === '') {
-            showInitialAssessmentNotice(
-                'Eligibility is Required',
-                'Please enter your civil service eligibility to continue with the initial assessment.'
-            );
-            return;
-        }
-
-        // If data-value exists (from dropdown selection), use that; otherwise use input value
-        const dataValue = eligibilityInput.getAttribute('data-value');
-        if (dataValue) {
-            eligibility = normalizeAssessmentInput(dataValue);
-        } else {
-            // Extract name from formatted text like "Name (Legal Basis | Level)"
-            // by taking everything before the first " ("
-            const parenIndex = eligibility.indexOf(' (');
-            if (parenIndex > 0) {
-                eligibility = normalizeAssessmentInput(eligibility.substring(0, parenIndex));
-            }
-        }
-
-        initialAssessmentState.eligibility = eligibility;
-        const result = await submitInitialAssessment();
-        if (!result) {
-            return;
-        }
-
-        closeModal('initialAssessmentEligibilityModal');
-        const isPlantilla = @json($typeIsPlantilla);
-        if (isPlantilla && result.requires_pqe) {
-            initialAssessmentState.hasPqe = null;
-            openModal('initialAssessmentPqeModal');
-            return;
-        }
-
-        openModal('initialAssessmentSubscribedPdsModal');
+    function goBackToInitialAssessmentEducation() {
+        closeModal('initialAssessmentPqeModal');
+        openModal('initialAssessmentEducationModal');
     }
 
     async function answerInitialAssessmentPqe(hasPqe) {
@@ -1402,7 +1326,6 @@
             'requiredDocsModal',
             'docTrackMismatchModal',
             'initialAssessmentEducationModal',
-            'initialAssessmentEligibilityModal',
             'initialAssessmentPqeModal',
             'initialAssessmentSubscribedPdsModal',
             'initialAssessmentFeedbackModal',
@@ -1430,7 +1353,6 @@
         }
 
         bindAssessmentDropdown('degree');
-        bindAssessmentDropdown('eligibility');
         const educationLevelSelect = assessmentEducationLevelEl();
         if (educationLevelSelect) {
             educationLevelSelect.addEventListener('change', () => {

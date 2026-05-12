@@ -234,6 +234,49 @@ class PDSController extends Controller
         return $this->normalizeDateForDatabase($raw);
     }
 
+    private function normalizeDateForHtmlInput($value): string
+    {
+        $raw = trim((string) ($value ?? ''));
+        if ($raw === '') {
+            return '';
+        }
+
+        if (strtolower($raw) === 'present') {
+            return 'present';
+        }
+
+        $parsed = $this->parseFlexibleDate($raw);
+        if ($parsed) {
+            return $parsed->format('Y-m-d');
+        }
+
+        try {
+            return Carbon::parse($raw)->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return '';
+        }
+    }
+
+    private function normalizeWorkExperienceRowsForView($rows): array
+    {
+        if (!is_iterable($rows)) {
+            return [];
+        }
+
+        $normalizedRows = [];
+        foreach ($rows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $row['work_exp_from'] = $this->normalizeDateForHtmlInput($row['work_exp_from'] ?? null);
+            $row['work_exp_to'] = $this->normalizeDateForHtmlInput($row['work_exp_to'] ?? null);
+            $normalizedRows[] = $row;
+        }
+
+        return $normalizedRows;
+    }
+
     private function parseEducationDateForValidation($value): ?Carbon
     {
         $value = is_string($value) ? trim($value) : null;
@@ -2819,6 +2862,7 @@ class PDSController extends Controller
             '=',
             $current_user_id
         )->get()->toArray();
+        $all_user_work_exps = $this->normalizeWorkExperienceRowsForView($all_user_work_exps);
 
         /**NOTE:
          * $user_work_exps is a multidimensional array with the format:
@@ -2866,7 +2910,7 @@ class PDSController extends Controller
         }
 
         // Run if session exists
-        $all_user_work_exps = session('form.c2.all_user_work_exps');
+        $all_user_work_exps = $this->normalizeWorkExperienceRowsForView(session('form.c2.all_user_work_exps'));
         $all_user_civil_service_eligibility = session('form.c2.all_user_civil_service_eligibility');
 
         // Determine education level for eligibility filtering
@@ -6895,7 +6939,7 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
         if (!session()->has('form.c2')) {
             session(['form.c2' => $this->c2GetFormFromDB()]);
         }
-        $all_user_work_exps = session('form.c2.all_user_work_exps', []);
+        $all_user_work_exps = $this->normalizeWorkExperienceRowsForView(session('form.c2.all_user_work_exps', []));
         $all_user_civil_service_eligibility = session('form.c2.all_user_civil_service_eligibility', []);
         return view('pds_update.c2_update', compact('all_user_work_exps', 'all_user_civil_service_eligibility'));
     }

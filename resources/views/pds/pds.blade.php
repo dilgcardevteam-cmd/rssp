@@ -80,7 +80,7 @@
             border: 1px solid rgba(164, 188, 227, 0.45);
             border-radius: 1.25rem;
             background:
-                linear-gradient(135deg, rgba(0, 44, 118, 0.92) 0%, rgba(17, 94, 201, 0.9) 100%);
+                linear-gradient(135deg, #001a45 0%, #002c76 58%, #0b4ea8 100%);
             color: #fff;
             box-shadow: 0 18px 40px rgba(14, 36, 82, 0.18);
         }
@@ -112,13 +112,6 @@
             display: flex;
             flex-wrap: wrap;
             gap: 0.6rem;
-        }
-
-        .pds-form-banner-actions {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            gap: 0.75rem;
         }
 
         .pds-form-banner-chip {
@@ -183,6 +176,50 @@
             cursor: not-allowed;
             opacity: 0.6;
             box-shadow: none;
+        }
+
+        .pds-preview-fab {
+            position: fixed;
+            right: 1.25rem;
+            bottom: 1.25rem;
+            z-index: 70;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            min-height: 3.5rem;
+            padding: 0.9rem 1.2rem;
+            border: 1px solid rgba(189, 213, 255, 0.35);
+            border-radius: 999px;
+            background: linear-gradient(135deg, #002c76 0%, #0d5bd7 100%);
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 700;
+            line-height: 1;
+            box-shadow: 0 18px 36px rgba(7, 26, 67, 0.28);
+            backdrop-filter: blur(12px);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+            touch-action: none;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .pds-preview-fab:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 22px 42px rgba(7, 26, 67, 0.34);
+        }
+
+        .pds-preview-fab.is-dragging,
+        .pds-preview-fab:active {
+            cursor: grabbing;
+        }
+
+        .pds-preview-fab:disabled {
+            cursor: not-allowed;
+            opacity: 0.72;
+            background: linear-gradient(135deg, #8a97ad 0%, #a7b2c6 100%);
+            box-shadow: 0 10px 22px rgba(15, 36, 79, 0.12);
+            transform: none;
         }
 
         .pds-form-section {
@@ -378,6 +415,13 @@
                 height: 2.55rem;
                 border-radius: 0.8rem;
             }
+
+            .pds-preview-fab {
+                left: 1rem;
+                right: 1rem;
+                bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
+                width: auto;
+            }
         }
     </style>
     <!-- Main Content -->
@@ -408,12 +452,6 @@
                         <span class="material-icons !text-sm">school</span>
                         Section III: Educational Background
                     </a>
-                </div>
-                <div class="pds-form-banner-actions">
-                    <button type="button" id="pdsPreviewBtn" class="pds-form-banner-action">
-                        <span class="material-icons !text-base">visibility</span>
-                        Preview PDS
-                    </button>
                 </div>
             </div>
             <!-- Personal Information Section -->
@@ -1096,6 +1134,17 @@
             </p>
             <p>CS FORM 212 (Revised 2025), Page 1 of 4.</p>
         </footer>
+
+        <button
+            type="button"
+            id="pdsPreviewBtn"
+            class="pds-preview-fab"
+            aria-controls="pdsPreviewOverlay"
+            aria-haspopup="dialog"
+        >
+            <span class="material-icons !text-base">visibility</span>
+            Preview PDS
+        </button>
     </main>
 
     <!-- Error Alerts Placeholder -->
@@ -2519,13 +2568,7 @@ function addPdsEducationDays(date, days) {
             const btn=document.getElementById('pdsPreviewBtn'); if(!btn) return;
             const ok=requiredValid();
             btn.disabled=!ok;
-            if(ok){
-                btn.classList.remove('bg-gray-400','cursor-not-allowed','opacity-60');
-                btn.classList.add('bg-blue-600','hover:bg-blue-700');
-            }else{
-                btn.classList.add('bg-gray-400','cursor-not-allowed','opacity-60');
-                btn.classList.remove('bg-blue-600','hover:bg-blue-700');
-            }
+            btn.setAttribute('aria-disabled', ok ? 'false' : 'true');
         }
         const form=document.getElementById('myForm');
         if(form){
@@ -2664,6 +2707,11 @@ function addPdsEducationDays(date, days) {
         const openBtn = document.getElementById('pdsPreviewBtn');
         if (openBtn) {
             openBtn.addEventListener('click', async function () {
+                const lastDragAt = Number(openBtn.dataset.lastDragAt || '0');
+                if (Date.now() - lastDragAt < 250) {
+                    return;
+                }
+
                 if (openBtn.disabled) return;
                 
                 // Show a small indication that we are preparing the preview
@@ -2692,6 +2740,118 @@ function addPdsEducationDays(date, days) {
                 }
             });
         }
+        function initDraggablePdsPreviewButton() {
+            const button = document.getElementById('pdsPreviewBtn');
+            if (!button) return;
+
+            let isPointerDown = false;
+            let isDragging = false;
+            let pointerId = null;
+            let startX = 0;
+            let startY = 0;
+            let originLeft = 0;
+            let originTop = 0;
+            let suppressClick = false;
+
+            const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+            const getViewportBounds = () => {
+                const rect = button.getBoundingClientRect();
+                return {
+                    minLeft: 8,
+                    minTop: 8,
+                    maxLeft: Math.max(8, window.innerWidth - rect.width - 8),
+                    maxTop: Math.max(8, window.innerHeight - rect.height - 8),
+                };
+            };
+
+            const applyPosition = (left, top) => {
+                button.style.left = `${left}px`;
+                button.style.top = `${top}px`;
+                button.style.right = 'auto';
+                button.style.bottom = 'auto';
+            };
+
+            const syncToViewport = () => {
+                const rect = button.getBoundingClientRect();
+                const bounds = getViewportBounds();
+                applyPosition(
+                    clamp(rect.left, bounds.minLeft, bounds.maxLeft),
+                    clamp(rect.top, bounds.minTop, bounds.maxTop)
+                );
+            };
+
+            button.addEventListener('pointerdown', (event) => {
+                if (event.button !== 0) return;
+
+                const rect = button.getBoundingClientRect();
+                isPointerDown = true;
+                isDragging = false;
+                pointerId = event.pointerId;
+                startX = event.clientX;
+                startY = event.clientY;
+                originLeft = rect.left;
+                originTop = rect.top;
+
+                applyPosition(originLeft, originTop);
+                button.setPointerCapture(pointerId);
+            });
+
+            button.addEventListener('pointermove', (event) => {
+                if (!isPointerDown || event.pointerId !== pointerId) return;
+
+                const deltaX = event.clientX - startX;
+                const deltaY = event.clientY - startY;
+
+                if (!isDragging && (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4)) {
+                    isDragging = true;
+                    button.classList.add('is-dragging');
+                }
+
+                if (!isDragging) return;
+
+                event.preventDefault();
+                const bounds = getViewportBounds();
+                applyPosition(
+                    clamp(originLeft + deltaX, bounds.minLeft, bounds.maxLeft),
+                    clamp(originTop + deltaY, bounds.minTop, bounds.maxTop)
+                );
+            });
+
+            button.addEventListener('pointerup', (event) => {
+                if (event.pointerId !== pointerId) return;
+
+                if (isDragging) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    suppressClick = true;
+                    button.dataset.lastDragAt = String(Date.now());
+                }
+
+                button.classList.remove('is-dragging');
+                isPointerDown = false;
+                isDragging = false;
+                pointerId = null;
+            });
+
+            button.addEventListener('pointercancel', () => {
+                button.classList.remove('is-dragging');
+                isPointerDown = false;
+                isDragging = false;
+                pointerId = null;
+            });
+
+            button.addEventListener('click', (event) => {
+                if (suppressClick) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    suppressClick = false;
+                }
+            }, true);
+
+            window.addEventListener('resize', syncToViewport);
+        }
+        initDraggablePdsPreviewButton();
         document.addEventListener('click', function (e) {
             const closeEl = (e.target && e.target.id === 'pdsPreviewClose') ? e.target : (e.target && e.target.closest && e.target.closest('#pdsPreviewClose'));
             if (closeEl) {
@@ -3155,22 +3315,225 @@ function addPdsEducationDays(date, days) {
         });
     })();
 </script>
+<script>
+    (function () {
+        function initC1DraftSupport() {
+            const form = document.getElementById('myForm');
+            if (!form) return;
+
+            const LOCAL_DRAFT_KEY = 'dilg-car:pds:c1:local-draft:v1';
+            const errorMessages = @json($errors->all());
+            const sessionError = @json(session('error'));
+            let isRestoringDraft = false;
+
+            const notify = (message, type = 'error', duration = 5000) => {
+                if (!message) return;
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification(message, type);
+                    return;
+                }
+                if (typeof window.showAppToast === 'function') {
+                    window.showAppToast(message, type, duration);
+                }
+            };
+
+            const shouldShowDraftRestoreToast = () => {
+                const navigation = performance.getEntriesByType?.('navigation')?.[0];
+                return navigation?.type === 'reload' || performance.navigation?.type === 1;
+            };
+
+            const formFields = () => Array.from(form.querySelectorAll('[name]'));
+            const getNamedFields = (name) => formFields().filter((field) => field.name === name);
+
+            function collectDraftData() {
+                const data = {};
+
+                formFields().forEach((field) => {
+                    if (!field.name || ['file', 'submit', 'button', 'reset'].includes(field.type)) {
+                        return;
+                    }
+
+                    if (field.type === 'radio') {
+                        if (!Object.prototype.hasOwnProperty.call(data, field.name)) {
+                            data[field.name] = '';
+                        }
+                        if (field.checked) {
+                            data[field.name] = field.value;
+                        }
+                        return;
+                    }
+
+                    if (field.type === 'checkbox') {
+                        if (!Array.isArray(data[field.name])) {
+                            data[field.name] = [];
+                        }
+                        if (field.checked) {
+                            data[field.name].push(field.value);
+                        }
+                        return;
+                    }
+
+                    data[field.name] = field.value;
+                });
+
+                return data;
+            }
+
+            function persistLocalDraft() {
+                try {
+                    window.localStorage.setItem(LOCAL_DRAFT_KEY, JSON.stringify({
+                        savedAt: new Date().toISOString(),
+                        data: collectDraftData(),
+                    }));
+                } catch (error) {
+                    // Ignore storage write failures.
+                }
+            }
+
+            function readLocalDraft() {
+                try {
+                    const raw = window.localStorage.getItem(LOCAL_DRAFT_KEY);
+                    return raw ? JSON.parse(raw) : null;
+                } catch (error) {
+                    return null;
+                }
+            }
+
+            function draftDataDiffers(localDraftData) {
+                if (!localDraftData || typeof localDraftData !== 'object') {
+                    return false;
+                }
+
+                const currentData = collectDraftData();
+                const fieldNames = new Set([...Object.keys(currentData), ...Object.keys(localDraftData)]);
+
+                for (const fieldName of fieldNames) {
+                    const currentValue = currentData[fieldName];
+                    const localValue = localDraftData[fieldName];
+
+                    if (Array.isArray(currentValue) || Array.isArray(localValue)) {
+                        const currentArray = Array.isArray(currentValue) ? currentValue : [];
+                        const localArray = Array.isArray(localValue) ? localValue : [];
+
+                        if (currentArray.length !== localArray.length) {
+                            return true;
+                        }
+
+                        if (currentArray.some((value, index) => value !== localArray[index])) {
+                            return true;
+                        }
+
+                        continue;
+                    }
+
+                    if (String(currentValue ?? '') !== String(localValue ?? '')) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            function restoreLocalDraftIfNeeded() {
+                const localDraft = readLocalDraft();
+                if (!localDraft?.data || !draftDataDiffers(localDraft.data)) {
+                    return false;
+                }
+
+                const restoredFields = new Set();
+                isRestoringDraft = true;
+
+                Object.entries(localDraft.data).forEach(([name, value]) => {
+                    const fields = getNamedFields(name);
+                    if (!fields.length) return;
+
+                    const firstField = fields[0];
+
+                    if (firstField.type === 'radio') {
+                        const checkedField = fields.find((field) => field.value === value) ?? null;
+                        fields.forEach((field) => {
+                            field.checked = field.value === value;
+                        });
+                        if (checkedField) restoredFields.add(checkedField);
+                        return;
+                    }
+
+                    if (firstField.type === 'checkbox') {
+                        const values = Array.isArray(value) ? value : [value];
+                        fields.forEach((field) => {
+                            field.checked = values.includes(field.value);
+                        });
+                        restoredFields.add(firstField);
+                        return;
+                    }
+
+                    firstField.value = String(value ?? '');
+                    restoredFields.add(firstField);
+                });
+
+                restoredFields.forEach((field) => {
+                    field.dispatchEvent(new Event('change', { bubbles: true }));
+                    if (!['radio', 'checkbox', 'select-one', 'select-multiple'].includes(field.type)) {
+                        field.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                });
+
+                isRestoringDraft = false;
+                if (shouldShowDraftRestoreToast()) {
+                    notify('A saved C1 draft was restored from this browser.', 'warning', 4000);
+                }
+                return true;
+            }
+
+            const persistIfNeeded = () => {
+                if (isRestoringDraft) return;
+                persistLocalDraft();
+            };
+
+            form.addEventListener('input', persistIfNeeded);
+            form.addEventListener('change', persistIfNeeded);
+            form.addEventListener('click', (event) => {
+                if (event.target.closest('button[type="button"], input[type="checkbox"], input[type="radio"]')) {
+                    persistIfNeeded();
+                }
+            });
+            form.addEventListener('submit', persistLocalDraft);
+            window.addEventListener('pagehide', persistLocalDraft);
+            window.addEventListener('beforeunload', persistLocalDraft);
+
+            restoreLocalDraftIfNeeded();
+
+            const firstError = sessionError || (errorMessages.length ? errorMessages[0] : '');
+            if (firstError) {
+                const suffix = errorMessages.length > 1 ? ` (+${errorMessages.length - 1} more)` : '';
+                notify(`${firstError}${suffix}`, 'error', 6000);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initC1DraftSupport, { once: true });
+        } else {
+            initC1DraftSupport();
+        }
+    })();
+</script>
 <div id="pdsPreviewOverlay" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-50 p-4 sm:p-8 flex items-center justify-center">
-    <div class="bg-white w-full max-w-6xl max-h-[90vh] overflow-auto rounded-xl shadow-2xl">
-        <div class="flex items-center justify-between px-4 sm:px-6 py-3 border-b">
+    <div class="bg-white w-full max-w-6xl h-[90vh] overflow-hidden rounded-xl shadow-2xl flex flex-col">
+        <div class="flex items-center justify-between px-4 sm:px-6 py-3 border-b shrink-0">
             <h3 class="text-base sm:text-lg font-semibold text-gray-900">Personal Data Sheet Preview</h3>
             <button id="pdsPreviewClose" class="p-2 rounded hover:bg-gray-100">
                 <span class="material-icons">close</span>
             </button>
         </div>
-        <div class="p-4 sm:p-6">
+        <div class="p-4 sm:p-6 flex-1 min-h-0">
             <div class="mb-3 text-xs text-gray-500">Preview is rendered from the PDF template and auto-filled from your saved PDS data.</div>
-            <div class="w-full h-[75vh] border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+            <div class="w-full h-[calc(100%-1.75rem)] border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
                 <iframe
                     id="pdsPdfPreviewFrame"
                     title="PDS PDF Preview"
                     src="about:blank"
-                    data-preview-src="{{ route('pds.preview') }}"
+                    data-preview-src="{{ route('pds.preview', ['embedded' => 1]) }}"
+                    scrolling="no"
                     class="w-full h-full"
                 ></iframe>
             </div>

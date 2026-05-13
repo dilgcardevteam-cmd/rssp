@@ -30,7 +30,7 @@
         padding: 1rem 1.1rem;
         border: 1px solid rgba(164, 188, 227, 0.45);
         border-radius: 1.25rem;
-        background: linear-gradient(135deg, rgba(0, 44, 118, 0.92) 0%, rgba(17, 94, 201, 0.9) 100%);
+        background: linear-gradient(135deg, #001a45 0%, #002c76 58%, #0b4ea8 100%);
         color: #fff;
         box-shadow: 0 18px 40px rgba(14, 36, 82, 0.18);
     }
@@ -205,6 +205,59 @@
         background: linear-gradient(180deg, rgba(255, 248, 231, 0.95) 0%, rgba(255, 252, 245, 0.98) 100%);
         color: #70511b;
         box-shadow: 0 12px 28px rgba(122, 84, 19, 0.08);
+    }
+
+    .pds-preview-fab {
+        position: fixed;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        z-index: 70;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        min-height: 3.5rem;
+        padding: 0.9rem 1.2rem;
+        border: 1px solid rgba(189, 213, 255, 0.35);
+        border-radius: 999px;
+        background: linear-gradient(135deg, #002c76 0%, #0d5bd7 100%);
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 700;
+        line-height: 1;
+        box-shadow: 0 18px 36px rgba(7, 26, 67, 0.28);
+        backdrop-filter: blur(12px);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, background 0.2s ease;
+        touch-action: none;
+        cursor: grab;
+        user-select: none;
+    }
+
+    .pds-preview-fab:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 22px 42px rgba(7, 26, 67, 0.34);
+    }
+
+    .pds-preview-fab.is-dragging,
+    .pds-preview-fab:active {
+        cursor: grabbing;
+    }
+
+    .pds-preview-fab:disabled {
+        cursor: not-allowed;
+        opacity: 0.72;
+        background: linear-gradient(135deg, #8a97ad 0%, #a7b2c6 100%);
+        box-shadow: 0 10px 22px rgba(15, 36, 79, 0.12);
+        transform: none;
+    }
+
+    @media (max-width: 640px) {
+        .pds-preview-fab {
+            left: 1rem;
+            right: 1rem;
+            bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
+            width: auto;
+        }
     }
 </style>
 <main class="pds-flow-page {{ $simple ? 'w-full max-w-none' : 'max-w-7xl mx-auto' }} -mt-8 sm:-mt-10 px-4 sm:px-6 lg:px-8 pt-0 pb-8">
@@ -821,31 +874,52 @@
             </div>
         </form>
 
+        <button
+            type="button"
+            id="pdsPreviewBtn"
+            class="pds-preview-fab"
+            aria-controls="pdsPreviewOverlay"
+            aria-haspopup="dialog"
+        >
+            <span class="material-icons !text-base">visibility</span>
+            Preview PDS
+        </button>
+
         <!-- Confirmation Modal -->
         <div id="other-info-modal" class="hidden fixed inset-0 z-[2147483001] flex items-center justify-center px-4 pointer-events-none">
             <div class="absolute inset-0 z-0 bg-slate-900/45 backdrop-blur-sm pointer-events-none"></div>
-            <div class="relative z-10 w-full max-w-3xl rounded-3xl bg-white shadow-2xl border border-slate-200 p-8 space-y-6 animate-fade-in pointer-events-auto" role="dialog" aria-modal="true">
-                <div class="flex items-start gap-4">
-                    <span class="material-icons text-blue-600 text-3xl">gavel</span>
-                    <div class="space-y-2">
-                        <h3 class="text-2xl font-black text-slate-900">Are you sure you want to submit?</h3>
-                        <div class="bg-blue-50 border border-blue-100 text-blue-900 rounded-2xl p-4 text-sm leading-relaxed">
-                            <p class="font-semibold mb-2">Oath & Legal Reminder</p>
-                            <p class="mb-2">42. I declare under oath that I have personally accomplished this Personal Data Sheet which is a true, correct, and complete statement pursuant to the provisions of pertinent laws, rules, and regulations of the Republic of the Philippines.</p>
-                            <label class="mb-2 flex items-start gap-3 cursor-pointer rounded-xl border border-blue-200 bg-white/70 px-3 py-3">
-                                <input type="checkbox" id="other-info-ack-oath" class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                <span>I authorize the agency head/authorized representative to verify/validate the contents stated herein.</span>
-                            </label>
-                            <label class="flex items-start gap-3 cursor-pointer rounded-xl border border-blue-200 bg-white/70 px-3 py-3 font-semibold">
-                                <input type="checkbox" id="other-info-ack-legal" class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
-                                <span>I agree that any misrepresentation made in this document and its attachments shall cause the filing of administrative/criminal case/s against me.</span>
-                            </label>
+            <div class="relative z-10 w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl border border-blue-100 animate-fade-in pointer-events-auto" role="dialog" aria-modal="true">
+                <div class="bg-gradient-to-br from-[#001a45] via-[#002c76] to-[#0b4ea8] px-6 py-5 text-white sm:px-8">
+                    <div class="flex items-center gap-4">
+                        <span class="material-icons flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-3xl ring-1 ring-white/25">gavel</span>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-blue-100">Oath and Legal Reminder</p>
+                            <h3 class="text-xl font-bold leading-tight sm:text-2xl">Are you sure you want to submit?</h3>
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row justify-end gap-3">
-                    <button type="button" id="other-info-cancel" class="px-4 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 pointer-events-auto">Review</button>
-                    <button type="button" id="other-info-confirm" class="px-4 py-2.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 pointer-events-auto disabled:cursor-not-allowed disabled:bg-blue-300 disabled:text-white/90 disabled:hover:bg-blue-300" disabled>I Declare (5)</button>
+                <div class="space-y-5 px-6 py-6 sm:px-8">
+                    <div class="rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-4 text-sm leading-relaxed text-slate-700">
+                        <p class="font-semibold text-slate-900">Declaration under oath</p>
+                        <p class="mt-2">42. I declare under oath that I have personally accomplished this Personal Data Sheet which is a true, correct, and complete statement pursuant to the provisions of pertinent laws, rules, and regulations of the Republic of the Philippines.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50/40">
+                            <input type="checkbox" id="other-info-ack-oath" class="mt-1 h-4 w-4 rounded border-slate-300 text-[#002c76] focus:ring-[#002c76]">
+                            <span>I authorize the agency head/authorized representative to verify/validate the contents stated herein.</span>
+                        </label>
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-800 shadow-sm transition hover:border-blue-200 hover:bg-blue-50/40">
+                            <input type="checkbox" id="other-info-ack-legal" class="mt-1 h-4 w-4 rounded border-slate-300 text-[#002c76] focus:ring-[#002c76]">
+                            <span>I agree that any misrepresentation made in this document and its attachments shall cause the filing of administrative/criminal case/s against me.</span>
+                        </label>
+                    </div>
+                    <div class="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+                        <button type="button" id="other-info-cancel" class="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 pointer-events-auto">Review</button>
+                        <button type="button" id="other-info-confirm" class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#002c76] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/20 hover:bg-[#001f54] pointer-events-auto disabled:cursor-not-allowed disabled:bg-blue-300 disabled:text-white/90 disabled:shadow-none disabled:hover:bg-blue-300" disabled>
+                            <span class="material-icons text-base">verified</span>
+                            I Declare (5)
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -857,6 +931,29 @@
             </p>
             <p>CS FORM 212 (Revised 2025), Page 4 of 4.</p>
         </footer>
+        <div id="pdsPreviewOverlay" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-50 p-4 sm:p-8 flex items-center justify-center">
+            <div class="bg-white w-full max-w-6xl h-[90vh] overflow-hidden rounded-xl shadow-2xl flex flex-col">
+                <div class="flex items-center justify-between px-4 sm:px-6 py-3 border-b shrink-0">
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-900">Personal Data Sheet Preview</h3>
+                    <button id="pdsPreviewClose" class="p-2 rounded hover:bg-gray-100">
+                        <span class="material-icons">close</span>
+                    </button>
+                </div>
+                <div class="p-4 sm:p-6 flex-1 min-h-0">
+                    <div class="mb-3 text-xs text-gray-500">Preview is rendered from the PDF template and auto-filled from your saved PDS data.</div>
+                    <div class="w-full h-[calc(100%-1.75rem)] border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
+                        <iframe
+                            id="pdsPdfPreviewFrame"
+                            title="PDS PDF Preview"
+                            src="about:blank"
+                            data-preview-src="{{ route('pds.preview', ['embedded' => 1]) }}"
+                            scrolling="no"
+                            class="w-full h-full"
+                        ></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
     @include('partials.loader')
     @endsection
@@ -1175,6 +1272,10 @@
             const modalConfirmDelaySeconds = 5;
             let modalConfirmCountdownTimer = null;
             let modalConfirmRemainingSeconds = modalConfirmDelaySeconds;
+            const setModalConfirmLabel = (label) => {
+                if (!modalConfirm) return;
+                modalConfirm.innerHTML = '<span class="material-icons text-base">verified</span>' + label;
+            };
             const showSystemLoader = (message = 'Loading...') => {
                 const loader = document.getElementById('loader');
                 if (!loader) return;
@@ -1205,9 +1306,9 @@
                 if (!modalConfirm) return;
                 const countdownActive = modalConfirmRemainingSeconds > 0;
                 modalConfirm.disabled = !canEnableModalConfirm();
-                modalConfirm.textContent = countdownActive
+                setModalConfirmLabel(countdownActive
                     ? `${modalConfirmBaseLabel} (${modalConfirmRemainingSeconds})`
-                    : modalConfirmBaseLabel;
+                    : modalConfirmBaseLabel);
             };
             const resetModalConfirmCountdown = () => {
                 if (!modalConfirm) return;
@@ -1561,6 +1662,210 @@
     </script>
     <script>
         (function () {
+            function initPdsPreview() {
+                const openBtn = document.getElementById('pdsPreviewBtn');
+                const overlay = document.getElementById('pdsPreviewOverlay');
+                const closeBtn = document.getElementById('pdsPreviewClose');
+                const frame = document.getElementById('pdsPdfPreviewFrame');
+                if (!openBtn || !overlay || !closeBtn || !frame) return;
+
+                const closeOverlay = () => overlay.classList.add('hidden');
+
+                openBtn.addEventListener('click', async () => {
+                    const lastDragAt = Number(openBtn.dataset.lastDragAt || '0');
+                    if (Date.now() - lastDragAt < 250) {
+                        return;
+                    }
+
+                    if (openBtn.disabled) return;
+
+                    const originalText = openBtn.innerHTML;
+                    openBtn.innerHTML = '<span class="material-icons text-sm animate-spin">autorenew</span>Preparing...';
+                    openBtn.disabled = true;
+
+                    try {
+                        if (typeof window.__pdsAutosaveNow === 'function') {
+                            await window.__pdsAutosaveNow({ force: true, maxWaitMs: 5000 });
+                        }
+
+                        const previewSrc = frame.dataset.previewSrc || @json(route('pds.preview'));
+                        const separator = previewSrc.includes('?') ? '&' : '?';
+                        frame.src = previewSrc + separator + 'ts=' + Date.now();
+                        overlay.classList.remove('hidden');
+                    } finally {
+                        openBtn.innerHTML = originalText;
+                        openBtn.disabled = false;
+                    }
+                });
+
+                closeBtn.addEventListener('click', closeOverlay);
+                overlay.addEventListener('click', (event) => {
+                    if (event.target === overlay) {
+                        closeOverlay();
+                    }
+                });
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape' && !overlay.classList.contains('hidden')) {
+                        closeOverlay();
+                    }
+                });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPdsPreview, { once: true });
+            } else {
+                initPdsPreview();
+            }
+        })();
+    </script>
+    <script>
+        (function () {
+            function initDraggablePdsPreviewButton() {
+                const button = document.getElementById('pdsPreviewBtn');
+                if (!button) return;
+
+                let isPointerDown = false;
+                let isDragging = false;
+                let pointerId = null;
+                let startX = 0;
+                let startY = 0;
+                let originLeft = 0;
+                let originTop = 0;
+                let suppressClick = false;
+
+                const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+                const getViewportBounds = () => {
+                    const rect = button.getBoundingClientRect();
+                    return {
+                        minLeft: 8,
+                        minTop: 8,
+                        maxLeft: Math.max(8, window.innerWidth - rect.width - 8),
+                        maxTop: Math.max(8, window.innerHeight - rect.height - 8),
+                    };
+                };
+
+                const applyPosition = (left, top) => {
+                    button.style.left = `${left}px`;
+                    button.style.top = `${top}px`;
+                    button.style.right = 'auto';
+                    button.style.bottom = 'auto';
+                };
+
+                const syncToViewport = () => {
+                    const rect = button.getBoundingClientRect();
+                    const bounds = getViewportBounds();
+                    applyPosition(
+                        clamp(rect.left, bounds.minLeft, bounds.maxLeft),
+                        clamp(rect.top, bounds.minTop, bounds.maxTop)
+                    );
+                };
+
+                button.addEventListener('pointerdown', (event) => {
+                    if (event.button !== 0) return;
+
+                    const rect = button.getBoundingClientRect();
+                    isPointerDown = true;
+                    isDragging = false;
+                    pointerId = event.pointerId;
+                    startX = event.clientX;
+                    startY = event.clientY;
+                    originLeft = rect.left;
+                    originTop = rect.top;
+
+                    applyPosition(originLeft, originTop);
+                    button.setPointerCapture(pointerId);
+                });
+
+                button.addEventListener('pointermove', (event) => {
+                    if (!isPointerDown || event.pointerId !== pointerId) return;
+
+                    const deltaX = event.clientX - startX;
+                    const deltaY = event.clientY - startY;
+
+                    if (!isDragging && (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4)) {
+                        isDragging = true;
+                        button.classList.add('is-dragging');
+                    }
+
+                    if (!isDragging) return;
+
+                    event.preventDefault();
+                    const bounds = getViewportBounds();
+                    applyPosition(
+                        clamp(originLeft + deltaX, bounds.minLeft, bounds.maxLeft),
+                        clamp(originTop + deltaY, bounds.minTop, bounds.maxTop)
+                    );
+                });
+
+                button.addEventListener('pointerup', (event) => {
+                    if (event.pointerId !== pointerId) return;
+
+                    if (isDragging) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        suppressClick = true;
+                        button.dataset.lastDragAt = String(Date.now());
+                    }
+
+                    button.classList.remove('is-dragging');
+                    isPointerDown = false;
+                    isDragging = false;
+                    pointerId = null;
+                });
+
+                button.addEventListener('pointercancel', () => {
+                    button.classList.remove('is-dragging');
+                    isPointerDown = false;
+                    isDragging = false;
+                    pointerId = null;
+                });
+
+                button.addEventListener('click', (event) => {
+                    if (suppressClick) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        suppressClick = false;
+                    }
+                }, true);
+
+                window.addEventListener('resize', syncToViewport);
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initDraggablePdsPreviewButton, { once: true });
+            } else {
+                initDraggablePdsPreviewButton();
+            }
+        })();
+    </script>
+    <script>
+        (function () {
+            function initC4ErrorToast() {
+                const errorMessages = @json($errors->all());
+                const sessionError = @json(session('error'));
+                const firstError = sessionError || (errorMessages.length ? errorMessages[0] : '');
+                if (!firstError) return;
+
+                const message = `${firstError}${errorMessages.length > 1 ? ` (+${errorMessages.length - 1} more)` : ''}`;
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification(message, 'error');
+                    return;
+                }
+                if (typeof window.showAppToast === 'function') {
+                    window.showAppToast(message, 'error', 6000);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initC4ErrorToast, { once: true });
+            } else {
+                initC4ErrorToast();
+            }
+        })();
+    </script>
+    <script>
+        (function () {
             function initAutosave() {
             const form = document.getElementById('other-info-form');
             if (!form) return;
@@ -1686,6 +1991,11 @@
                 }
             }
 
+            function shouldShowDraftRestoreToast() {
+                const navigation = performance.getEntriesByType?.('navigation')?.[0];
+                return navigation?.type === 'reload' || performance.navigation?.type === 1;
+            }
+
             function draftDataDiffers(localDraftData) {
                 if (!localDraftData || typeof localDraftData !== 'object') {
                     return false;
@@ -1788,7 +2098,7 @@
                 isDirty = true;
                 updateDraftStatus(`Unsynced draft restored from this browser at ${formatDraftTime(localDraft.savedAt)}.`, 'warning');
 
-                if (typeof window.showAppToast === 'function') {
+                if (shouldShowDraftRestoreToast() && typeof window.showAppToast === 'function') {
                     window.showAppToast('A saved C4 draft was restored from this browser.', 'warning', 4000);
                 }
 

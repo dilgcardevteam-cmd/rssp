@@ -3,7 +3,12 @@
 
 @section('content')
     <div class="bg-[#f5f7fb]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div
+            data-sidebar-max-width-open="80rem"
+            data-sidebar-max-width-closed="calc(100% - 2rem)"
+            data-sidebar-offset-breakpoint="lg"
+            class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6 transition-all duration-300"
+        >
 
             <!-- Hero / Welcome Section -->
             <div

@@ -6,17 +6,20 @@
     <title>Work Experience Sheet Preview</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+@php
+    $embedded = request()->boolean('embedded');
+@endphp
+<body class="{{ $embedded ? 'bg-white h-screen overflow-hidden' : 'bg-gray-100 min-h-screen' }}">
     <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-3 rounded-xl bg-gray-900 px-5 py-3 text-sm text-white shadow-lg">
         <svg class="h-5 w-5 flex-shrink-0 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" /></svg>
         <span id="toast-msg">Please allow pop-ups so the print version can open.</span>
     </div>
-    <main class="max-w-6xl mx-auto px-4 sm:px-6 py-6">
-        <div class="bg-white rounded-xl shadow p-4 sm:p-6">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+    <main class="{{ $embedded ? 'h-screen overflow-hidden' : 'max-w-6xl mx-auto px-4 sm:px-6 py-6' }}">
+        <div class="{{ $embedded ? 'flex h-full flex-col bg-white p-3 sm:p-4' : 'bg-white rounded-xl shadow p-4 sm:p-6' }}">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 {{ $embedded ? 'mb-3 shrink-0' : 'mb-4' }}">
                 <div>
                     <h1 class="text-lg sm:text-xl font-bold text-gray-900">Work Experience Sheet Preview</h1>
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-gray-600 {{ $embedded ? 'hidden sm:block' : '' }}">
                         This preview shows the final PDF format before printing or downloading.
                     </p>
                 </div>
@@ -37,11 +40,12 @@
                 </div>
             </div>
 
-            <div class="rounded-lg border border-gray-200 overflow-hidden h-[80vh] bg-gray-50">
+            <div class="rounded-lg border border-gray-200 overflow-hidden bg-gray-50 {{ $embedded ? 'min-h-0 flex-1' : 'h-[80vh]' }}">
                 <iframe
                     id="previewPdfFrame"
                     title="WES Preview PDF"
                     src="{{ route('export.wes', ['preview' => 1, 't' => now()->timestamp]) }}"
+                    scrolling="no"
                     class="w-full h-full"
                 ></iframe>
             </div>

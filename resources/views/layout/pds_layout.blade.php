@@ -720,9 +720,9 @@
             },
             {
                 id: 'display_c5',
-                label: 'UPLOAD PDF',
-                icon: 'upload_file',
-                title: 'Upload PDF'
+                label: 'DOWNLOAD DOCUMENTS',
+                icon: 'download',
+                title: 'Download Documents'
             }
         ];
 
@@ -1065,7 +1065,7 @@
                 'display_c3': 'Educational background and training programs',
                 'display_c4': 'Additional details, references, and declarations',
                 'display_wes': 'Detailed duties and accomplishments (attached sheet)',
-                'display_c5': 'Generate and download your completed PDS form'
+                'display_c5': 'Generate and download your completed PDS and WES documents'
             };
             return descriptions[stepId] || '';
         }

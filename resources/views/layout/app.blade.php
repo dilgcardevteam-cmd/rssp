@@ -272,7 +272,12 @@
                 </div>
             </header>
             <!-- <div class="p-3 sm:p-10 pt-8 mt-0 sm:mt-1 space-y-10"> -->
-            <div class="mt-0 sm:mt-1 space-y-10">
+            <div
+                data-sidebar-max-width-open="80rem"
+                data-sidebar-max-width-closed="calc(100% - 2rem)"
+                data-sidebar-offset-breakpoint="lg"
+                class="mt-0 sm:mt-1 space-y-10 w-full mx-auto transition-all duration-300"
+            >
                 @yield('content')
             </div>
         </main>

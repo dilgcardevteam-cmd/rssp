@@ -157,30 +157,29 @@
                             <i data-feather="briefcase" class="w-4 h-4 stroke-[3] flex-shrink-0"></i>
                             <span class="ml-3">WORK EXPERIENCE SHEET</span>
                         </a>
-                    </div>
-                </div>
-
-                <div class="w-full">
-                    <div class="flex items-center justify-between w-full rounded-md px-4 py-2 text-sm font-bold transition text-[#002C76] hover:text-white hover:bg-[#002C76]">
-                        <a href="#" class="flex items-center" id="btnDocs">
-                            <i data-feather="download" class="w-5 h-5 stroke-[3] flex-shrink-0"></i>
-                            <span id="textDownloadDocs" data-sidebar-label class="sidebar-text-hidden ml-3">DOWNLOAD DOCUMENTS</span>
-                        </a>
-                        <button type="button" id="docsToggle" aria-expanded="false" class="ml-2">
-                            <i id="docsCaret" data-feather="chevron-down" class="w-4 h-4 stroke-[3]"></i>
-                        </button>
-                    </div>
-                    <div id="docsMenu" class="pds-menu mt-1 pl-10 space-y-1">
-                        <a href="{{ route('pds.preview') }}" target="_blank" rel="noopener"
-                            class="flex items-center rounded-md px-3 py-2 text-sm font-semibold transition text-[#002C76] hover:text-white hover:bg-[#002C76]">
-                            <i data-feather="file-text" class="w-4 h-4 stroke-[3] flex-shrink-0"></i>
-                            <span class="ml-3">PERSONAL DATA SHEET</span>
-                        </a>
-                        <a href="{{ route('wes.preview') }}" target="_blank" rel="noopener"
-                            class="flex items-center rounded-md px-3 py-2 text-sm font-semibold transition text-[#002C76] hover:text-white hover:bg-[#002C76]">
-                            <i data-feather="file" class="w-4 h-4 stroke-[3] flex-shrink-0"></i>
-                            <span class="ml-3">WORK EXPERIENCE SHEET</span>
-                        </a>
+                        <div class="w-full">
+                            <div class="flex items-center justify-between w-full rounded-md px-3 py-2 text-sm font-semibold transition text-[#002C76] hover:text-white hover:bg-[#002C76]">
+                                <a href="#" class="flex items-center" id="btnDocs">
+                                    <i data-feather="download" class="w-4 h-4 stroke-[3] flex-shrink-0"></i>
+                                    <span id="textDownloadDocs" class="ml-3">DOWNLOAD DOCUMENTS</span>
+                                </a>
+                                <button type="button" id="docsToggle" aria-expanded="false" class="ml-2">
+                                    <i id="docsCaret" data-feather="chevron-down" class="w-4 h-4 stroke-[3]"></i>
+                                </button>
+                            </div>
+                            <div id="docsMenu" class="pds-menu mt-1 ml-7 space-y-1">
+                                <a href="{{ route('pds.preview') }}" target="_blank" rel="noopener"
+                                    class="flex items-center rounded-md px-3 py-2 text-sm font-semibold transition text-[#002C76] hover:text-white hover:bg-[#002C76]">
+                                    <i data-feather="file-text" class="w-4 h-4 stroke-[3] flex-shrink-0"></i>
+                                    <span class="ml-3">PERSONAL DATA SHEET</span>
+                                </a>
+                                <a href="{{ route('wes.preview') }}" target="_blank" rel="noopener"
+                                    class="flex items-center rounded-md px-3 py-2 text-sm font-semibold transition text-[#002C76] hover:text-white hover:bg-[#002C76]">
+                                    <i data-feather="file" class="w-4 h-4 stroke-[3] flex-shrink-0"></i>
+                                    <span class="ml-3">WORK EXPERIENCE SHEET</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -259,7 +258,7 @@
                 link.addEventListener('click', async (e) => {
                     sessionStorage.setItem('pdsCollapsed', 'false');
 
-                    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) {
+                    if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey || link.target === '_blank' || link.id === 'btnDocs') {
                         return;
                     }
 
@@ -320,7 +319,7 @@
             const desktopToggleButton = document.getElementById('desktopSidebarToggle');
             const desktopToggleIcon = document.getElementById('desktopSidebarToggleIcon');
             const logo = document.querySelector('img[alt="DILG Logo"]');
-            const sidebarOffsetTargets = Array.from(document.querySelectorAll('[data-sidebar-offset]'));
+            const sidebarOffsetTargets = Array.from(document.querySelectorAll('[data-sidebar-offset], [data-sidebar-max-width-open], [data-sidebar-max-width-closed]'));
             const textElements = [
                 "sidebarText", "textHome", "textJobVacancies", "textMyApplications",
                 "textPersonalDataSheet", "textDownloadDocs", "textAboutWebsite", "textWorkExperience", "textManual"
@@ -337,17 +336,25 @@
                     const breakpoint = target.getAttribute('data-sidebar-offset-breakpoint') || 'lg';
                     const openOffset = target.getAttribute('data-sidebar-offset-open');
                     const closedOffset = target.getAttribute('data-sidebar-offset-closed');
-
-                    if (!openOffset || !closedOffset) {
-                        return;
-                    }
+                    const openMaxWidth = target.getAttribute('data-sidebar-max-width-open');
+                    const closedMaxWidth = target.getAttribute('data-sidebar-max-width-closed');
 
                     if (window.innerWidth >= getBreakpointWidth(breakpoint)) {
-                        target.style.marginLeft = isOpen ? openOffset : closedOffset;
+                        if (openOffset && closedOffset) {
+                            target.style.marginLeft = isOpen ? openOffset : closedOffset;
+                        }
+                        if (openMaxWidth && closedMaxWidth) {
+                            target.style.maxWidth = isOpen ? openMaxWidth : closedMaxWidth;
+                        }
                         return;
                     }
 
-                    target.style.marginLeft = '';
+                    if (openOffset && closedOffset) {
+                        target.style.marginLeft = '';
+                    }
+                    if (openMaxWidth && closedMaxWidth) {
+                        target.style.maxWidth = '';
+                    }
                 });
             }
 

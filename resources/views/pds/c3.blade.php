@@ -1,5 +1,8 @@
 @extends('layout.pds_layout')
 @section('title', 'Learning and Development')
+@php
+    $simple = in_array(request()->input('simple'), [1, '1', true, 'true'], true);
+@endphp
 <style>
     body {
         font-family: 'Inter', sans-serif;
@@ -109,10 +112,174 @@
     .entry-card.is-collapsed .collapse-icon {
         transform: rotate(180deg);
     }
+
+    .pds-flow-page {
+        position: relative;
+        color: #163053;
+        scroll-behavior: smooth;
+    }
+
+    .pds-flow-page::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background:
+            radial-gradient(circle at top left, rgba(13, 91, 215, 0.14), transparent 28%),
+            radial-gradient(circle at top right, rgba(0, 44, 118, 0.08), transparent 24%),
+            linear-gradient(180deg, #f7faff 0%, #edf3fb 100%);
+    }
+
+    .pds-flow-banner {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding: 1rem 1.1rem;
+        border: 1px solid rgba(164, 188, 227, 0.45);
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, rgba(0, 44, 118, 0.92) 0%, rgba(17, 94, 201, 0.9) 100%);
+        color: #fff;
+        box-shadow: 0 18px 40px rgba(14, 36, 82, 0.18);
+    }
+
+    .pds-flow-banner p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .pds-flow-banner-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.7rem;
+    }
+
+    .pds-flow-banner-title .material-icons {
+        font-size: clamp(1.6rem, 1.35rem + 0.55vw, 2rem);
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .pds-flow-banner-title strong {
+        display: inline-block;
+        font-size: clamp(1.45rem, 1.2rem + 0.7vw, 1.95rem);
+        line-height: 1.15;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .pds-flow-banner-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .pds-flow-banner-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.42rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 0.78rem;
+        line-height: 1.1;
+    }
+
+    a.pds-flow-banner-chip {
+        text-decoration: none;
+        color: inherit;
+        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    a.pds-flow-banner-chip:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(8, 26, 67, 0.14);
+    }
+
+    .pds-flow-section {
+        position: relative;
+        overflow: hidden;
+        scroll-margin-top: 6.5rem;
+        border: 1px solid rgba(153, 176, 214, 0.32);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 255, 0.96) 100%);
+        box-shadow: 0 16px 40px rgba(15, 36, 79, 0.08), 0 2px 8px rgba(15, 36, 79, 0.04);
+    }
+
+    .pds-flow-section::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg, #002c76 0%, #2563eb 56%, #7fb2ff 100%);
+    }
+
+    .pds-section-title {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9rem;
+    }
+
+    .pds-section-icon {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 2.9rem;
+        height: 2.9rem;
+        margin-right: 0 !important;
+        border-radius: 0.95rem;
+        background: linear-gradient(135deg, #e6efff 0%, #f7faff 100%);
+        color: #002c76;
+        box-shadow: inset 0 0 0 1px rgba(115, 151, 210, 0.22);
+    }
+
+    .pds-empty-state {
+        border: 1px dashed #c8d7ef;
+        background: linear-gradient(180deg, #f8fbff 0%, #f1f6ff 100%) !important;
+    }
+
+    .pds-subsection {
+        border: 1px solid #d8e4f8;
+        border-radius: 1rem;
+        background: linear-gradient(180deg, rgba(248, 251, 255, 0.94) 0%, rgba(255, 255, 255, 0.98) 100%);
+        padding: 1rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    }
+
+    .pds-primary-action,
+    .pds-submit-button,
+    .pds-back-button {
+        border-radius: 0.95rem !important;
+        box-shadow: 0 12px 24px rgba(0, 44, 118, 0.14);
+    }
+
+    .pds-submit-bar {
+        position: sticky;
+        bottom: 1rem;
+        z-index: 20;
+        padding: 1rem;
+        border: 1px solid rgba(162, 183, 218, 0.4);
+        border-radius: 1.15rem;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 18px 40px rgba(15, 36, 79, 0.12);
+    }
+
+    .pds-submit-button {
+        background: linear-gradient(135deg, #0d5bd7 0%, #002c76 100%) !important;
+    }
+
+    .pds-warning-footer {
+        border: 1px solid rgba(231, 188, 110, 0.4);
+        border-radius: 1rem;
+        background: linear-gradient(180deg, rgba(255, 248, 231, 0.95) 0%, rgba(255, 252, 245, 0.98) 100%);
+        color: #70511b;
+        box-shadow: 0 12px 28px rgba(122, 84, 19, 0.08);
+    }
 </style>
 @section('content')
     <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <main class="pds-flow-page {{ $simple ? 'w-full max-w-none' : 'max-w-7xl mx-auto' }} -mt-6 sm:-mt-8 px-4 sm:px-6 lg:px-8 pt-0 pb-8">
         @php
     $c3RouteParams = ['go_to' => 'display_c4'];
     if (request()->query('simple')) {
@@ -124,19 +291,39 @@
             @if(request()->boolean('simple'))
                 <input type="hidden" name="simple" value="1">
             @endif
+            <div class="pds-flow-banner">
+                <div class="pds-flow-banner-title">
+                    <span class="material-icons">volunteer_activism</span>
+                    <strong>VOLUNTARY WORK, TRAININGS AND OTHER INFORMATION</strong>
+                </div>
+                <div class="pds-flow-banner-meta">
+                    <a href="#voluntary-work-section" class="pds-flow-banner-chip">
+                        <span class="material-icons text-sm">volunteer_activism</span>
+                        Voluntary work
+                    </a>
+                    <a href="#learning-development-section" class="pds-flow-banner-chip">
+                        <span class="material-icons text-sm">school</span>
+                        Learning and development
+                    </a>
+                    <a href="#other-information-section" class="pds-flow-banner-chip">
+                        <span class="material-icons text-sm">info</span>
+                        Other information
+                    </a>
+                </div>
+            </div>
 
             <!-- Voluntary Work Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
+            <section id="voluntary-work-section" class="pds-flow-section bg-white rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                    <div class="flex items-start sm:items-center">
+                    <div class="pds-section-title">
                         <span
-                            class="material-icons text-blue-600 mr-3 text-2xl sm:text-3xl mt-1 sm:mt-0">volunteer_activism</span>
+                            class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl mt-1 sm:mt-0">volunteer_activism</span>
                         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 leading-tight">VI. VOLUNTARY WORK OR
                             INVOLVEMENT IN CIVIC /<br class="hidden sm:block">NON-GOVERNMENT / PEOPLE / VOLUNTARY ORGANIZATION/S
                         </h2>
                     </div>
                     <button type="button" id="add-voluntary-btn"
-                        class="hidden w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base">
+                        class="pds-primary-action hidden w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base">
                             <span class="material-icons mr-2 text-sm sm:text-base">add_circle</span>
                         Add Voluntary Work
                     </button>
@@ -153,7 +340,7 @@
                 </div>
 
                 <!-- Empty State -->
-                <div id="voluntary-empty" class="text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
+                <div id="voluntary-empty" class="pds-empty-state text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
                     <span class="material-icons text-4xl sm:text-6xl text-gray-300 mb-4">volunteer_activism</span>
                     <p class="text-gray-500 mb-4 text-sm sm:text-base">No voluntary work entries yet.</p>
                     <button type="button"
@@ -165,15 +352,15 @@
             </section> <!-- END Voluntary Work Section -->
 
             <!-- Learning and Development Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
+            <section id="learning-development-section" class="pds-flow-section bg-white rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                    <div class="flex items-start sm:items-center">
-                        <span class="material-icons text-blue-600 mr-3 text-2xl sm:text-3xl mt-1 sm:mt-0">school</span>
+                    <div class="pds-section-title">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl mt-1 sm:mt-0">school</span>
                         <h2 class="text-lg sm:text-2xl font-bold text-gray-900 leading-tight">VII. LEARNING AND DEVELOPMENT
                             (L&D) INTERVENTIONS /<br class="hidden sm:block">TRAINING PROGRAMS ATTENDED</h2>
                     </div>
                     <button type="button" id="add-learning-btn"
-                        class="hidden w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base">
+                        class="pds-primary-action hidden w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base">
                         <span class="material-icons mr-2 text-sm sm:text-base">add_circle</span>
                         Add Training
                     </button>
@@ -190,7 +377,7 @@
                 </div>
 
                 <!-- Empty State -->
-                <div id="learning-empty" class="text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
+                <div id="learning-empty" class="pds-empty-state text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
                     <span class="material-icons text-4xl sm:text-6xl text-gray-300 mb-4">school</span>
                     <p class="text-gray-500 mb-4 text-sm sm:text-base">No learning and development entries yet.</p>
                     <button type="button"
@@ -203,17 +390,17 @@
             </section> <!-- End Learning and Development Section-->
 
             <!-- Other Information Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
+            <section id="other-information-section" class="pds-flow-section bg-white rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
                 <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center">
-                        <span class="material-icons text-blue-600 mr-3 text-2xl sm:text-3xl">info</span>
+                    <div class="pds-section-title">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">info</span>
                         <h2 class="text-lg sm:text-2xl font-bold text-gray-900">VIII. OTHER INFORMATION</h2>
                     </div>
                 </div>
 
                 <div class="space-y-6 sm:space-y-8">
                     <!-- Special Skills and Hobbies -->
-                    <div>
+                    <div class="pds-subsection">
                         <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-4 flex items-center">
                             <span class="material-icons text-sm mr-2 text-blue-500">sports_esports</span>
                             31. SPECIAL SKILLS AND HOBBIES
@@ -231,7 +418,7 @@
                     </div>
 
                     <!-- Non-Academic Distinctions -->
-                    <div>
+                    <div class="pds-subsection">
                         <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-4 flex items-center">
                             <span class="material-icons text-sm mr-2 text-blue-500">emoji_events</span>
                             32. NON-ACADEMIC DISTINCTIONS / RECOGNITION
@@ -250,7 +437,7 @@
                     </div>
 
                     <!-- Membership in Organizations -->
-                    <div>
+                    <div class="pds-subsection">
                         <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-4 flex items-center">
                             <span class="material-icons text-sm mr-2 text-blue-500">groups</span>
                             33. MEMBERSHIP IN ASSOCIATION/ORGANIZATION (Write in full)
@@ -271,14 +458,14 @@
             </section> <!-- END Other Information Section -->
 
             <!-- Navigation -->
-            <div class="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
+            <div class="pds-submit-bar flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
                 <button type="button" onclick="window.location.href='{{ route('display_c2', ['simple' => 1]) }}'"
-                    class="use-loader w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center">
+                    class="pds-back-button use-loader w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center">
                     <span class="material-icons mr-2">arrow_back</span>
                     Previous
                 </button>
                 <button type="submit"
-                    class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
+                    class="pds-submit-button w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
                     Save
                     <span class="material-icons ml-2">arrow_forward</span>
                 </button>
@@ -286,7 +473,7 @@
         </form>
 
     </main>
-    <footer class="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-gray-600 px-4">
+    <footer class="pds-warning-footer mt-8 sm:mt-12 text-center text-xs sm:text-sm text-gray-600 px-4 py-4">
         <p class="mb-2">
             <strong>WARNING:</strong> Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet
             shall cause the filing of administrative/criminal case/s against the person concerned.
@@ -867,12 +1054,25 @@
 
         const autosaveUrl = @json(route('pds.autosave', ['section' => 'c3']));
         const AUTOSAVE_INTERVAL_MS = 30000;
+        const AUTOSAVE_DEBOUNCE_MS = 600;
         let isDirty = false;
         let isSubmitting = false;
         let inFlight = false;
         let queued = false;
+        let autosaveTimer = null;
 
-        const markDirty = () => { isDirty = true; };
+        const scheduleAutosave = () => {
+            if (isSubmitting) return;
+            window.clearTimeout(autosaveTimer);
+            autosaveTimer = window.setTimeout(() => {
+                saveDraft(false);
+            }, AUTOSAVE_DEBOUNCE_MS);
+        };
+
+        const markDirty = () => {
+            isDirty = true;
+            scheduleAutosave();
+        };
         form.addEventListener('input', markDirty);
         form.addEventListener('change', markDirty);
         form.addEventListener('click', (event) => {
@@ -880,7 +1080,10 @@
                 markDirty();
             }
         });
-        form.addEventListener('submit', () => { isSubmitting = true; });
+        form.addEventListener('submit', () => {
+            isSubmitting = true;
+            window.clearTimeout(autosaveTimer);
+        });
 
         async function saveDraft(force = false) {
             if (isSubmitting) return;
@@ -954,17 +1157,20 @@
 
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isDirty) {
+                window.clearTimeout(autosaveTimer);
                 saveDraft(true);
             }
         });
 
         window.addEventListener('pagehide', () => {
+            window.clearTimeout(autosaveTimer);
             if (!isDirty || isSubmitting || !navigator.sendBeacon) return;
             const formData = new FormData(form);
             navigator.sendBeacon(autosaveUrl, formData);
         });
 
         window.addEventListener('beforeunload', () => {
+            window.clearTimeout(autosaveTimer);
             if (!isDirty || isSubmitting || !navigator.sendBeacon) return;
             const formData = new FormData(form);
             navigator.sendBeacon(autosaveUrl, formData);

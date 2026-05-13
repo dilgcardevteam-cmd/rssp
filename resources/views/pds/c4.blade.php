@@ -1,7 +1,213 @@
-\@extends('layout.pds_layout')
+@extends('layout.pds_layout')
 @section('title', 'Other Information')
 @section('content')
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+@php
+    $simple = in_array(request()->input('simple'), [1, '1', true, 'true'], true);
+@endphp
+<style>
+    .pds-flow-page {
+        position: relative;
+        color: #163053;
+        scroll-behavior: smooth;
+    }
+
+    .pds-flow-page::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background:
+            radial-gradient(circle at top left, rgba(13, 91, 215, 0.14), transparent 28%),
+            radial-gradient(circle at top right, rgba(0, 44, 118, 0.08), transparent 24%),
+            linear-gradient(180deg, #f7faff 0%, #edf3fb 100%);
+    }
+
+    .pds-flow-banner {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding: 1rem 1.1rem;
+        border: 1px solid rgba(164, 188, 227, 0.45);
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, rgba(0, 44, 118, 0.92) 0%, rgba(17, 94, 201, 0.9) 100%);
+        color: #fff;
+        box-shadow: 0 18px 40px rgba(14, 36, 82, 0.18);
+    }
+
+    .pds-flow-banner p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .pds-flow-banner-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .pds-flow-banner-title .material-icons {
+        font-size: 1.8rem;
+        color: rgba(255, 255, 255, 0.96);
+    }
+
+    .pds-flow-banner-title strong {
+        font-size: clamp(1.2rem, 1rem + 0.65vw, 1.7rem);
+        line-height: 1.1;
+    }
+
+    .pds-flow-banner-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .pds-flow-banner-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.42rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 0.78rem;
+        line-height: 1.1;
+    }
+
+    a.pds-flow-banner-chip {
+        color: inherit;
+        text-decoration: none;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    a.pds-flow-banner-chip:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.34);
+        transform: translateY(-1px);
+    }
+
+    .pds-flow-section {
+        position: relative;
+        overflow: hidden;
+        scroll-margin-top: 6.5rem;
+        border: 1px solid rgba(153, 176, 214, 0.32);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 255, 0.96) 100%);
+        box-shadow: 0 16px 40px rgba(15, 36, 79, 0.08), 0 2px 8px rgba(15, 36, 79, 0.04);
+    }
+
+    .pds-flow-section::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg, #002c76 0%, #2563eb 56%, #7fb2ff 100%);
+    }
+
+    .pds-question-card {
+        border: 1px solid #d8e4f8;
+        border-radius: 1rem;
+        background: linear-gradient(180deg, rgba(248, 251, 255, 0.94) 0%, rgba(255, 255, 255, 0.98) 100%);
+        padding: 1rem 1.1rem;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+    }
+
+    .pds-question-card .flex.gap-4,
+    .pds-question-card .flex.gap-6 {
+        flex-wrap: wrap;
+    }
+
+    .pds-question-card label.flex.items-center {
+        gap: 0.55rem;
+        min-height: 2.8rem;
+        padding: 0.7rem 0.95rem;
+        border: 1px solid #d8e4f8;
+        border-radius: 0.95rem;
+        background: rgba(255, 255, 255, 0.9);
+        color: #27405f;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .pds-question-card label.flex.items-center:hover {
+        border-color: #9cb8e8;
+        box-shadow: 0 8px 18px rgba(15, 36, 79, 0.06);
+        transform: translateY(-1px);
+    }
+
+    .pds-declaration-group + .pds-declaration-group {
+        margin-top: 1.5rem;
+    }
+
+    .pds-declaration-group-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 0.85rem;
+        padding: 0.45rem 0.8rem;
+        border-radius: 999px;
+        border: 1px solid #d8e4f8;
+        background: linear-gradient(180deg, rgba(240, 246, 255, 0.96) 0%, rgba(255, 255, 255, 0.98) 100%);
+        color: #23406a;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .pds-declaration-group-title .material-icons {
+        font-size: 1rem;
+        color: #0d5bd7;
+    }
+
+    .pds-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .pds-section-icon {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 2.9rem;
+        height: 2.9rem;
+        margin-right: 0 !important;
+        border-radius: 0.95rem;
+        background: linear-gradient(135deg, #e6efff 0%, #f7faff 100%);
+        color: #002c76;
+        box-shadow: inset 0 0 0 1px rgba(115, 151, 210, 0.22);
+    }
+
+    .pds-submit-bar {
+        position: sticky;
+        bottom: 1rem;
+        z-index: 20;
+        padding: 1rem;
+        border: 1px solid rgba(162, 183, 218, 0.4);
+        border-radius: 1.15rem;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 18px 40px rgba(15, 36, 79, 0.12);
+    }
+
+    .pds-submit-button,
+    .pds-back-button {
+        border-radius: 0.95rem !important;
+        box-shadow: 0 12px 24px rgba(0, 44, 118, 0.14);
+    }
+
+    .pds-submit-button {
+        background: linear-gradient(135deg, #0d5bd7 0%, #002c76 100%) !important;
+    }
+
+    .pds-warning-footer {
+        border: 1px solid rgba(231, 188, 110, 0.4);
+        border-radius: 1rem;
+        background: linear-gradient(180deg, rgba(255, 248, 231, 0.95) 0%, rgba(255, 252, 245, 0.98) 100%);
+        color: #70511b;
+        box-shadow: 0 12px 28px rgba(122, 84, 19, 0.08);
+    }
+</style>
+<main class="pds-flow-page {{ $simple ? 'w-full max-w-none' : 'max-w-7xl mx-auto' }} -mt-8 sm:-mt-10 px-4 sm:px-6 lg:px-8 pt-0 pb-8">
         @php
             $hasWorkExperience = !empty($data['work_experience'] ?? []) || !empty($data['work_exp'] ?? []) || !empty($data['work_exps'] ?? []);
         @endphp
@@ -16,10 +222,40 @@
             @if(request()->boolean('simple'))
                 <input type="hidden" name="simple" value="1">
             @endif
-            <!-- IX: Related Third Degree Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-                <!-- NUMBER 34 -->
-                <div class="question-card">
+            <div class="pds-flow-banner">
+                <div>
+                    <div class="pds-flow-banner-title">
+                        <span class="material-icons">assignment_turned_in</span>
+                        <strong class="font-semibold">Declarations, References and Government-Issued ID Details</strong>
+                    </div>
+                </div>
+                <div class="pds-flow-banner-meta">
+                    <a href="#declarations-section" class="pds-flow-banner-chip">
+                        <span class="material-icons text-sm">fact_check</span>
+                        Declarations
+                    </a>
+                    <a href="#references-section" class="pds-flow-banner-chip">
+                        <span class="material-icons text-sm">people</span>
+                        References
+                    </a>
+                    <a href="#government-id-section" class="pds-flow-banner-chip">
+                        <span class="material-icons text-sm">badge</span>
+                        Government ID Details
+                    </a>
+                </div>
+            </div>
+            <section id="declarations-section" class="pds-flow-section bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
+                <div class="pds-section-title mb-6">
+                    <span class="material-icons pds-section-icon text-blue-600 text-3xl">fact_check</span>
+                    <h2 class="text-2xl font-bold text-gray-900">Declarations</h2>
+                </div>
+
+                <div class="pds-declaration-group">
+                <div class="pds-declaration-group-title">
+                    <span class="material-icons">supervisor_account</span>
+                    Relationship Declarations
+                </div>
+                <div class="question-card pds-question-card">
                     <p class="text-gray-700 font-bold mb-3">
                         34. Are you related by consanguinity or affinity to the appointing or recommending authority, or to the 
                         chief of bureau or office or to the person who has immediate supervision over you in the Office,
@@ -59,13 +295,15 @@
                         <textarea name="related_34_b_details" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all resize-none"
                         >{{ old('related_34_b', $data['related_34_b'] ?? '') }}</textarea>
                     </div>
-                </div> <!-- END: NUMBER 34 -->
-            </section> <!-- END:Related Third Degree Section -->
+                </div>
+                </div>
 
-            <!-- X: Administrative Offense Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-
-                <div class="question-card">
+                <div class="pds-declaration-group">
+                <div class="pds-declaration-group-title">
+                    <span class="material-icons">gavel</span>
+                    Administrative and Criminal Cases
+                </div>
+                <div class="question-card pds-question-card">
                     <p class="text-gray-700 font-bold mb-3">
                         35. A. Have you ever been found guilty of any administrative offense?
                     </p>
@@ -88,7 +326,7 @@
                     </div>
                 </div>
 
-                <div class="question-card mt-6">
+                <div class="question-card pds-question-card mt-6">
                     <p class="text-gray-700 font-bold mb-3">
                         B. Have you been criminally charged before any court?
                     </p>
@@ -123,10 +361,7 @@
                     </div>
 
                 </div>
-            </section> <!-- END:Administrative Offense Section -->
-
-            <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-                <div class="question-card mt-6">
+                <div class="question-card pds-question-card mt-6">
                     <p class="text-gray-700 font-bold mb-3">
                         36. Have you ever been convicted of any crime or violation of any law, decree, ordinance or regulation by any court or tribunal?
                     </p>
@@ -148,11 +383,14 @@
                         >{{ old('convicted_36', $data['convicted_36'] ?? '') }}</textarea>
                     </div>
                 </div>
-            </section>
+                </div>
 
-            <!-- XI: Other Information  -->
-            <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-                <div class="question-card">
+                <div class="pds-declaration-group">
+                <div class="pds-declaration-group-title">
+                    <span class="material-icons">policy</span>
+                    Service, Election, and Residency
+                </div>
+                <div class="question-card pds-question-card">
                     <p class="text-gray-700 font-bold mb-3">
                         37. Have you ever been separated from the service in any of the following modes: resignation, retirement, dropped from the rolls, dismissal, termination, end of term
                         finish contract or phased out (abolition) in the public or private sector?
@@ -175,9 +413,7 @@
                         >{{ old('separated_37', $data['separated_37'] ?? '') }}</textarea>
                     </div>
                 </div>
-    </section>
-    <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-                <div class="question-card mt-6">
+                <div class="question-card pds-question-card mt-6">
                     <p class="text-gray-700 font-bold mb-3">
                         38. A. Have you ever been a candidate in a national or local election held within the last year (except Barangay election)?
                     </p>
@@ -200,7 +436,7 @@
                     </div>
                 </div>
 
-                <div class="question-card mt-6">
+                <div class="question-card pds-question-card mt-6">
                     <p class="text-gray-700 font-bold mb-3">
                         B. Have you resigned from the government service during the three (3)-month period before the last election to promote/actively campaign for a national and local candidate?
                     </p>
@@ -222,10 +458,7 @@
                         >{{ old('resigned_38_b', $data['resigned_38_b'] ?? '') }}</textarea>
                     </div>
                 </div>
-    </section>
-
-    <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-                <div class="question-card mt-6">
+                <div class="question-card pds-question-card mt-6">
                     <p class="text-gray-700 font-bold mb-3">
                         39. Have you acquired the status of an immigrant or permanent resident of another country?
                     </p>
@@ -247,17 +480,19 @@
                         >{{ old('immigrant_39', $data['immigrant_39'] ?? '') }}</textarea>
                     </div>
                 </div>
+                </div>
 
-    </section>
-
-    <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-                <!-- Special Status Questions -->
+                <div class="pds-declaration-group">
+                <div class="pds-declaration-group-title">
+                    <span class="material-icons">diversity_3</span>
+                    Special Status Declarations
+                </div>
                 <p class="text-gray-700 font-bold mb-3">
                 40. Pursuant to: (a) Indigenous People's Act (RA 8371); (b) Magna Carta for Disabled Persons (RA 7277, as amended); and (c) Expanded Solo Parents Welfare Act (RA 11861), please answer the following items:
                 </p>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pb-6 border-b-2 border-gray-200">
-                    <div class="question-card">
+                    <div class="question-card pds-question-card">
                         <p class="text-gray-700 font-bold mb-3">A. Are you a member of any indigenous group?</p>
                         <div class="flex gap-4"> <!-- NUMBER 40: a -->
                             <label class="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
@@ -278,7 +513,7 @@
                         </div>
                     </div>
 
-                    <div class="question-card">
+                    <div class="question-card pds-question-card">
                         <p class="text-gray-700 font-bold mb-3">B. Are you a person with disability?</p>
                         <div class="flex gap-4"> <!-- NUMBER 40: b -->
                             <label class="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
@@ -299,7 +534,7 @@
                         </div>
                     </div>
 
-                    <div class="question-card">
+                    <div class="question-card pds-question-card">
                         <p class="text-gray-700 font-bold mb-3">C. Are you a solo parent?</p>
                         <div class="flex gap-4"> <!-- NUMBER 40: c -->
                             <label class="flex items-center cursor-pointer hover:text-blue-600 transition-colors">
@@ -320,12 +555,13 @@
                         </div>
                     </div>
                 </div>
-            </section> <!-- END: Other Questions Section -->
+                </div>
+            </section>
 
             <!-- References Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-                <div class="flex items-center mb-6">
-                    <span class="material-icons text-blue-600 mr-3 text-3xl">people</span>
+            <section id="references-section" class="pds-flow-section bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
+                <div class="pds-section-title mb-6">
+                    <span class="material-icons pds-section-icon text-blue-600 text-3xl">people</span>
                     <h2 class="text-2xl font-bold text-gray-900">41. REFERENCES</h2>
                 </div>
 
@@ -434,9 +670,9 @@
             </section>
 
             <!-- Government ID Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
-                <div class="flex items-center mb-6">
-                    <span class="material-icons text-blue-600 mr-3 text-3xl">badge</span>
+            <section id="government-id-section" class="pds-flow-section bg-white rounded-2xl shadow-xl p-8 animate-slide-in">
+                <div class="pds-section-title mb-6">
+                    <span class="material-icons pds-section-icon text-blue-600 text-3xl">badge</span>
                     <h2 class="text-2xl font-bold text-gray-900">Government Issued IDs (i.e.Passport, GSIS, SSS, PRC, Driver's License, etc.)</h2>
                 </div>
 
@@ -573,12 +809,12 @@
             -->
 
             <!-- Navigation and Submit -->
-            <div class="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
-                <button type="button" onclick="window.location.href='{{ route('display_c3', ['simple' => 1]) }}'" class="use-loader w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center">
+            <div class="pds-submit-bar flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
+                <button type="button" onclick="window.location.href='{{ route('display_c3', ['simple' => 1]) }}'" class="pds-back-button use-loader w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center">
                     <span class="material-icons mr-2">arrow_back</span>
                     Previous
                 </button>
-                <button id="save-work-exp" type="button" class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
+                <button id="save-work-exp" type="button" class="pds-submit-button w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
                     Save
                     <span class="material-icons ml-2">arrow_forward</span>
                 </button>
@@ -596,20 +832,26 @@
                         <div class="bg-blue-50 border border-blue-100 text-blue-900 rounded-2xl p-4 text-sm leading-relaxed">
                             <p class="font-semibold mb-2">Oath & Legal Reminder</p>
                             <p class="mb-2">42. I declare under oath that I have personally accomplished this Personal Data Sheet which is a true, correct, and complete statement pursuant to the provisions of pertinent laws, rules, and regulations of the Republic of the Philippines.</p>
-                            <p class="mb-2">I authorize the agency head/authorized representative to verify/validate the contents stated herein.</p>
-                            <p class="font-semibold">I agree that any misrepresentation made in this document and its attachments shall cause the filing of administrative/criminal case/s against me.</p>
+                            <label class="mb-2 flex items-start gap-3 cursor-pointer rounded-xl border border-blue-200 bg-white/70 px-3 py-3">
+                                <input type="checkbox" id="other-info-ack-oath" class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                <span>I authorize the agency head/authorized representative to verify/validate the contents stated herein.</span>
+                            </label>
+                            <label class="flex items-start gap-3 cursor-pointer rounded-xl border border-blue-200 bg-white/70 px-3 py-3 font-semibold">
+                                <input type="checkbox" id="other-info-ack-legal" class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                                <span>I agree that any misrepresentation made in this document and its attachments shall cause the filing of administrative/criminal case/s against me.</span>
+                            </label>
                         </div>
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row justify-end gap-3">
                     <button type="button" id="other-info-cancel" class="px-4 py-2.5 rounded-lg border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 pointer-events-auto">Review</button>
-                    <button type="button" id="other-info-confirm" class="px-4 py-2.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 pointer-events-auto">I Declare</button>
+                    <button type="button" id="other-info-confirm" class="px-4 py-2.5 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 pointer-events-auto disabled:cursor-not-allowed disabled:bg-blue-300 disabled:text-white/90 disabled:hover:bg-blue-300" disabled>I Declare (5)</button>
                 </div>
             </div>
         </div>
 
         <!-- Warning Footer -->
-        <footer class="mt-12 text-center text-sm text-gray-600">
+        <footer class="pds-warning-footer mt-12 text-center text-sm text-gray-600 px-4 py-4">
             <p class="mb-2">
                 <strong>WARNING:</strong> Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet shall cause the filing of administrative/criminal case/s against the person concerned.
             </p>
@@ -926,7 +1168,13 @@
             const modal = document.getElementById('other-info-modal');
             const modalConfirm = document.getElementById('other-info-confirm');
             const modalCancel = document.getElementById('other-info-cancel');
+            const modalAckOath = document.getElementById('other-info-ack-oath');
+            const modalAckLegal = document.getElementById('other-info-ack-legal');
             const focusTargets = [modalConfirm, modalCancel];
+            const modalConfirmBaseLabel = 'I Declare';
+            const modalConfirmDelaySeconds = 5;
+            let modalConfirmCountdownTimer = null;
+            let modalConfirmRemainingSeconds = modalConfirmDelaySeconds;
             const showSystemLoader = (message = 'Loading...') => {
                 const loader = document.getElementById('loader');
                 if (!loader) return;
@@ -945,18 +1193,60 @@
                     loaderLive.textContent = message;
                 }
             };
+            const canEnableModalConfirm = () => {
+                return Boolean(
+                    modalConfirm &&
+                    modalConfirmRemainingSeconds <= 0 &&
+                    modalAckOath?.checked &&
+                    modalAckLegal?.checked
+                );
+            };
+            const syncModalConfirmState = () => {
+                if (!modalConfirm) return;
+                const countdownActive = modalConfirmRemainingSeconds > 0;
+                modalConfirm.disabled = !canEnableModalConfirm();
+                modalConfirm.textContent = countdownActive
+                    ? `${modalConfirmBaseLabel} (${modalConfirmRemainingSeconds})`
+                    : modalConfirmBaseLabel;
+            };
+            const resetModalConfirmCountdown = () => {
+                if (!modalConfirm) return;
+                window.clearInterval(modalConfirmCountdownTimer);
+                modalConfirmRemainingSeconds = modalConfirmDelaySeconds;
+                syncModalConfirmState();
+
+                modalConfirmCountdownTimer = window.setInterval(() => {
+                    modalConfirmRemainingSeconds -= 1;
+                    if (modalConfirmRemainingSeconds <= 0) {
+                        modalConfirmRemainingSeconds = 0;
+                        window.clearInterval(modalConfirmCountdownTimer);
+                        syncModalConfirmState();
+                        return;
+                    }
+                    syncModalConfirmState();
+                }, 1000);
+            };
             const toggleModal = (show) => {
                 if (!modal) return;
                 modal.classList.toggle('hidden', !show);
                 document.body.classList.toggle('modal-open', show);
                 if (show && modalConfirm) {
+                    if (modalAckOath) modalAckOath.checked = false;
+                    if (modalAckLegal) modalAckLegal.checked = false;
+                    resetModalConfirmCountdown();
                     try {
-                        modalConfirm.focus({ preventScroll: true });
+                        modalCancel?.focus({ preventScroll: true });
                     } catch (error) {
-                        modalConfirm.focus();
+                        modalCancel?.focus();
                     }
                 } else {
-                    if (modalConfirm) modalConfirm.textContent = 'I Declare';
+                    window.clearInterval(modalConfirmCountdownTimer);
+                    if (modalConfirm) {
+                        modalConfirmRemainingSeconds = modalConfirmDelaySeconds;
+                        syncModalConfirmState();
+                    }
+                    if (modalAckOath) modalAckOath.checked = false;
+                    if (modalAckLegal) modalAckLegal.checked = false;
                     if (modalCancel) modalCancel.textContent = 'Review';
                 }
             };
@@ -988,10 +1278,20 @@
             if (modalConfirm) {
                 modalConfirm.addEventListener('click', (event) => {
                     event.preventDefault();
+                    if (modalConfirm.disabled) {
+                        return;
+                    }
                     toggleModal(false);
                     submitOtherInfoForm();
                 });
             }
+
+            [modalAckOath, modalAckLegal].forEach((checkbox) => {
+                if (!checkbox) return;
+                checkbox.addEventListener('change', () => {
+                    syncModalConfirmState();
+                });
+            });
 
             document.addEventListener('keydown', (ev) => {
                 if (modal && modal.classList.contains('hidden')) return;
@@ -1268,12 +1568,14 @@
             const autosaveUrl = @json(route('pds.autosave', ['section' => 'c4']));
             const LOCAL_DRAFT_KEY = @json('dilg-car:pds:c4:draft:' . (string) (Auth::id() ?? 'guest'));
             const AUTOSAVE_INTERVAL_MS = 15000;
+            const AUTOSAVE_DEBOUNCE_MS = 600;
             let isDirty = false;
             let isSubmitting = false;
             let inFlight = false;
             let queued = false;
             let isRestoringDraft = false;
             let draftVersion = 0;
+            let autosaveTimer = null;
 
             function updateDraftStatus() {}
 
@@ -1500,6 +1802,10 @@
 
                 isDirty = true;
                 draftVersion += 1;
+                window.clearTimeout(autosaveTimer);
+                autosaveTimer = window.setTimeout(() => {
+                    saveDraft(false);
+                }, AUTOSAVE_DEBOUNCE_MS);
                 updateDraftStatus(
                     navigator.onLine
                         ? 'Saving draft...'
@@ -1513,6 +1819,7 @@
             form.addEventListener('change', markDirty);
             form.addEventListener('submit', () => {
                 isSubmitting = true;
+                window.clearTimeout(autosaveTimer);
                 persistLocalDraft(true);
             });
 
@@ -1606,6 +1913,7 @@
 
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden) {
+                    window.clearTimeout(autosaveTimer);
                     persistLocalDraft(true);
                 }
                 if (document.hidden && isDirty) {
@@ -1622,6 +1930,7 @@
             });
 
             window.addEventListener('pagehide', () => {
+                window.clearTimeout(autosaveTimer);
                 persistLocalDraft(true);
                 if (!isDirty || isSubmitting || !navigator.sendBeacon || !navigator.onLine) return;
                 const formData = new FormData(form);
@@ -1629,6 +1938,7 @@
             });
 
             window.addEventListener('beforeunload', () => {
+                window.clearTimeout(autosaveTimer);
                 persistLocalDraft(true);
                 if (!isDirty || isSubmitting || !navigator.sendBeacon || !navigator.onLine) return;
                 const formData = new FormData(form);

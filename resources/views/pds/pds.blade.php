@@ -1,6 +1,9 @@
 @extends('layout.pds_layout')
 @section('title', 'PDS - Personal Data Sheet')
 @section('content')
+    @php
+        $simple = in_array(request()->input('simple'), [1, '1', true, 'true'], true);
+    @endphp
     <style>
         .pds-responsive-font {
             --pds-font-body: clamp(0.88rem, 0.82rem + 0.22vw, 1rem);
@@ -8,6 +11,15 @@
             --pds-font-heading: clamp(1.1rem, 0.98rem + 0.9vw, 1.65rem);
             --pds-font-subheading: clamp(0.98rem, 0.9rem + 0.45vw, 1.2rem);
             --pds-font-meta: clamp(0.76rem, 0.72rem + 0.2vw, 0.9rem);
+            --pds-ink: #163053;
+            --pds-muted: #5f6f89;
+            --pds-line: #d8e4f8;
+            --pds-soft-line: rgba(153, 176, 214, 0.32);
+            --pds-surface: linear-gradient(180deg, #f4f8ff 0%, #eef4ff 100%);
+            --pds-card: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 255, 0.96) 100%);
+            --pds-accent: #002c76;
+            --pds-accent-soft: #dce8ff;
+            --pds-accent-strong: #0d5bd7;
         }
 
         .pds-responsive-font :is(input, select, textarea, button) {
@@ -37,21 +49,323 @@
             font-size: var(--pds-font-meta) !important;
             line-height: 1.45;
         }
+
+        .pds-page {
+            position: relative;
+            color: var(--pds-ink);
+            scroll-behavior: smooth;
+        }
+
+        .pds-page::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(circle at top left, rgba(13, 91, 215, 0.14), transparent 28%),
+                radial-gradient(circle at top right, rgba(0, 44, 118, 0.08), transparent 24%),
+                linear-gradient(180deg, #f7faff 0%, #edf3fb 100%);
+        }
+
+        .pds-form-shell {
+            position: relative;
+        }
+
+        .pds-form-banner {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 1rem 1.1rem;
+            border: 1px solid rgba(164, 188, 227, 0.45);
+            border-radius: 1.25rem;
+            background:
+                linear-gradient(135deg, rgba(0, 44, 118, 0.92) 0%, rgba(17, 94, 201, 0.9) 100%);
+            color: #fff;
+            box-shadow: 0 18px 40px rgba(14, 36, 82, 0.18);
+        }
+
+        .pds-form-banner-title {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .pds-form-banner-title .material-icons {
+            font-size: clamp(1.6rem, 1.35rem + 0.55vw, 2rem);
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .pds-form-banner strong {
+            display: inline-block;
+            font-size: clamp(1.45rem, 1.2rem + 0.7vw, 1.95rem);
+            line-height: 1.15;
+        }
+
+        .pds-form-banner p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .pds-form-banner-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .pds-form-banner-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.42rem 0.75rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.12);
+            font-size: 0.78rem !important;
+            line-height: 1.1;
+        }
+
+        a.pds-form-banner-chip {
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        a.pds-form-banner-chip:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(8, 26, 67, 0.14);
+        }
+
+        .pds-form-section {
+            position: relative;
+            overflow: hidden;
+            scroll-margin-top: 6.5rem;
+            border: 1px solid var(--pds-soft-line);
+            background: var(--pds-card);
+            box-shadow:
+                0 16px 40px rgba(15, 36, 79, 0.08),
+                0 2px 8px rgba(15, 36, 79, 0.04);
+        }
+
+        .pds-form-section::before {
+            content: '';
+            position: absolute;
+            inset: 0 0 auto;
+            height: 4px;
+            background: linear-gradient(90deg, #002c76 0%, #2563eb 56%, #7fb2ff 100%);
+        }
+
+        .pds-toolbar {
+            margin-bottom: 1.35rem;
+        }
+
+        .pds-section-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .pds-section-title {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            min-width: 0;
+        }
+
+        .pds-section-icon {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            width: 2.9rem;
+            height: 2.9rem;
+            margin-right: 0 !important;
+            border-radius: 0.95rem;
+            background: linear-gradient(135deg, #e6efff 0%, #f7faff 100%);
+            color: var(--pds-accent);
+            box-shadow: inset 0 0 0 1px rgba(115, 151, 210, 0.22);
+        }
+
+        .pds-section-note {
+            max-width: 52rem;
+            margin-bottom: 1.35rem;
+            color: var(--pds-muted) !important;
+        }
+
+        .pds-soft-panel {
+            border: 1px solid var(--pds-line);
+            background: var(--pds-surface);
+        }
+
+        .pds-subsection {
+            border: 1px solid var(--pds-line);
+            border-radius: 1rem;
+            background: linear-gradient(180deg, rgba(248, 251, 255, 0.94) 0%, rgba(255, 255, 255, 0.98) 100%);
+            padding: 1rem;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        }
+
+        .pds-page .entry-card {
+            border: 1px solid var(--pds-line);
+            border-radius: 1rem;
+            background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+            box-shadow: 0 10px 24px rgba(15, 36, 79, 0.05);
+        }
+
+        .pds-page .floating-label-input,
+        .pds-page select,
+        .pds-page textarea,
+        .pds-page input:not([type='radio']):not([type='checkbox']) {
+            border-color: #d3deef !important;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 1px 2px rgba(15, 36, 79, 0.03);
+        }
+
+        .pds-page .floating-label-input:hover,
+        .pds-page select:hover,
+        .pds-page textarea:hover,
+        .pds-page input:not([type='radio']):not([type='checkbox']):hover {
+            border-color: #b8cae7 !important;
+        }
+
+        .pds-page .floating-label-input:focus,
+        .pds-page select:focus,
+        .pds-page textarea:focus,
+        .pds-page input:not([type='radio']):not([type='checkbox']):focus {
+            border-color: var(--pds-accent-strong) !important;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12) !important;
+        }
+
+        .pds-page .floating-label,
+        .pds-page label {
+            color: #55647d;
+        }
+
+        .pds-choice-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .pds-choice-group > label {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            min-height: 2.9rem;
+            padding: 0.7rem 0.95rem;
+            border: 1px solid var(--pds-line);
+            border-radius: 0.95rem;
+            background: rgba(255, 255, 255, 0.9);
+            color: #27405f;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .pds-choice-group > label:hover {
+            border-color: #9cb8e8;
+            box-shadow: 0 8px 18px rgba(15, 36, 79, 0.06);
+            transform: translateY(-1px);
+        }
+
+        .pds-choice-group input[type='radio'],
+        .pds-choice-group input[type='checkbox'] {
+            margin: 0 !important;
+        }
+
+        .pds-primary-action,
+        .pds-secondary-action,
+        .pds-submit-button,
+        .pds-page [data-education-add] {
+            border-radius: 0.95rem !important;
+            box-shadow: 0 12px 24px rgba(0, 44, 118, 0.14);
+        }
+
+        .pds-secondary-action {
+            box-shadow: 0 10px 22px rgba(15, 36, 79, 0.08);
+        }
+
+        .pds-submit-bar {
+            position: sticky;
+            bottom: 1rem;
+            z-index: 20;
+            padding: 1rem;
+            border: 1px solid rgba(162, 183, 218, 0.4);
+            border-radius: 1.15rem;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 18px 40px rgba(15, 36, 79, 0.12);
+        }
+
+        .pds-submit-button {
+            min-width: min(100%, 14rem);
+            background: linear-gradient(135deg, #0d5bd7 0%, #002c76 100%) !important;
+        }
+
+        .pds-warning-footer {
+            border: 1px solid rgba(231, 188, 110, 0.4);
+            border-radius: 1rem;
+            background: linear-gradient(180deg, rgba(255, 248, 231, 0.95) 0%, rgba(255, 252, 245, 0.98) 100%);
+            color: #70511b;
+            box-shadow: 0 12px 28px rgba(122, 84, 19, 0.08);
+        }
+
+        @media (max-width: 640px) {
+            .pds-form-banner,
+            .pds-submit-bar,
+            .pds-subsection {
+                border-radius: 1rem;
+            }
+
+            .pds-section-header {
+                flex-direction: column;
+            }
+
+            .pds-section-title {
+                align-items: flex-start;
+            }
+
+            .pds-section-icon {
+                width: 2.55rem;
+                height: 2.55rem;
+                border-radius: 0.8rem;
+            }
+        }
     </style>
     <!-- Main Content -->
-    <main class="pds-responsive-font max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8 mb-20 sm:mb-0" style="padding-top: 0px;">
+    <main class="pds-responsive-font pds-page {{ $simple ? 'w-full max-w-none' : 'max-w-7xl mx-auto' }} -mt-4 sm:-mt-6 px-2 sm:px-4 lg:px-8 py-4 sm:py-8 mb-20 sm:mb-0" style="padding-top: 0px;">
         @php
     $c1RouteParams = ['go_to' => 'display_c2'];
     if (request()->query('simple')) {
         $c1RouteParams['simple'] = 1;
     }
 @endphp
-<form id="myForm" class="no-spinner space-y-4 sm:space-y-8" action="{{ route('submit_c1', $c1RouteParams) }}" method="POST" x-data="{ civilStatus: '{{ old('civil_status', session('form.c1.civil_status')) }}' }">
+<form id="myForm" class="pds-form-shell no-spinner space-y-4 sm:space-y-8" action="{{ route('submit_c1', $c1RouteParams) }}" method="POST" x-data="{ civilStatus: '{{ old('civil_status', session('form.c1.civil_status')) }}' }">
             @csrf
+            <div class="pds-form-banner">
+                <div class="pds-form-banner-title">
+                    <span class="material-icons">badge</span>
+                    <strong>Personal Information</strong>
+                </div>
+                <div class="pds-form-banner-meta">
+                    <a href="#personal-information-section" class="pds-form-banner-chip">
+                        <span class="material-icons !text-sm">description</span>
+                        Section I: Personal Information
+                    </a>
+                    <a href="#family-background" class="pds-form-banner-chip">
+                        <span class="material-icons !text-sm">family_restroom</span>
+                        Section II: Family Background
+                    </a>
+                    <a href="#educational-background" class="pds-form-banner-chip">
+                        <span class="material-icons !text-sm">school</span>
+                        Section III: Educational Background
+                    </a>
+                </div>
+            </div>
             <!-- Personal Information Section -->
-            <section class="bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
+            <section id="personal-information-section" class="pds-form-section bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
 
-                <div class="flex flex-col sm:flex-row justify-end gap-2">
+                <div class="pds-toolbar flex flex-col sm:flex-row justify-end gap-2">
                     <!-- <a
                         href="{{ route('export.pds') }}"
                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border-2 border-rose-700 bg-rose-700 px-4 py-3 text-sm sm:text-base font-montserrat font-semibold text-white shadow-sm transition-all duration-200 hover:border-rose-800 hover:bg-rose-800 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-rose-700/30"
@@ -70,21 +384,21 @@
                 <button
                         type="button"
                         id="importPdsExcelBtn" 
-                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border-2 border-[#002C76] bg-[#002C76] px-4 py-3 text-sm sm:text-base font-montserrat font-semibold text-white shadow-sm transition-all duration-200 hover:border-[#001F5A] hover:bg-[#001F5A] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#002C76]/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:border-[#002C76] disabled:hover:bg-[#002C76] disabled:hover:text-white"
+                        class="pds-primary-action w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-lg border-2 border-[#002C76] bg-[#002C76] px-4 py-3 text-sm sm:text-base font-montserrat font-semibold text-white shadow-sm transition-all duration-200 hover:border-[#001F5A] hover:bg-[#001F5A] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#002C76]/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:border-[#002C76] disabled:hover:bg-[#002C76] disabled:hover:text-white"
                     >
                         <span class="material-icons text-lg sm:text-xl">upload_file</span>
                         Import from Excel
                     </button>
                 </div>
 
-                <div class="flex items-center mb-4 sm:mb-6">
-                    <span class="material-icons text-blue-600 mr-2 sm:mr-3 text-2xl sm:text-3xl">badge</span>
-                    <h2 class="text-lg sm:text-2xl font-bold text-gray-900">I. PERSONAL INFORMATION</h2>
-
-                    
+                <div class="pds-section-header">
+                    <div class="pds-section-title">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">badge</span>
+                        <h2 class="text-lg sm:text-2xl font-bold text-gray-900">I. PERSONAL INFORMATION</h2>
+                    </div>
                 </div>
 
-                <p class="text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm">
+                <p class="pds-section-note text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm">
                     Print legibly. Tick appropriate boxes and use separate sheet if necessary. Indicate N/A if not applicable. DO NOT ABBREVIATE.
                 </p>
 
@@ -135,7 +449,7 @@
                 </div>
 
                 <!-- Personal Details -->
-                <div class="mobile-stack md:grid md:grid-cols-4 gap-4 rounded-lg p-4 sm:gap-6 mb-4 sm:mb-6">
+                <div class="pds-soft-panel mobile-stack md:grid md:grid-cols-4 gap-4 rounded-lg p-4 sm:gap-6 mb-4 sm:mb-6">
                     <div class="relative">
                         <input type="text" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', session('form.c1.date_of_birth')) }}" required autocomplete="bday" inputmode="numeric" data-uppercase="off" data-dob-input class="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-sm sm:text-base">
                         <label for="date_of_birth" class="absolute -top-2 left-3 bg-white px-1 text-sm text-gray-600">3. DATE OF BIRTH <span class="text-red-500">*</span></label>
@@ -147,7 +461,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">5. SEX AT BIRTH <span class="text-red-500">*</span></label>
-                        <div class="flex space-x-4 sm:space-x-6">
+                        <div class="pds-choice-group flex space-x-4 sm:space-x-6">
                             <label class="flex items-center cursor-pointer hover:text-blue-600 transition-colors text-sm sm:text-base">
                                 <input type="radio" name="sex" value="male" {{ old('sex', session('form.c1.sex')) == 'male' ? 'checked' : '' }} class="mr-2 text-blue-600 focus:ring-blue-500" required>
                                 <span>Male</span>
@@ -234,7 +548,7 @@
                         <label class="block text-gray-700 font-medium mb-2 text-sm sm:text-base">16. CITIZENSHIP <span class="text-red-500">*</span></label>
 
                         <!-- Primary citizenship options -->
-                        <div class="flex flex-col sm:flex-row gap-2">
+                        <div class="pds-choice-group flex flex-col sm:flex-row gap-2">
                             <label class="inline-flex items-center text-sm sm:text-base">
                                 <input type="radio" name="citizenship" value="Filipino" x-model="citizenship"
                                        class="text-blue-600 border-gray-300 focus:ring-blue-500" required
@@ -254,7 +568,7 @@
                         <div x-show="citizenship === 'Dual Citizenship'" class="space-y-4 mt-4">
                             <!-- Sub-options -->
                             <label class="block text-gray-700 font-medium mb-2 text-sm sm:text-base">If holder of dual citizenship, please indicate the details.</label>
-                            <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="pds-choice-group flex flex-col sm:flex-row gap-2">
                                 <label class="inline-flex items-center text-sm sm:text-base">
                                     <input type="radio" name="dual_type" value="By Birth" x-model="dualType"
                                            class="text-blue-600 border-gray-300 focus:ring-blue-500"
@@ -283,10 +597,12 @@
             </section>
 
             <!-- Contact Information Section -->
-            <section class="bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
-                <div class="flex items-center mb-4 sm:mb-6">
-                    <span class="material-icons text-blue-600 mr-2 sm:mr-3 text-2xl sm:text-3xl">home</span>
-                    <h2 class="text-lg sm:text-2xl font-bold text-gray-900">17. RESIDENTIAL ADDRESS</h2>
+            <section class="pds-form-section bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
+                <div class="pds-section-header">
+                    <div class="pds-section-title">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">home</span>
+                        <h2 class="text-lg sm:text-2xl font-bold text-gray-900">17. RESIDENTIAL ADDRESS</h2>
+                    </div>
                 </div>
                 <div class="mobile-stack md:grid md:grid-cols-3 gap-4 sm:gap-6">
                     <div class="relative">
@@ -325,14 +641,16 @@
             </section>
 
             <!-- Permanent Address Section -->
-            <section class="bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in mt-2">
-                <div class="flex items-center mb-4 sm:mb-6">
-                    <span class="material-icons text-blue-600 mr-2 sm:mr-3 text-2xl sm:text-3xl">home</span>
-                    <h2 class="text-lg sm:text-2xl font-bold text-gray-900">18. PERMANENT ADDRESS</h2>
+            <section class="pds-form-section bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in mt-2">
+                <div class="pds-section-header">
+                    <div class="pds-section-title">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">home</span>
+                        <h2 class="text-lg sm:text-2xl font-bold text-gray-900">18. PERMANENT ADDRESS</h2>
+                    </div>
                 </div>
                 <div class="mb-4 w-full flex justify-end">
                     <button type="button" id="copy_res_to_per" 
-                    class="border-2 border-[#002C76] bg-[#002C76] text-white rounded-lg px-4 py-2 text-sm sm:text-base font-montserrat 
+                    class="pds-secondary-action border-2 border-[#002C76] bg-[#002C76] text-white rounded-lg px-4 py-2 text-sm sm:text-base font-montserrat 
                     hover:bg-white hover:text-[#002C76] transition">
                         Copy from Residential Address
                     </button>
@@ -372,10 +690,12 @@
                 </div>
             </section>
 
-            <section class="bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in mt-2">
-                <div class="flex items-center mb-4 sm:mb-6">
-                    <span class="material-icons text-blue-600 mr-2 sm:mr-3 text-2xl sm:text-3xl">phone</span>
-                    <h2 class="text-lg sm:text-2xl font-bold text-gray-900">CONTACT INFORMATION</h2>
+            <section class="pds-form-section bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in mt-2">
+                <div class="pds-section-header">
+                    <div class="pds-section-title">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">phone</span>
+                        <h2 class="text-lg sm:text-2xl font-bold text-gray-900">CONTACT INFORMATION</h2>
+                    </div>
                 </div>
                 <div class="mobile-stack md:grid md:grid-cols-3 gap-4 sm:gap-6">
                     <div class="relative">
@@ -400,19 +720,21 @@
             </section>
 
             <!-- Family Background Section -->
-            <section id="family-background" class="bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
-                <div class="flex items-center mb-4 sm:mb-6">
-                    <span class="material-icons text-blue-600 mr-2 sm:mr-3 text-2xl sm:text-3xl">family_restroom</span>
-                    <h2 class="text-lg sm:text-2xl font-bold text-gray-900">II. FAMILY BACKGROUND</h2>
+            <section id="family-background" class="pds-form-section bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
+                <div class="pds-section-header">
+                    <div class="pds-section-title">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">family_restroom</span>
+                        <h2 class="text-lg sm:text-2xl font-bold text-gray-900">II. FAMILY BACKGROUND</h2>
+                    </div>
                 </div>
 
-                <p class="text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm">
+                <p class="pds-section-note text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm">
                     Write full name and list all requested details.
                 </p>
 
                 <!-- Spouse Information -->
                 <!-- Spouse Information -->
-                <div class="mb-6 sm:mb-8"
+                <div class="pds-subsection mb-6 sm:mb-8"
                     x-effect="
                         const isNA = civilStatus === 'single';
                         $el.querySelectorAll('input[id^=\'spouse_\']').forEach(f => {
@@ -480,14 +802,14 @@
                 </div>
 
                 <!-- Children Information Placeholder -->
-                <div class="mb-6 sm:mb-8">
+                <div class="pds-subsection mb-6 sm:mb-8">
                     @livewire('pds-children-form', [
                         'children' => (array) old('children', session('form.c1.children', []))
                     ])
                 </div>
 
                 <!-- Parents Information -->
-                <div class="mb-6 sm:mb-8">
+                <div class="pds-subsection mb-6 sm:mb-8">
                     <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-4 flex items-center">
                         <span class="material-icons text-sm mr-2 text-blue-500">escalator_warning</span>
                         PARENTS INFORMATION
@@ -529,10 +851,12 @@
 
             <!-- Educational Background Section -->
             <!-- Educational Background Section -->
-<section id="educational-background" class="bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
-    <div class="flex items-center mb-4 sm:mb-6">
-        <span class="material-icons text-blue-600 mr-2 sm:mr-3 text-2xl sm:text-3xl">school</span>
-        <h2 class="text-lg sm:text-2xl font-bold text-gray-900">III. EDUCATIONAL BACKGROUND</h2>
+<section id="educational-background" class="pds-form-section bg-white rounded-lg sm:rounded-2xl shadow-xl p-4 sm:p-8 animate-slide-in">
+    <div class="pds-section-header">
+        <div class="pds-section-title">
+            <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">school</span>
+            <h2 class="text-lg sm:text-2xl font-bold text-gray-900">III. EDUCATIONAL BACKGROUND</h2>
+        </div>
     </div>
 
     <!-- Elementary -->
@@ -584,7 +908,7 @@
             return '';
         };
     @endphp
-    <div class="mb-8" data-education-section="elementary">
+    <div class="pds-subsection mb-8" data-education-section="elementary">
         <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-4">ELEMENTARY</h3>
         <div class="mobile-stack md:grid md:grid-cols-4 gap-4 sm:gap-6" data-education-date-range>
             <div class="relative md:col-span-2">
@@ -620,7 +944,7 @@
     </div>
 
     <!-- Secondary -->
-    <div class="my-6" data-education-section="secondary">
+    <div class="pds-subsection my-6" data-education-section="secondary">
         <h3 class="text-base sm:text-lg font-semibold text-gray-700 mb-4">SECONDARY</h3>
         <div class="mobile-stack md:grid md:grid-cols-4 gap-4 sm:gap-6" data-education-date-range>
             <div class="relative md:col-span-2">
@@ -667,7 +991,7 @@
     </div>
 
     <!-- Vocational / Trade Course Placeholder -->
-    <div class="mb-6 mt-[80px]" data-education-section="vocational">
+    <div class="pds-subsection mb-6 mt-[80px]" data-education-section="vocational">
         @include('partials.pds-education-form', [
             'education_type' => 'vocational',
             'education_type_meta' => ['title' => 'Vocational / Trade Course'],
@@ -676,7 +1000,7 @@
     </div>
 
     <!-- College Placeholder -->
-    <div class="mb-6 mt-[80px]" data-education-section="college">
+    <div class="pds-subsection mb-6 mt-[80px]" data-education-section="college">
         @include('partials.pds-education-form', [
             'education_type' => 'college',
             'education_type_meta' => ['title' => 'College'],
@@ -685,7 +1009,7 @@
     </div>
 
     <!-- Graduate Studies Placeholder -->
-    <div class="mb-6 mt-[80px]" data-education-section="grad">
+    <div class="pds-subsection mb-6 mt-[80px]" data-education-section="grad">
         @include('partials.pds-education-form', [
             'education_type' => 'grad',
             'education_type_meta' => ['title' => 'Graduate Studies'],
@@ -695,7 +1019,7 @@
 </section>
 
             <!-- Navigation -->
-            <div class="flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 gap-4">
+            <div class="pds-submit-bar flex flex-col sm:flex-row justify-between items-center mt-6 sm:mt-8 gap-4">
                 <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-3">
                     
                     <input type="file" id="pdsExcelFileInput" class="hidden" accept=".xlsx,.xls">
@@ -704,7 +1028,7 @@
                     <span class="material-icons mr-2 text-lg sm:text-xl">home</span>
                     Dashboard
                 </button> --}}
-                <button type="submit" class="w-full sm:w-auto px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
+                <button type="submit" class="pds-submit-button w-full sm:w-auto px-4 sm:px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center text-sm sm:text-base">
                     Save
                     <span class="material-icons ml-2 text-lg sm:text-xl">arrow_forward</span>
                 </button>
@@ -712,7 +1036,7 @@
         </form>
 
         <!-- Warning Footer -->
-        <footer class="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-gray-600 px-4">
+        <footer class="pds-warning-footer mt-8 sm:mt-12 text-center text-xs sm:text-sm text-gray-600 px-4 py-4">
             <p class="mb-2">
                 <strong>WARNING:</strong> Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet shall cause the filing of administrative/criminal case/s against the person concerned.
             </p>
@@ -2331,15 +2655,31 @@ function addPdsEducationDays(date, days) {
 
         const autosaveUrl = @json(route('pds.autosave', ['section' => 'c1']));
         const AUTOSAVE_INTERVAL_MS = 30000;
+        const AUTOSAVE_DEBOUNCE_MS = 600;
         let isDirty = false;
         let isSubmitting = false;
         let inFlight = false;
         let queued = false;
+        let autosaveTimer = null;
 
-        const markDirty = () => { isDirty = true; };
+        const scheduleAutosave = () => {
+            if (isSubmitting) return;
+            window.clearTimeout(autosaveTimer);
+            autosaveTimer = window.setTimeout(() => {
+                saveDraft(false);
+            }, AUTOSAVE_DEBOUNCE_MS);
+        };
+
+        const markDirty = () => {
+            isDirty = true;
+            scheduleAutosave();
+        };
         form.addEventListener('input', markDirty);
         form.addEventListener('change', markDirty);
-        form.addEventListener('submit', () => { isSubmitting = true; });
+        form.addEventListener('submit', () => {
+            isSubmitting = true;
+            window.clearTimeout(autosaveTimer);
+        });
 
         async function saveDraft(force = false) {
             if (isSubmitting) return;
@@ -2416,11 +2756,20 @@ function addPdsEducationDays(date, days) {
 
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && isDirty) {
+                window.clearTimeout(autosaveTimer);
                 saveDraft(true);
             }
         });
 
+        window.addEventListener('pagehide', () => {
+            window.clearTimeout(autosaveTimer);
+            if (!isDirty || isSubmitting || !navigator.sendBeacon) return;
+            const formData = new FormData(form);
+            navigator.sendBeacon(autosaveUrl, formData);
+        });
+
         window.addEventListener('beforeunload', () => {
+            window.clearTimeout(autosaveTimer);
             if (!isDirty || isSubmitting || !navigator.sendBeacon) return;
             const formData = new FormData(form);
             navigator.sendBeacon(autosaveUrl, formData);

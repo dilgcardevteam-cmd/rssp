@@ -20,7 +20,37 @@
                 transform: rotate(180deg);
                 transition: transform 200ms ease;
             }
+            #sidebar.sidebar-collapsed #pdsMenu,
+            #sidebar.sidebar-collapsed #docsMenu,
+            #sidebar.sidebar-collapsed #pdsToggle,
+            #sidebar.sidebar-collapsed #docsToggle {
+                display: none;
+            }
+            #sidebar.sidebar-collapsed [data-sidebar-label] {
+                opacity: 0;
+                width: 0;
+                max-width: 0;
+                margin-left: 0;
+                overflow: hidden;
+                pointer-events: none;
+            }
+            #sidebar.sidebar-collapsed nav {
+                padding-left: 0.25rem;
+                padding-right: 0.25rem;
+            }
+            #sidebar.sidebar-collapsed nav > a,
+            #sidebar.sidebar-collapsed nav > div > div,
+            #sidebar.sidebar-collapsed > div > a {
+                justify-content: center;
+            }
         </style>
+
+        <button id="desktopSidebarToggle" type="button"
+            class="hidden lg:flex items-center justify-center absolute top-3 right-3 z-20 h-9 w-9 rounded-lg text-[#002C76] transition hover:bg-[#EAF2FF]"
+            aria-label="Collapse sidebar"
+            aria-expanded="{{ $simple ? 'true' : 'false' }}">
+            <i id="desktopSidebarToggleIcon" data-feather="menu" class="w-4 h-4 stroke-[3]"></i>
+        </button>
 
         <!-- Toggle Button (mobile only) -->
         <button id="toggleSidebar" class="lg:hidden p-2 focus:outline-none absolute top-3 right-3 z-20" aria-label="Toggle sidebar">
@@ -32,7 +62,7 @@
             <a class="flex items-center gap-2 pt-14 px-2">
                 <img src="{{ asset('images/dilg_logo.png') }}" alt="DILG Logo"
                     class="h-12 w-12 rounded-full border border-white flex-shrink-0 logo-transition" />
-                <div id="sidebarText" class="{{ $simple ? 'sidebar-text-visible' : 'sidebar-text-hidden' }} whitespace-nowrap overflow-hidden">
+                <div id="sidebarText" data-sidebar-label class="{{ $simple ? 'sidebar-text-visible' : 'sidebar-text-hidden' }} whitespace-nowrap overflow-hidden">
                     <div class="font-bold font-montserrat text-[#002C76] text-[20px] uppercase leading-tight tracking-wide">
                         DILG - CAR
                     </div>
@@ -52,7 +82,7 @@
                             ? 'bg-[#002C76] text-white'
                             : 'text-[#002C76] hover:text-white hover:bg-[#002C76]' }}">
                     <i data-feather="home" class="w-5 h-5 stroke-[3] flex-shrink-0"></i>
-                    <span id="textHome" class="sidebar-text-hidden ml-3">HOME</span>
+                    <span id="textHome" data-sidebar-label class="sidebar-text-hidden ml-3">HOME</span>
                 </a>
 
                 <a href="{{ route('job_vacancy') }}"
@@ -61,7 +91,7 @@
                             ? 'bg-[#002C76] text-white'
                             : 'text-[#002C76] hover:text-white hover:bg-[#002C76]' }}">
                     <i data-feather="archive" class="w-5 h-5 stroke-[3] flex-shrink-0"></i>
-                    <span id="textJobVacancies" class="sidebar-text-hidden ml-3">JOB VACANCIES</span>
+                    <span id="textJobVacancies" data-sidebar-label class="sidebar-text-hidden ml-3">JOB VACANCIES</span>
                 </a>
 
                 <a href="{{ route('my_applications') }}"
@@ -70,18 +100,18 @@
                             ? 'bg-[#002C76] text-white'
                             : 'text-[#002C76] hover:text-white hover:bg-[#002C76]' }}">
                     <i data-feather="user" class="w-5 h-5 stroke-[3] flex-shrink-0"></i>
-                    <span id="textMyApplications" class="sidebar-text-hidden ml-3">MY APPLICATIONS</span>
+                    <span id="textMyApplications" data-sidebar-label class="sidebar-text-hidden ml-3">MY APPLICATIONS</span>
                 </a>
 
                 <div class="w-full">
-                    <div class="flex items-center justify-between w-full rounded-md px-4 py-2 text-sm font-bold transition
+                    <div data-sidebar-pds-trigger class="flex items-center justify-between w-full rounded-md px-4 py-2 text-sm font-bold transition cursor-pointer
                         {{ (request()->routeIs('display_c1') || request()->routeIs('display_c2') || request()->routeIs('display_c3') || request()->routeIs('display_c4') || request()->routeIs('display_wes') || request()->routeIs('display_c5'))
                             ? 'bg-[#002C76] text-white'
                             : 'text-[#002C76] hover:text-white hover:bg-[#002C76]' }}">
-                        <a href="{{ route('display_c1', ['simple' => 1]) }}" class="flex items-center use-loader">
+                        <div class="flex items-center">
                             <i data-feather="file-text" class="w-5 h-5 stroke-[3] flex-shrink-0"></i>
-                            <span id="textPersonalDataSheet" class="sidebar-text-hidden ml-3">PERSONAL DATA SHEET</span>
-                        </a>
+                            <span id="textPersonalDataSheet" data-sidebar-label class="sidebar-text-hidden ml-3">PERSONAL DATA SHEET</span>
+                        </div>
                         <button type="button" id="pdsToggle" aria-expanded="{{ (request()->routeIs('display_c1') || request()->routeIs('display_c2') || request()->routeIs('display_c3') || request()->routeIs('display_c4') || request()->routeIs('display_wes') || request()->routeIs('display_c5')) ? 'true' : 'false' }}" class="ml-2">
                             <i id="pdsCaret" data-feather="chevron-down" class="w-4 h-4 stroke-[3]"></i>
                         </button>
@@ -101,7 +131,7 @@
                                     ? 'bg-[#002C76] text-white'
                                     : 'text-[#002C76] hover:text-white hover:bg-[#002C76]' }}">
                             <i data-feather="briefcase" class="w-4 h-4 stroke-[3] flex-shrink-0"></i>
-                            <span class="ml-3">WORK EXPERIENCE</span>
+                            <span class="ml-3">ELIGIBILITY AND WORK EXPERIENCE</span>
                         </a>
                         <a href="{{ route('display_c3', ['simple' => 1]) }}"
                             class="flex items-center rounded-md px-3 py-2 text-sm font-semibold transition use-loader
@@ -134,7 +164,7 @@
                     <div class="flex items-center justify-between w-full rounded-md px-4 py-2 text-sm font-bold transition text-[#002C76] hover:text-white hover:bg-[#002C76]">
                         <a href="#" class="flex items-center" id="btnDocs">
                             <i data-feather="download" class="w-5 h-5 stroke-[3] flex-shrink-0"></i>
-                            <span id="textDownloadDocs" class="sidebar-text-hidden ml-3">DOWNLOAD DOCUMENTS</span>
+                            <span id="textDownloadDocs" data-sidebar-label class="sidebar-text-hidden ml-3">DOWNLOAD DOCUMENTS</span>
                         </a>
                         <button type="button" id="docsToggle" aria-expanded="false" class="ml-2">
                             <i id="docsCaret" data-feather="chevron-down" class="w-4 h-4 stroke-[3]"></i>
@@ -160,7 +190,7 @@
                             ? 'bg-[#002C76] text-white'
                             : 'text-[#002C76] hover:text-white hover:bg-[#002C76]' }}">
                     <i data-feather="info" class="w-5 h-5 stroke-[3] flex-shrink-0"></i>
-                    <span id="textAboutWebsite" class="sidebar-text-hidden ml-3">ABOUT THIS WEBSITE</span>
+                    <span id="textAboutWebsite" data-sidebar-label class="sidebar-text-hidden ml-3">ABOUT THIS WEBSITE</span>
                 </a>
 
                 <a href="{{ route('manual.user') }}"
@@ -169,7 +199,7 @@
                             ? 'bg-[#002C76] text-white'
                             : 'text-[#002C76] hover:text-white hover:bg-[#002C76]' }}">
                     <i data-feather="book-open" class="w-5 h-5 stroke-[3] flex-shrink-0"></i>
-                    <span id="textManual" class="sidebar-text-hidden ml-3">MANUAL</span>
+                    <span id="textManual" data-sidebar-label class="sidebar-text-hidden ml-3">MANUAL</span>
                 </a>
             </nav>
         </div>
@@ -181,30 +211,47 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             feather.replace();
+            const pdsTrigger = document.querySelector('[data-sidebar-pds-trigger]');
             const pdsToggle = document.getElementById('pdsToggle');
             const pdsMenu = document.getElementById('pdsMenu');
             const pdsCaret = document.getElementById('pdsCaret');
+            const setPdsMenuExpanded = (expanded) => {
+                if (!pdsMenu || !pdsCaret || !pdsToggle) {
+                    return;
+                }
+
+                pdsMenu.classList.toggle('show', expanded);
+                pdsCaret.classList.toggle('rotate-180', expanded);
+                pdsToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                sessionStorage.setItem('pdsCollapsed', expanded ? 'false' : 'true');
+            };
+            const togglePdsMenu = () => {
+                if (!pdsMenu) {
+                    return;
+                }
+
+                if (!isOpen) {
+                    openSidebar();
+                    setPdsMenuExpanded(true);
+                    return;
+                }
+
+                setPdsMenuExpanded(!pdsMenu.classList.contains('show'));
+            };
             if (pdsToggle && pdsMenu && pdsCaret) {
                 if (pdsMenu.classList.contains('show')) {
                     pdsCaret.classList.add('rotate-180');
                 }
                 const collapsed = sessionStorage.getItem('pdsCollapsed') === 'true';
                 if (collapsed) {
-                    pdsMenu.classList.remove('show');
-                    pdsCaret.classList.remove('rotate-180');
+                    setPdsMenuExpanded(false);
+                } else {
+                    setPdsMenuExpanded(pdsMenu.classList.contains('show'));
                 }
-                pdsToggle.addEventListener('click', () => {
-                    pdsMenu.classList.toggle('show');
-                    pdsCaret.classList.toggle('rotate-180');
-                    const nowCollapsed = !pdsMenu.classList.contains('show');
-                    sessionStorage.setItem('pdsCollapsed', nowCollapsed ? 'true' : 'false');
-                });
-            }
-            const pdsLink = document.querySelector('#sidebar a[href*="display_c1"]');
-            if (pdsLink) {
-                pdsLink.classList.remove('use-loader');
-                pdsLink.addEventListener('click', (e) => {
+                pdsToggle.addEventListener('click', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
+                    togglePdsMenu();
                 });
             }
             const pdsMenuLinks = document.querySelectorAll('#pdsMenu a');
@@ -259,6 +306,9 @@
                 if (btnDocs) {
                     btnDocs.addEventListener('click', (e) => {
                         e.preventDefault();
+                        if (!isOpen) {
+                            openSidebar();
+                        }
                         toggleDocs();
                     });
                 }
@@ -267,7 +317,10 @@
             // Keep sidebar fixed in simple mode: page scroll should not scroll the sidebar itself.
             const sidebar = document.getElementById('sidebar');
             const toggleButton = document.getElementById('toggleSidebar');
+            const desktopToggleButton = document.getElementById('desktopSidebarToggle');
+            const desktopToggleIcon = document.getElementById('desktopSidebarToggleIcon');
             const logo = document.querySelector('img[alt="DILG Logo"]');
+            const sidebarOffsetTargets = Array.from(document.querySelectorAll('[data-sidebar-offset]'));
             const textElements = [
                 "sidebarText", "textHome", "textJobVacancies", "textMyApplications",
                 "textPersonalDataSheet", "textDownloadDocs", "textAboutWebsite", "textWorkExperience", "textManual"
@@ -276,8 +329,36 @@
             const isSimple = {{ $simple ? 'true' : 'false' }};
             let storedState = localStorage.getItem('userSidebarOpen');
             let isOpen = storedState === null ? true : storedState === 'true';
+            const getBreakpointWidth = (breakpoint) => breakpoint === 'md' ? 768 : 1024;
+            const isDesktopViewport = () => window.innerWidth >= 1024;
 
-            function openSidebar() {
+            function syncSidebarOffsets() {
+                sidebarOffsetTargets.forEach((target) => {
+                    const breakpoint = target.getAttribute('data-sidebar-offset-breakpoint') || 'lg';
+                    const openOffset = target.getAttribute('data-sidebar-offset-open');
+                    const closedOffset = target.getAttribute('data-sidebar-offset-closed');
+
+                    if (!openOffset || !closedOffset) {
+                        return;
+                    }
+
+                    if (window.innerWidth >= getBreakpointWidth(breakpoint)) {
+                        target.style.marginLeft = isOpen ? openOffset : closedOffset;
+                        return;
+                    }
+
+                    target.style.marginLeft = '';
+                });
+            }
+
+            function syncSidebarStateUi() {
+                sidebar?.classList.toggle('sidebar-collapsed', !isOpen);
+                desktopToggleButton?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                desktopToggleButton?.setAttribute('aria-label', isOpen ? 'Collapse sidebar' : 'Expand sidebar');
+                syncSidebarOffsets();
+            }
+
+            function openSidebar({ persist = true } = {}) {
                 sidebar?.classList.remove('w-16');
                 sidebar?.classList.add('w-72');
                 logo?.classList.remove('logo-small');
@@ -286,21 +367,25 @@
                     el?.classList.add('sidebar-text-visible');
                 });
                 isOpen = true;
-                localStorage.setItem('userSidebarOpen', 'true');
+                if (persist) {
+                    localStorage.setItem('userSidebarOpen', 'true');
+                }
+                syncSidebarStateUi();
             }
 
-            function closeSidebar() {
+            function closeSidebar({ persist = true } = {}) {
                 sidebar?.classList.remove('w-72');
                 sidebar?.classList.add('w-16');
                 logo?.classList.add('logo-small');
-                if (!isSimple) {
-                    textElements.forEach(el => {
-                        el?.classList.remove('sidebar-text-visible');
-                        el?.classList.add('sidebar-text-hidden');
-                    });
-                }
+                textElements.forEach(el => {
+                    el?.classList.remove('sidebar-text-visible');
+                    el?.classList.add('sidebar-text-hidden');
+                });
                 isOpen = false;
-                localStorage.setItem('userSidebarOpen', 'false');
+                if (persist) {
+                    localStorage.setItem('userSidebarOpen', 'false');
+                }
+                syncSidebarStateUi();
             }
 
             if (isSimple) {
@@ -309,26 +394,44 @@
             }
 
             toggleButton?.addEventListener('click', () => {
+                isOpen ? closeSidebar({ persist: false }) : openSidebar({ persist: false });
+            });
+
+            desktopToggleButton?.addEventListener('click', () => {
                 isOpen ? closeSidebar() : openSidebar();
             });
 
-            // Always open on desktop, always closed on mobile
-            if (window.innerWidth >= 1024) {
-                openSidebar();
-            } else {
-                closeSidebar();
+            if (pdsTrigger) {
+                pdsTrigger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    togglePdsMenu();
+                });
             }
+
+            function applyResponsiveSidebarState() {
+                storedState = localStorage.getItem('userSidebarOpen');
+                isOpen = storedState === null ? true : storedState === 'true';
+
+                if (isDesktopViewport()) {
+                    if (isOpen) {
+                        openSidebar({ persist: false });
+                    } else {
+                        closeSidebar({ persist: false });
+                    }
+                    return;
+                }
+
+                closeSidebar({ persist: false });
+            }
+
+            applyResponsiveSidebarState();
 
             // Auto open/close on resize
             let userSidebarResizeTimer;
             window.addEventListener('resize', () => {
                 clearTimeout(userSidebarResizeTimer);
                 userSidebarResizeTimer = setTimeout(() => {
-                    if (window.innerWidth >= 1024) {
-                        openSidebar();
-                    } else {
-                        closeSidebar();
-                    }
+                    applyResponsiveSidebarState();
                 }, 150);
             });
         });

@@ -282,6 +282,12 @@
             margin-top: 0.25rem;
         }
 
+        .error-container-focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14), 0 0 0 1px rgba(239, 68, 68, 0.32);
+            border-color: rgba(239, 68, 68, 0.55) !important;
+            transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
         /* Notification styles */
         .notification {
             position: fixed;
@@ -511,7 +517,7 @@
     @endphp
 
     @if ($pdsErrorMessages->isNotEmpty())
-    <div id="pds-error-banner" class="mx-auto max-w-7xl px-2 pt-4 sm:px-4 lg:px-8 md:ml-20 lg:ml-[20.5rem] relative z-[60]">
+    <div id="pds-error-banner" data-sidebar-offset data-sidebar-offset-breakpoint="md" data-sidebar-offset-open="20.5rem" data-sidebar-offset-closed="5.5rem" class="mx-auto max-w-7xl px-2 pt-4 sm:px-4 lg:px-8 md:ml-20 lg:ml-[20.5rem] relative z-[60]">
         <div class="rounded-2xl border border-red-200 bg-red-50 text-red-800 shadow-lg">
             <div class="flex items-start gap-3 px-4 py-4">
                 <span class="material-icons mt-0.5 text-red-600">error</span>
@@ -531,59 +537,128 @@
     </div>
     @endif
 
-    @if(!$simple)
     <!-- Header -->
-    <header class="bg-white shadow-lg sticky top-0 z-50 glass-effect">
-        <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-            <div class="flex items-center justify-between h-14 sm:h-16">
-                <div class="flex items-center">
-                    <span class="material-icons text-blue-600 mr-2 sm:mr-3 text-xl sm:text-2xl">article</span>
-                    <h1 class="text-lg sm:text-xl font-bold text-gray-900">Personal Data Sheet</h1>
-                </div>
-                
-                <!-- Mobile Menu Toggle -->
-                <button class="md:hidden flex items-center px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors" onclick="toggleMobileNav()">
-                    <span class="material-icons text-lg mr-1">menu</span>
-                    <span class="text-sm font-medium">Menu</span>
+    <header class="sticky top-0 z-40 bg-[#F3F8FF] backdrop-blur px-4 sm:px-8 py-3 flex items-center justify-between gap-6">
+        <div class="flex items-center gap-3 min-w-0">
+            <span class="material-icons text-blue-600 text-xl sm:text-2xl">article</span>
+            <button class="md:hidden flex items-center px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors" onclick="toggleMobileNav()">
+                <span class="material-icons text-lg mr-1">menu</span>
+                <span class="text-sm font-medium">Menu</span>
+            </button>
+        </div>
+
+        <div class="flex items-center justify-end gap-6">
+            <div id="notifBell" class="relative group">
+                <button id="notifToggle" aria-label="Notifications"
+                    class="relative p-2 rounded-full hover:bg-blue-50 transition-colors group-hover:bg-blue-50">
+                    <span class="material-icons text-[#0D2B70] text-[24px]">notifications_none</span>
+                    <span id="notifBadge"
+                        class="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-red-600 text-white text-[10px] font-bold flex items-center justify-center border-2 border-[#F3F8FF]"
+                        style="display: none;">0</span>
                 </button>
-                
-                <!-- Desktop Info -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <span class="text-sm text-gray-500">CS Form No. 212 (Revised 2025)</span>
+
+                <div id="notifMenu"
+                    class="hidden absolute right-0 mt-3 w-80 sm:w-96 bg-white shadow-2xl rounded-2xl border border-gray-100 overflow-hidden transform origin-top-right transition-all duration-200 z-50">
+                    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-white sticky top-0 z-10">
+                        <h3 class="font-bold text-[#0D2B70] text-base">Notifications</h3>
+                        <button id="notifMarkAll"
+                            class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors">
+                            Mark all as read
+                        </button>
+                    </div>
+
+                    <ul id="notifList" class="max-h-[400px] overflow-y-auto divide-y divide-gray-50 scrollbar-thin">
+                    </ul>
+
+                    <div class="px-4 py-3 bg-gray-50 border-t border-gray-100 text-center">
+                        <a href="{{ route('notifications.index', [], false) }}"
+                            class="text-xs font-bold text-[#0D2B70] hover:text-blue-700 hover:underline">
+                            View Full History
+                        </a>
+                    </div>
+
+                    <div id="notifLoader"
+                        class="hidden absolute inset-0 bg-white/80 flex items-center justify-center z-20">
+                        <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Mobile Navigation Menu -->
-        <div id="mobileNavMenu" class="mobile-nav-menu md:hidden">
-            <div class="max-w-7xl mx-auto px-2 sm:px-4">
-                <div class="nav-menu-content">
-                    <!-- Menu items will be populated by JavaScript -->
+
+            <div class="relative">
+                <button id="profileToggle" aria-label="Profile menu"
+                    class="flex items-center gap-2 p-2 rounded hover:bg-gray-100">
+                    @php
+                        $u = Auth::user();
+                        $accountMiddleInitial = filled($u?->middle_name)
+                            ? mb_substr(trim((string) $u->middle_name), 0, 1) . '.'
+                            : '';
+                        $accountNameParts = array_filter([
+                            trim((string) ($u?->first_name ?? '')),
+                            $accountMiddleInitial,
+                            trim((string) ($u?->last_name ?? '')),
+                        ], fn($part) => $part !== '');
+                        $accountDisplayName = $accountNameParts ? trim(implode(' ', $accountNameParts)) : null;
+
+                        $displayName = $accountDisplayName ?: ($u?->name ?: 'N/A');
+                        $avatar = $u?->avatar_path ? asset('storage/' . $u->avatar_path) : null;
+                    @endphp
+                    <div class="h-8 w-8 overflow-hidden rounded-full bg-slate-100 text-slate-500 flex items-center justify-center shrink-0">
+                        @if($avatar)
+                            <img
+                                src="{{ $avatar }}"
+                                alt="Avatar"
+                                class="h-8 w-8 rounded-full object-cover"
+                                onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');"
+                            >
+                            <div class="hidden h-8 w-8 flex items-center justify-center bg-slate-100 text-slate-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 21a8 8 0 10-16 0"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                        @else
+                            <div class="h-8 w-8 flex items-center justify-center bg-slate-100 text-slate-500" aria-label="Profile placeholder">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 21a8 8 0 10-16 0"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            </div>
+                        @endif
+                    </div>
+                    <span class="text-sm font-semibold hidden sm:inline">{{ $displayName }}</span>
+                    <span class="material-icons text-[20px]">expand_more</span>
+                </button>
+                <div id="profileMenu"
+                    class="hidden absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg border border-gray-200 p-2">
+                    <a href="{{ route('account.settings') }}"
+                        class="block px-3 py-2 text-sm rounded hover:bg-gray-100">
+                        <span class="material-icons text-[18px] align-middle mr-2">settings</span> Account Settings
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit"
+                            class="w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100">Logout</button>
+                    </form>
                 </div>
             </div>
         </div>
     </header>
-    @endif
 
-    @if(!$simple)
-    <!-- Desktop Progress Indicator -->
-    <div class="hidden md:block bg-white shadow-sm sticky top-14 sm:top-16 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2 overflow-hidden" id="progressBar">
-                    <!-- Progress steps will be dynamically generated here -->
-                </div>
+    <!-- Mobile Navigation Menu -->
+    <div id="mobileNavMenu" class="mobile-nav-menu md:hidden">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4">
+            <div class="nav-menu-content">
+                <!-- Menu items will be populated by JavaScript -->
             </div>
         </div>
     </div>
-    @endif
 
     @if($simple)
         <div class="flex min-h-screen w-full">
             <div class="sidebar-desktop">
                 @include('partials.sidebar')
             </div>
-            <main class="flex-1 overflow-x-hidden p-3 sm:p-10 pt-8 pb-10 mt-0 sm:mt-1 space-y-10 md:ml-20 lg:ml-[20.5rem] transition-all duration-300">
+            <main data-sidebar-offset data-sidebar-offset-breakpoint="md" data-sidebar-offset-open="20.5rem" data-sidebar-offset-closed="5.5rem" class="flex-1 overflow-x-hidden p-3 sm:p-10 pt-8 pb-10 mt-0 sm:mt-1 space-y-10 md:ml-20 lg:ml-[20.5rem] transition-all duration-300">
                 @yield('content')
             </main>
         </div>
@@ -1343,7 +1418,451 @@
         })();
     </script>
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const notifToggle = document.getElementById('notifToggle');
+            const notifMenu = document.getElementById('notifMenu');
+            const notifBadge = document.getElementById('notifBadge');
+            const notifList = document.getElementById('notifList');
+            const notifMarkAll = document.getElementById('notifMarkAll');
+            const profileToggle = document.getElementById('profileToggle');
+            const profileMenu = document.getElementById('profileMenu');
+
+            if (!notifToggle || !notifMenu || !notifBadge || !notifList || !notifMarkAll || !profileToggle || !profileMenu) {
+                return;
+            }
+
+            let page = 1;
+            let loading = false;
+
+            const normalizeNotificationUrl = (targetUrl) => {
+                if (!targetUrl) return '';
+                try {
+                    const parsed = new URL(targetUrl, window.location.origin);
+                    if (parsed.origin !== window.location.origin) {
+                        return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+                    }
+                    return parsed.href;
+                } catch (_) {
+                    return targetUrl;
+                }
+            };
+
+            function renderNotifications(items) {
+                const list = Array.isArray(items) ? items : [];
+                const fragment = document.createDocumentFragment();
+                notifList.innerHTML = '';
+
+                if (!list.length) {
+                    const empty = document.createElement('li');
+                    empty.className = 'px-5 py-8 text-center text-sm text-slate-500';
+                    empty.textContent = 'No notifications yet.';
+                    fragment.appendChild(empty);
+                    notifList.appendChild(fragment);
+                    return;
+                }
+
+                list.forEach((n) => {
+                    const unread = !n?.read_at;
+                    const item = document.createElement('li');
+                    item.className = `px-4 py-3 transition-colors cursor-pointer ${unread ? 'bg-blue-50/30' : 'bg-white'} hover:bg-slate-50`;
+
+                    item.innerHTML = `
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-sm ${unread ? 'font-semibold' : 'font-medium'} text-[#0D2B70]">${n?.data?.title || 'Notification'}</p>
+                                <p class="text-xs text-slate-600 mt-1 line-clamp-2">${n?.data?.message || ''}</p>
+                            </div>
+                            <span class="text-[10px] text-gray-400 whitespace-nowrap">${n?.created_at ? new Date(n.created_at).toLocaleString() : ''}</span>
+                        </div>
+                    `;
+
+                    item.addEventListener('click', async () => {
+                        try {
+                            await fetch(`/notifications/${n.id}/read`, {
+                                method: 'POST',
+                                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                                keepalive: true
+                            });
+                        } catch (_) {
+                            // Ignore and allow navigation.
+                        } finally {
+                            fetchCount();
+                        }
+
+                        const targetUrl = n?.data?.action_url || n?.data?.link;
+                        if (targetUrl) {
+                            window.location.href = normalizeNotificationUrl(targetUrl);
+                        }
+                    });
+
+                    fragment.appendChild(item);
+                });
+
+                notifList.appendChild(fragment);
+            }
+
+            function fetchCount() {
+                fetch('/notifications/count', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        notifBadge.textContent = data.display ?? (data.count >= 100 ? '99+' : data.count);
+                        notifBadge.style.display = data.count > 0 ? 'flex' : 'none';
+                    });
+            }
+
+            function fetchItems(reset = false) {
+                if (loading) return;
+                loading = true;
+                if (reset) {
+                    page = 1;
+                    notifList.innerHTML = '';
+                }
+
+                fetch(`/notifications/fetch?page=${page}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        renderNotifications(data.data || []);
+                        page = (data.current_page || 1) + 1;
+                    })
+                    .finally(() => {
+                        loading = false;
+                    });
+            }
+
+            notifToggle.addEventListener('click', () => {
+                notifMenu.classList.toggle('hidden');
+                if (!notifMenu.classList.contains('hidden')) {
+                    fetchItems(true);
+                    fetchCount();
+                }
+            });
+
+            notifMarkAll.addEventListener('click', () => {
+                fetch('/notifications/mark-all', {
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                }).then(() => {
+                    fetchCount();
+                    notifMenu.classList.add('hidden');
+                });
+            });
+
+            profileToggle.addEventListener('click', () => {
+                profileMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!notifMenu.classList.contains('hidden') && !notifMenu.contains(event.target) && !notifToggle.contains(event.target)) {
+                    notifMenu.classList.add('hidden');
+                }
+
+                if (!profileMenu.classList.contains('hidden') && !profileMenu.contains(event.target) && !profileToggle.contains(event.target)) {
+                    profileMenu.classList.add('hidden');
+                }
+            });
+
+            const isAuthed = @json(auth()->check());
+            const channelId = @json(auth()->id());
+            if (window.Echo && isAuthed && channelId) {
+                window.Echo.private(`notifications.${channelId}`).listen('.NewSystemNotification', (event) => {
+                    fetchCount();
+                    if (!notifMenu.classList.contains('hidden')) {
+                        fetchItems(true);
+                    }
+                    if (typeof window.showAppToast === 'function') {
+                        const title = event?.data?.title ? String(event.data.title).trim() : 'New notification';
+                        const message = event?.data?.message ? String(event.data.message).trim() : '';
+                        const toastMessage = message !== '' ? `${title}: ${message}` : title;
+                        const toastType = event?.data?.level ? String(event.data.level).toLowerCase() : 'info';
+                        window.showAppToast(toastMessage, toastType);
+                    }
+                });
+            }
+
+            setInterval(fetchCount, 15000);
+            fetchCount();
+        });
+    </script>
+    <script>
         (function () {
+            const serverValidationErrors = @json($errors->getMessages());
+
+            function cssEscapeValue(value) {
+                const text = String(value ?? '');
+                if (window.CSS && typeof window.CSS.escape === 'function') {
+                    return window.CSS.escape(text);
+                }
+                return text.replace(/["\\]/g, '\\$&');
+            }
+
+            function isVisibleElement(element) {
+                if (!(element instanceof HTMLElement)) return false;
+                if (element.hidden) return false;
+                if (element.closest('[hidden]')) return false;
+                if (element.closest('.hidden')) return false;
+                return true;
+            }
+
+            function revealErrorContext(element) {
+                if (!(element instanceof HTMLElement)) return;
+                let parent = element.parentElement;
+                let depth = 0;
+                while (parent && depth < 6) {
+                    if (parent.classList.contains('hidden')) {
+                        parent.classList.remove('hidden');
+                    }
+                    if (parent.classList.contains('detail-input')) {
+                        parent.classList.remove('hidden');
+                    }
+                    if (parent.hasAttribute('x-show') && parent.style.display === 'none') {
+                        parent.style.display = '';
+                    }
+                    parent = parent.parentElement;
+                    depth += 1;
+                }
+            }
+
+            function fieldLabelText(field) {
+                if (!(field instanceof HTMLElement)) return 'This field';
+
+                if (field instanceof HTMLInputElement && (field.type === 'radio' || field.type === 'checkbox')) {
+                    const fieldset = field.closest('fieldset');
+                    const legend = fieldset ? fieldset.querySelector('legend') : null;
+                    if (legend && String(legend.textContent || '').trim() !== '') {
+                        return String(legend.textContent || '').replace(/\s+/g, ' ').replace(/\*/g, '').trim();
+                    }
+
+                    const questionCard = field.closest('.question-card, td, .relative, .pds-subsection');
+                    if (questionCard) {
+                        const prompt = Array.from(questionCard.querySelectorAll('p, h3, h4, .floating-label, label'))
+                            .find((node) => {
+                                if (!(node instanceof HTMLElement)) return false;
+                                if (node.closest('label') && node !== node.closest('label')) return false;
+                                const text = String(node.textContent || '').replace(/\s+/g, ' ').trim();
+                                if (text === '' || /^(yes|no)$/i.test(text)) return false;
+                                return true;
+                            });
+                        if (prompt) {
+                            return String(prompt.textContent || '').replace(/\s+/g, ' ').replace(/\*/g, '').trim();
+                        }
+                    }
+                }
+
+                const byFor = field.id
+                    ? document.querySelector(`label[for="${cssEscapeValue(field.id)}"]`)
+                    : null;
+                const label = byFor || field.closest('label');
+                const rawLabel = label ? label.textContent : (field.getAttribute('aria-label') || field.getAttribute('placeholder') || field.name || 'This field');
+                return String(rawLabel || 'This field')
+                    .replace(/\s+/g, ' ')
+                    .replace(/\*/g, '')
+                    .trim() || 'This field';
+            }
+
+            function bracketNameFromErrorKey(key) {
+                const parts = String(key || '').split('.').filter(Boolean);
+                if (!parts.length) return '';
+                let output = parts[0];
+                for (let i = 1; i < parts.length; i += 1) {
+                    output += `[${parts[i]}]`;
+                }
+                return output;
+            }
+
+            function findFieldByErrorKey(key) {
+                const rawKey = String(key || '').trim();
+                if (rawKey === '') return null;
+
+                const exactName = document.querySelector(`[name="${cssEscapeValue(rawKey)}"]`);
+                if (exactName) return exactName;
+
+                const bracketName = bracketNameFromErrorKey(rawKey);
+                if (bracketName) {
+                    const bracketMatch = document.querySelector(`[name="${cssEscapeValue(bracketName)}"]`);
+                    if (bracketMatch) return bracketMatch;
+                }
+
+                const parts = rawKey.split('.');
+                if (parts.length >= 2 && /^\d+$/.test(parts[1])) {
+                    const arrayFields = Array.from(document.querySelectorAll(`[name="${cssEscapeValue(parts[0])}[]"]`));
+                    const indexedField = arrayFields[Number(parts[1])];
+                    if (indexedField) return indexedField;
+                }
+
+                const idGuess = document.getElementById(rawKey.replace(/\./g, '_'));
+                if (idGuess) return idGuess;
+
+                return null;
+            }
+
+            function firstVisibleErrorMessage(scope = document) {
+                return Array.from(scope.querySelectorAll('.error-message'))
+                    .find((node) => {
+                        if (!(node instanceof HTMLElement)) return false;
+                        if (!isVisibleElement(node)) return false;
+                        return String(node.textContent || '').trim() !== '';
+                    }) || null;
+            }
+
+            function findFieldNearMessage(messageEl) {
+                if (!(messageEl instanceof HTMLElement)) return null;
+                const container = messageEl.parentElement;
+                if (!container) return null;
+                return container.querySelector('input, select, textarea') || container.previousElementSibling || null;
+            }
+
+            function firstErrorField(scope = document) {
+                const errorField = Array.from(scope.querySelectorAll('.error-field'))
+                    .find((node) => node instanceof HTMLElement && isVisibleElement(node));
+                if (errorField) return errorField;
+
+                const invalidField = Array.from(scope.querySelectorAll('input, select, textarea'))
+                    .find((node) => node instanceof HTMLElement && node.getAttribute('aria-invalid') === 'true' && isVisibleElement(node));
+                if (invalidField) return invalidField;
+
+                const messageEl = firstVisibleErrorMessage(scope);
+                if (messageEl) {
+                    return findFieldNearMessage(messageEl);
+                }
+
+                return null;
+            }
+
+            function errorMessageForField(field, fallbackMessage = '') {
+                if (!(field instanceof HTMLElement)) {
+                    return fallbackMessage || 'Please review the highlighted field.';
+                }
+
+                const nearbyMessage = field.parentElement?.querySelector('.error-message');
+                const nearbyText = nearbyMessage ? String(nearbyMessage.textContent || '').trim() : '';
+                if (nearbyText) return nearbyText;
+
+                if ('validationMessage' in field) {
+                    const nativeMessage = String(field.validationMessage || '').trim();
+                    if (nativeMessage) return nativeMessage;
+                }
+
+                return fallbackMessage || 'Please review the highlighted field.';
+            }
+
+            function scrollFieldIntoView(field) {
+                if (!(field instanceof HTMLElement)) return;
+                const target = errorScrollTarget(field);
+                const stickyHeader = document.querySelector('header.sticky');
+                const headerOffset = stickyHeader instanceof HTMLElement ? stickyHeader.getBoundingClientRect().height + 24 : 120;
+                const rect = target.getBoundingClientRect();
+                const absoluteTop = window.scrollY + rect.top - headerOffset;
+                window.scrollTo({
+                    top: Math.max(absoluteTop, 0),
+                    behavior: 'smooth',
+                });
+            }
+
+            function errorScrollTarget(field) {
+                if (!(field instanceof HTMLElement)) return field;
+                return field.closest(
+                    '.question-card, .education-entry, .entry-card, .bg-gray-50, .pds-subsection, .pds-soft-panel, td, .relative'
+                ) || field;
+            }
+
+            function pulseErrorContainer(field) {
+                const target = errorScrollTarget(field);
+                if (!(target instanceof HTMLElement)) return;
+                target.classList.add('error-container-focus');
+                window.setTimeout(() => {
+                    target.classList.remove('error-container-focus');
+                }, 2600);
+            }
+
+            let lastAnnouncedError = { key: '', at: 0 };
+
+            function announceFieldError(field, message, options = {}) {
+                if (!(field instanceof HTMLElement)) return;
+
+                revealErrorContext(field);
+                field.classList.add('error-field');
+                pulseErrorContainer(field);
+                scrollFieldIntoView(field);
+
+                window.setTimeout(() => {
+                    if (typeof field.focus === 'function') {
+                        try {
+                            field.focus({ preventScroll: true });
+                        } catch (_) {
+                            field.focus();
+                        }
+                    }
+                }, 180);
+
+                const label = fieldLabelText(field);
+                const finalMessage = `${label}: ${message}`;
+                const now = Date.now();
+                if (lastAnnouncedError.key === finalMessage && now - lastAnnouncedError.at < 1500) {
+                    return;
+                }
+                lastAnnouncedError = { key: finalMessage, at: now };
+
+                if (typeof window.showAppToast === 'function' && options.toast !== false) {
+                    window.showAppToast(finalMessage, 'error', options.duration || 6500);
+                }
+            }
+
+            function handleServerValidationErrors() {
+                const entries = Object.entries(serverValidationErrors || {});
+                if (!entries.length) return;
+
+                const [firstKey, firstMessages] = entries[0];
+                const firstField = findFieldByErrorKey(firstKey) || firstErrorField(document);
+                const firstMessage = Array.isArray(firstMessages) && firstMessages.length
+                    ? String(firstMessages[0] || '').trim()
+                    : 'Please review the highlighted field.';
+
+                if (firstField) {
+                    announceFieldError(firstField, firstMessage, { duration: 7200 });
+                    return;
+                }
+
+                if (typeof window.showAppToast === 'function') {
+                    window.showAppToast(firstMessage, 'error', 7200);
+                }
+            }
+
+            let pendingInvalidField = null;
+            let invalidFlushTimer = null;
+
+            document.addEventListener('invalid', function (event) {
+                const field = event.target;
+                if (!(field instanceof HTMLElement)) return;
+                pendingInvalidField = pendingInvalidField || field;
+                field.classList.add('error-field');
+
+                window.clearTimeout(invalidFlushTimer);
+                invalidFlushTimer = window.setTimeout(() => {
+                    if (!pendingInvalidField) return;
+                    const message = errorMessageForField(pendingInvalidField);
+                    announceFieldError(pendingInvalidField, message);
+                    pendingInvalidField = null;
+                }, 0);
+            }, true);
+
+            document.addEventListener('submit', function (event) {
+                const form = event.target;
+                if (!(form instanceof HTMLFormElement)) return;
+
+                window.setTimeout(() => {
+                    const field = firstErrorField(form);
+                    if (!field) return;
+                    const message = errorMessageForField(field);
+                    announceFieldError(field, message);
+                }, 0);
+            }, true);
+
+            document.addEventListener('DOMContentLoaded', function () {
+                if (Object.keys(serverValidationErrors || {}).length > 0) {
+                    window.setTimeout(handleServerValidationErrors, 220);
+                }
+            });
+
             function clearPdsDraftStorage() {
                 const prefixes = ['dilg-car:pds:', 'pds:'];
                 const stores = [window.localStorage, window.sessionStorage];

@@ -93,13 +93,14 @@
 
         .pds-form-banner-title .material-icons {
             font-size: clamp(1.6rem, 1.35rem + 0.55vw, 2rem);
-            color: rgba(255, 255, 255, 0.92);
+            color: #d5e5ff;
         }
 
         .pds-form-banner strong {
             display: inline-block;
             font-size: clamp(1.45rem, 1.2rem + 0.7vw, 1.95rem);
             line-height: 1.15;
+            color: #eef4ff;
         }
 
         .pds-form-banner p {
@@ -111,6 +112,13 @@
             display: flex;
             flex-wrap: wrap;
             gap: 0.6rem;
+        }
+
+        .pds-form-banner-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 0.75rem;
         }
 
         .pds-form-banner-chip {
@@ -125,6 +133,11 @@
             line-height: 1.1;
         }
 
+        button.pds-form-banner-chip {
+            color: inherit;
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+
         a.pds-form-banner-chip {
             text-decoration: none;
             color: inherit;
@@ -135,6 +148,41 @@
             background: rgba(255, 255, 255, 0.2);
             transform: translateY(-1px);
             box-shadow: 0 10px 18px rgba(8, 26, 67, 0.14);
+        }
+
+        button.pds-form-banner-chip:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(8, 26, 67, 0.14);
+        }
+
+        .pds-form-banner-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            border-radius: 0.95rem;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+            font-size: 0.88rem;
+            font-weight: 700;
+            line-height: 1.1;
+            box-shadow: 0 12px 24px rgba(8, 26, 67, 0.16);
+            transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+        }
+
+        .pds-form-banner-action:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.24);
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(8, 26, 67, 0.18);
+        }
+
+        .pds-form-banner-action:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
         }
 
         .pds-form-section {
@@ -360,6 +408,12 @@
                         <span class="material-icons !text-sm">school</span>
                         Section III: Educational Background
                     </a>
+                </div>
+                <div class="pds-form-banner-actions">
+                    <button type="button" id="pdsPreviewBtn" class="pds-form-banner-action">
+                        <span class="material-icons !text-base">visibility</span>
+                        Preview PDS
+                    </button>
                 </div>
             </div>
             <!-- Personal Information Section -->
@@ -3116,7 +3170,7 @@ function addPdsEducationDays(date, days) {
                     id="pdsPdfPreviewFrame"
                     title="PDS PDF Preview"
                     src="about:blank"
-                    data-preview-src="/export-pds?preview=1&force_fpdi=1"
+                    data-preview-src="{{ route('pds.preview') }}"
                     class="w-full h-full"
                 ></iframe>
             </div>

@@ -42,6 +42,22 @@
       color: rgba(255, 255, 255, 0.82);
     }
 
+    .wes-banner-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .wes-banner-title .material-icons {
+      font-size: 1.8rem;
+      color: rgba(255, 255, 255, 0.96);
+    }
+
+    .wes-banner-title strong {
+      font-size: clamp(1.2rem, 1rem + 0.65vw, 1.7rem);
+      line-height: 1.1;
+    }
+
     .wes-banner-meta {
       display: flex;
       flex-wrap: wrap;
@@ -179,21 +195,69 @@
     <input type="hidden" name="after_action" id="after_action" value="{{ $wesAfterAction }}">
 
     <main class="wes-page {{ $simple ? 'w-full max-w-none' : 'max-w-full md:max-w-6xl mx-auto' }}" x-data="{
-                entries: (() => {
-                  let data = {{ old('entries') ? json_encode(old('entries')) : ($workEntries->isEmpty() ? json_encode([['start_date' => '', 'end_date' => '', 'position' => '', 'office' => '', 'supervisor' => '', 'agency' => '', 'accomplishments' => [''], 'duties' => [''], 'isDisplayed' => true,]]) : $workEntries->toJson()) }};
-                  return data.map(entry => ({
-                    ...entry,
-                    start_date: entry.start_date ? new Date(entry.start_date).toLocaleDateString('en-CA').split('T')[0] : '',
-                    end_date: entry.end_date ? new Date(entry.end_date).toLocaleDateString('en-CA').split('T')[0] : '',
-                    present: entry.end_date === null,
-                  }));
-                })(),
-              }" id="workSheet">
+                draftKey: 'dilg-car:pds:wes:draft:v1',
+                normalizeEntries(rows) {
+                  const source = Array.isArray(rows) && rows.length ? rows : [{
+                    start_date: '',
+                    end_date: '',
+                    position: '',
+                    office: '',
+                    supervisor: '',
+                    agency: '',
+                    accomplishments: [''],
+                    duties: [''],
+                    isDisplayed: true,
+                  }];
+
+                  return source.map((entry) => {
+                    const startDate = entry.start_date ? new Date(entry.start_date).toLocaleDateString('en-CA').split('T')[0] : '';
+                    const endDate = entry.end_date ? new Date(entry.end_date).toLocaleDateString('en-CA').split('T')[0] : '';
+                    const accomplishments = Array.isArray(entry.accomplishments) && entry.accomplishments.length ? entry.accomplishments : [''];
+                    const duties = Array.isArray(entry.duties) && entry.duties.length ? entry.duties : [''];
+                    const isDisplayed = entry.isDisplayed === false || entry.isDisplayed === 0 || entry.isDisplayed === '0' ? false : true;
+
+                    return {
+                      ...entry,
+                      start_date: startDate,
+                      end_date: endDate,
+                      accomplishments,
+                      duties,
+                      isDisplayed,
+                      present: entry.present === true || entry.present === 1 || entry.present === '1' || entry.end_date === null,
+                    };
+                  });
+                },
+                loadEntries() {
+                  const serverData = {{ old('entries') ? json_encode(old('entries')) : ($workEntries->isEmpty() ? json_encode([['start_date' => '', 'end_date' => '', 'position' => '', 'office' => '', 'supervisor' => '', 'agency' => '', 'accomplishments' => [''], 'duties' => [''], 'isDisplayed' => true,]]) : $workEntries->toJson()) }};
+                  try {
+                    const saved = window.localStorage.getItem(this.draftKey);
+                    if (saved) {
+                      const parsed = JSON.parse(saved);
+                      if (Array.isArray(parsed?.entries)) {
+                        return this.normalizeEntries(parsed.entries);
+                      }
+                    }
+                  } catch (_) {
+                    // Ignore malformed local drafts and fall back to server state.
+                  }
+                  return this.normalizeEntries(serverData);
+                },
+                persistDraft() {
+                  try {
+                    window.localStorage.setItem(this.draftKey, JSON.stringify({ entries: this.entries }));
+                  } catch (_) {
+                    // Ignore storage write failures.
+                  }
+                },
+                entries: [],
+              }" x-init="entries = loadEntries(); $watch('entries', () => persistDraft())" id="workSheet">
 
       <div class="wes-banner">
         <div>
-          <strong class="text-lg sm:text-xl font-semibold">Complete the Work Experience Sheet with relevant employment details.</strong>
-          <p>The add/remove entry flow and autosave behavior remain the same. This update only improves the page presentation.</p>
+          <div class="wes-banner-title">
+            <span class="material-icons">work_history</span>
+            <strong class="font-semibold">Work Experience Sheet</strong>
+          </div>
         </div>
         <div class="wes-banner-meta">
           <span class="wes-banner-chip">

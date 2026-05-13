@@ -1,59 +1,227 @@
 @extends('layout.pds_layout')
 @section('title','Work Experience')
 @section('content')
+@php
+    $simple = in_array(request()->input('simple'), [1, '1', true, 'true'], true);
+@endphp
+<style>
+    .pds-flow-page {
+        position: relative;
+        color: #163053;
+        scroll-behavior: smooth;
+    }
+
+    .pds-flow-page::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        background:
+            radial-gradient(circle at top left, rgba(13, 91, 215, 0.14), transparent 28%),
+            radial-gradient(circle at top right, rgba(0, 44, 118, 0.08), transparent 24%),
+            linear-gradient(180deg, #f7faff 0%, #edf3fb 100%);
+    }
+
+    .pds-flow-banner {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding: 1rem 1.1rem;
+        border: 1px solid rgba(164, 188, 227, 0.45);
+        border-radius: 1.25rem;
+        background: linear-gradient(135deg, rgba(0, 44, 118, 0.92) 0%, rgba(17, 94, 201, 0.9) 100%);
+        color: #fff;
+        box-shadow: 0 18px 40px rgba(14, 36, 82, 0.18);
+    }
+
+    .pds-flow-banner p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.82);
+    }
+
+    .pds-flow-banner-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.7rem;
+    }
+
+    .pds-flow-banner-title .material-icons {
+        font-size: clamp(1.6rem, 1.35rem + 0.55vw, 2rem);
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .pds-flow-banner-title strong {
+        display: inline-block;
+        font-size: clamp(1.45rem, 1.2rem + 0.7vw, 1.95rem);
+        line-height: 1.15;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .pds-flow-banner-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+    }
+
+    .pds-flow-banner-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.42rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.12);
+        font-size: 0.78rem;
+        line-height: 1.1;
+    }
+
+    .pds-flow-section {
+        position: relative;
+        overflow: hidden;
+        scroll-margin-top: 6.5rem;
+        border: 1px solid rgba(153, 176, 214, 0.32);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 250, 255, 0.96) 100%);
+        box-shadow: 0 16px 40px rgba(15, 36, 79, 0.08), 0 2px 8px rgba(15, 36, 79, 0.04);
+    }
+
+    .pds-flow-section::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: linear-gradient(90deg, #002c76 0%, #2563eb 56%, #7fb2ff 100%);
+    }
+
+    .pds-section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+    }
+
+    .pds-section-icon {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 2.9rem;
+        height: 2.9rem;
+        margin-right: 0 !important;
+        border-radius: 0.95rem;
+        background: linear-gradient(135deg, #e6efff 0%, #f7faff 100%);
+        color: #002c76;
+        box-shadow: inset 0 0 0 1px rgba(115, 151, 210, 0.22);
+    }
+
+    .pds-primary-action,
+    .pds-submit-button,
+    .pds-back-button {
+        border-radius: 0.95rem !important;
+        box-shadow: 0 12px 24px rgba(0, 44, 118, 0.14);
+    }
+
+    a.pds-flow-banner-chip {
+        text-decoration: none;
+        color: inherit;
+        transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    a.pds-flow-banner-chip:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(8, 26, 67, 0.14);
+    }
+
+    .pds-empty-state {
+        border: 1px dashed #c8d7ef;
+        background: linear-gradient(180deg, #f8fbff 0%, #f1f6ff 100%) !important;
+    }
+
+    .pds-table-shell {
+        border-color: #d7e3f5 !important;
+        box-shadow: 0 10px 24px rgba(15, 36, 79, 0.05);
+    }
+
+    .pds-submit-bar {
+        position: sticky;
+        bottom: 1rem;
+        z-index: 20;
+        padding: 1rem;
+        border: 1px solid rgba(162, 183, 218, 0.4);
+        border-radius: 1.15rem;
+        background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 18px 40px rgba(15, 36, 79, 0.12);
+    }
+
+    .pds-submit-button {
+        background: linear-gradient(135deg, #0d5bd7 0%, #002c76 100%) !important;
+    }
+
+    .pds-warning-footer {
+        border: 1px solid rgba(231, 188, 110, 0.4);
+        border-radius: 1rem;
+        background: linear-gradient(180deg, rgba(255, 248, 231, 0.95) 0%, rgba(255, 252, 245, 0.98) 100%);
+        color: #70511b;
+        box-shadow: 0 12px 28px rgba(122, 84, 19, 0.08);
+    }
+</style>
 <!-- Main Content -->
-<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <form id="myForm" method="POST" action='/pds/submit_c2/display_c3'>
+<main class="pds-flow-page {{ $simple ? 'w-full max-w-none' : 'max-w-7xl mx-auto' }} -mt-6 sm:-mt-8 px-4 sm:px-6 lg:px-8 pt-0 pb-8">
+        <form id="myForm" class="space-y-8" method="POST" action='/pds/submit_c2/display_c3'>
             @csrf
+            <div class="pds-flow-banner">
+                <div class="pds-flow-banner-title">
+                    <span class="material-icons">workspace_premium</span>
+                    <strong>Eligibility and Work Experience</strong>
+                </div>
+                <div class="pds-flow-banner-meta">
+                    <a href="#eligibility-section" class="pds-flow-banner-chip">
+                        <span class="material-icons text-sm">badge</span>
+                        Eligibility records
+                    </a>
+                    <a href="#work-experience-section" class="pds-flow-banner-chip">
+                        <span class="material-icons text-sm">work_history</span>
+                        Employment history
+                    </a>
+                </div>
+            </div>
 
             <!-- Civil Service Eligibility Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 mb-8 animate-slide-in">
+            <section id="eligibility-section" class="pds-flow-section bg-white rounded-2xl shadow-xl p-4 sm:p-8 mb-8 animate-slide-in">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-                    <div class="flex items-center mb-3 sm:mb-0">
-                        <span class="material-icons text-blue-600 mr-3 text-2xl sm:text-3xl">verified</span>
-                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">IV. CIVIL SERVICE ELIGIBILITY</h2>
+                    <div class="pds-section-title mb-3 sm:mb-0">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">verified</span>
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Eligibility</h2>
                     </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-3 mb-6">
-                    <button type="button" id="add-civil-service-btn" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base">
+                    <button type="button" id="add-civil-service-btn" class="pds-primary-action flex items-center justify-center w-full sm:w-auto sm:ml-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base">
                         <span class="material-icons mr-2 text-sm sm:text-base">add_circle</span>
                         Add Eligibility
-                    </button>
-                    <button id="clear-work-exp-btn" class="flex items-center justify-center px-4 py-2 bg-white-500 text-white text-sm sm:text-base cursor-not-allowed opacity-50" disabled>
-                        <span class="material-icons mr-2 text-sm sm:text-base">delete</span>
-                        Clear Eligibility
                     </button>
                 </div>
 
                 <!-- Empty State -->
-                <div id="civil-service-empty" class="hidden text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
+                <div id="civil-service-empty" class="pds-empty-state hidden text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
                     <span class="material-icons text-4xl sm:text-6xl text-gray-300 mb-4">badge</span>
                     <p class="text-gray-500 mb-4 text-sm sm:text-base">No civil service eligibility entries yet.</p>
                     <p class="text-xs sm:text-sm text-gray-400">Click "Add Eligibility" to get started.</p>
                 </div>
 
                 <!-- Civil Service Table -->
-                <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+                <div class="pds-table-shell overflow-x-auto rounded-lg shadow-sm border border-gray-200">
                     <table id="civil-service-table" class="modern-table civil-table w-full min-w-[1080px]">
                         <thead>
                             <tr>
-                                <th class="rounded-tl-lg text-xs sm:text-sm p-2 sm:p-3">27. CES/CSEE/CAREER SERVICE/RA 1080 (BOARD/ BAR)/UNDER SPECIAL LAWS/CATEGORY II/ IV ELIGIBILITY and ELIGIBILITIES FOR UNIFORMED PERSONNEL</th>
-                                <th class="text-xs sm:text-sm p-2 sm:p-3">RATING<br>(If Applicable)</th>
-                                <th class="text-xs sm:text-sm p-2 sm:p-3">DATE OF EXAMINATION / CONFERMENT</th>
-                                <th class="text-xs sm:text-sm p-2 sm:p-3">PLACE OF EXAMINATION / CONFERMENT</th>
+                                <th rowspan="2" class="rounded-tl-lg text-xs sm:text-sm p-2 sm:p-3">27. CES/CSEE/CAREER SERVICE/RA 1080 (BOARD/ BAR)/UNDER SPECIAL LAWS/CATEGORY II/ IV ELIGIBILITY and ELIGIBILITIES FOR UNIFORMED PERSONNEL</th>
+                                <th rowspan="2" class="text-xs sm:text-sm p-2 sm:p-3">RATING<br>(If Applicable)</th>
+                                <th rowspan="2" class="text-xs sm:text-sm p-2 sm:p-3">DATE OF EXAMINATION / CONFERMENT</th>
+                                <th rowspan="2" class="text-xs sm:text-sm p-2 sm:p-3">PLACE OF EXAMINATION / CONFERMENT</th>
                                 <th class="text-xs sm:text-sm p-2 sm:p-3" colspan="2">LICENSE (IF APPLICABLE)</th>
-                                <th class="rounded-tr-lg text-center text-xs sm:text-sm p-2 sm:p-3">ACTIONS</th>
+                                <th rowspan="2" class="rounded-tr-lg text-center text-xs sm:text-sm p-2 sm:p-3">ACTIONS</th>
                             </tr>
                             <tr class="license-subhead border-l-gray-200 border-t border-b">
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
                                 <th class="text-xs sm:text-sm p-1.5 sm:p-2">NUMBER</th>
                                 <th class="text-xs sm:text-sm p-1.5 sm:p-2">VALID UNTIL</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -68,40 +236,27 @@
             </section>
 
             <!-- Work Experience Section -->
-            <section class="bg-white rounded-2xl shadow-xl p-4 sm:p-8 mb-8 animate-slide-in">
+            <section id="work-experience-section" class="pds-flow-section bg-white rounded-2xl shadow-xl p-4 sm:p-8 mb-8 animate-slide-in">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-                    <div class="flex items-center mb-3 sm:mb-0">
-                        <span class="material-icons text-blue-600 mr-3 text-2xl sm:text-3xl">work_history</span>
+                    <div class="pds-section-title mb-3 sm:mb-0">
+                        <span class="material-icons pds-section-icon text-blue-600 text-2xl sm:text-3xl">work_history</span>
                         <h2 class="text-xl sm:text-2xl font-bold text-gray-900">V. WORK EXPERIENCE</h2>
                     </div>
-                </div>
-
-                <p class="text-gray-600 mb-6 text-xs sm:text-sm">
-                    Include private employment. Start from your recent work. Description of duties should be indicated in the attached Work Experience Sheet.
-                </p>
-
-                <!-- Action Buttons -->
-                <div class="flex flex-col sm:flex-row gap-3 mb-6">
-                    <button type="button" id="add-work-exp-btn" class="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base">
+                    <button type="button" id="add-work-exp-btn" class="pds-primary-action flex items-center justify-center w-full sm:w-auto sm:ml-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base">
                         <span class="material-icons mr-2 text-sm sm:text-base">add_circle</span>
                         Add Work Experience
-                    </button>
-
-                    <button class="flex items-center justify-center px-4 py-2 bg-white-500 text-white text-sm sm:text-base cursor-not-allowed opacity-50" disabled>
-                        <span class="material-icons mr-2 text-sm sm:text-base">delete</span>
-                        Clear Work Experience
                     </button>
                 </div>
 
                 <!-- Empty State -->
-                <div id="work-exp-empty" class="hidden text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
+                <div id="work-exp-empty" class="pds-empty-state hidden text-center py-8 sm:py-12 bg-gray-50 rounded-lg">
                     <span class="material-icons text-4xl sm:text-6xl text-gray-300 mb-4">work_off</span>
                     <p class="text-gray-500 mb-4 text-sm sm:text-base">No work experience entries yet.</p>
                     <p class="text-xs sm:text-sm text-gray-400">Click "Add Work Experience" to get started.</p>
                 </div>
 
                 <!-- Work Experience Table -->
-                <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200">
+                <div class="pds-table-shell overflow-x-auto rounded-lg shadow-sm border border-gray-200">
                     <table id="work-exp-table" class="modern-table w-full min-w-[1000px]">
                         <thead>
                             <tr>
@@ -125,18 +280,18 @@
             </section>
 
             <!-- Navigation -->
-            <div class="flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
-                <button type="button" onclick="window.location.href='{{ route('display_c1', ['simple' => 1]) }}'" class="use-loader w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center">
+            <div class="pds-submit-bar flex flex-col sm:flex-row justify-between items-center mt-8 gap-4">
+                <button type="button" onclick="window.location.href='{{ route('display_c1', ['simple' => 1]) }}'" class="pds-back-button use-loader w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center">
                     <span class="material-icons mr-2">arrow_back</span>
                     Previous
                 </button>
-                <button id="save-work-exp" type="submit" class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
+                <button id="save-work-exp" type="submit" class="pds-submit-button w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center">
                     Save
                     <span class="material-icons ml-2">arrow_forward</span>
                 </button>
             </div>
         </form>  <!-- end form database entry -->
-        <footer class="mt-8 sm:mt-12 text-center text-xs sm:text-sm text-gray-600 px-4">
+        <footer class="pds-warning-footer mt-8 sm:mt-12 text-center text-xs sm:text-sm text-gray-600 px-4 py-4">
             <p class="mb-2">
                 <strong>WARNING:</strong> Any misrepresentation made in the Personal Data Sheet and the Work Experience Sheet shall cause the filing of administrative/criminal case/s against the person concerned.
             </p>
@@ -209,6 +364,7 @@
         }
 
         .civil-table thead th {
+            text-align: center;
             text-transform: uppercase;
         }
 
@@ -218,6 +374,48 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.02em;
+        }
+
+        #civil-service-table thead {
+            background: linear-gradient(135deg, #071a46 0%, #0f2f7a 42%, #1b56c5 100%);
+        }
+
+        #civil-service-table thead th,
+        #civil-service-table thead .license-subhead th {
+            background: transparent !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        #civil-service-table thead th:first-child {
+            border-left: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        #civil-service-table thead tr:first-child th {
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        #civil-service-table thead .license-subhead th {
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        #work-exp-table thead th {
+            text-align: center;
+        }
+
+        #work-exp-table thead {
+            background: linear-gradient(135deg, #071a46 0%, #0f2f7a 42%, #1b56c5 100%);
+        }
+
+        #work-exp-table thead th {
+            background: transparent !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+            border-right: 1px solid rgba(255, 255, 255, 0.18);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        #work-exp-table thead th:first-child {
+            border-left: 1px solid rgba(255, 255, 255, 0.18);
         }
 
         .modern-table tbody tr {
@@ -284,6 +482,7 @@
         let CIVIL_SERVICE_ELIGIBILITY_OPTIONS = [...DEFAULT_CIVIL_SERVICE_ELIGIBILITY_OPTIONS];
 
         const CIVIL_SERVICE_ELIGIBILITY_OTHERS_VALUE = '__OTHERS__';
+        const CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE = '__ALL_LEVELS__';
 
         // Education level flags passed from controller
         const HAS_COLLEGE_DEGREE = @json($has_college_degree ?? false);
@@ -332,6 +531,10 @@
             return normalizedLevel.includes('second level');
         }
 
+        function normalizeCivilServiceEligibilityLevel(value) {
+            return String(value || '').trim().toLowerCase();
+        }
+
         function isCivilServiceCscProfessionalOption(option) {
             const normalizedName = normalizeCivilServiceEligibilityName(option?.name || '');
             return normalizedName.includes('csc professional') || normalizedName.includes('career service professional');
@@ -363,6 +566,41 @@
 
             // Default: show all (fallback)
             return CIVIL_SERVICE_ELIGIBILITY_OPTIONS;
+        }
+
+        function getSelectableCivilServiceEligibilityLevels() {
+            const seenLevels = new Set();
+            const orderedLevels = [];
+
+            getSelectableCivilServiceEligibilityOptions().forEach((option) => {
+                const rawLevel = String(option?.level || '').trim();
+                const normalizedLevel = normalizeCivilServiceEligibilityLevel(rawLevel);
+                if (!normalizedLevel || seenLevels.has(normalizedLevel)) {
+                    return;
+                }
+
+                seenLevels.add(normalizedLevel);
+                orderedLevels.push(rawLevel);
+            });
+
+            return orderedLevels.sort((a, b) => {
+                const first = normalizeCivilServiceEligibilityLevel(a);
+                const second = normalizeCivilServiceEligibilityLevel(b);
+
+                if (first === second) {
+                    return 0;
+                }
+
+                if (first.includes('first level')) {
+                    return -1;
+                }
+
+                if (second.includes('first level')) {
+                    return 1;
+                }
+
+                return a.localeCompare(b);
+            });
         }
 
         function findCivilServicePresetByName(name) {
@@ -409,8 +647,31 @@
                 .replace(/'/g, '&#039;');
         }
 
-        function renderCivilServiceEligibilityOptions(selectedValue) {
-            const selectableOptions = getSelectableCivilServiceEligibilityOptions();
+        function renderCivilServiceEligibilityLevelOptions(selectedLevel) {
+            const selectableLevels = getSelectableCivilServiceEligibilityLevels();
+            const normalizedSelected = normalizeCivilServiceEligibilityLevel(selectedLevel);
+            const hasLevelMatch = selectableLevels.some(
+                (level) => normalizeCivilServiceEligibilityLevel(level) === normalizedSelected
+            );
+            const selectedFilterValue = hasLevelMatch ? String(selectedLevel || '').trim() : CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE;
+
+            return `
+                <option value="${CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE}" ${selectedFilterValue === CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE ? 'selected' : ''}>All Levels</option>
+                ${selectableLevels.map((level) => `
+                    <option value="${escapeCivilServiceOptionHtml(level)}" ${selectedFilterValue === level ? 'selected' : ''}>${escapeCivilServiceOptionHtml(level)}</option>
+                `).join('')}
+            `;
+        }
+
+        function renderCivilServiceEligibilityOptions(selectedValue, selectedLevel = CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE) {
+            const normalizedSelectedLevel = normalizeCivilServiceEligibilityLevel(selectedLevel);
+            const selectableOptions = getSelectableCivilServiceEligibilityOptions().filter((option) => {
+                if (normalizedSelectedLevel === '' || selectedLevel === CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE) {
+                    return true;
+                }
+
+                return normalizeCivilServiceEligibilityLevel(option.level) === normalizedSelectedLevel;
+            });
             const normalizedSelected = normalizeCivilServiceEligibilityName(selectedValue);
             const hasPresetMatch = selectableOptions.some(
                 (option) => normalizeCivilServiceEligibilityName(option.name) === normalizedSelected
@@ -744,6 +1005,7 @@
                             <option value="Casual" ${(!is_new && work_exp_status == 'Casual') ? 'selected' : ''}>Casual</option>
                             <option value="Contractual" ${(!is_new && work_exp_status == 'Contractual') ? 'selected' : ''}>Contractual</option>
                             <option value="Contract of Service" ${(!is_new && work_exp_status == 'Contract of Service') ? 'selected' : ''}>Contract of Service</option>
+                            <option value="Job Order" ${(!is_new && work_exp_status == 'Job Order') ? 'selected' : ''}>Job Order</option>
                         </select>
                     </td>
                     <td>
@@ -800,12 +1062,16 @@
                     <input type="hidden" name="cs_eligibility_id[]" value="${(!is_new && cs_eligibility_id !== null && cs_eligibility_id !== undefined && String(cs_eligibility_id).toLowerCase() !== 'null') ? cs_eligibility_id : ''}">
                     <td>
                         <div class="space-y-2">
-                            <select class="form-input" data-cs-career-select required>
-                                ${renderCivilServiceEligibilityOptions((!is_new) ? cs_eligibility_career : '')}
-                            </select>
+                            <div class="grid gap-2 sm:grid-cols-[11rem_minmax(0,1fr)]">
+                                <select class="form-input" data-cs-career-level-select>
+                                    ${renderCivilServiceEligibilityLevelOptions()}
+                                </select>
+                                <select class="form-input" data-cs-career-select required>
+                                    ${renderCivilServiceEligibilityOptions((!is_new) ? cs_eligibility_career : '')}
+                                </select>
+                            </div>
                             <input type="text" class="form-input hidden" data-cs-career-custom placeholder="Specify eligibility not on list">
                             <input type="hidden" name="cs_eligibility_career[]" data-cs-career-value value="${(!is_new) ? escapeCivilServiceOptionHtml(cs_eligibility_career) : ''}">
-                            <p class="text-[11px] leading-4 text-gray-500">Select from the list. Choose Others if not listed.</p>
                         </div>
                     </td>
                     <td>
@@ -843,11 +1109,12 @@
             }
 
             function initializeCivilServiceCareerInput(row, initialCareerValue = '') {
+                const levelSelectEl = row.querySelector('[data-cs-career-level-select]');
                 const selectEl = row.querySelector('[data-cs-career-select]');
                 const customInputEl = row.querySelector('[data-cs-career-custom]');
                 const hiddenInputEl = row.querySelector('[data-cs-career-value]');
 
-                if (!selectEl || !customInputEl || !hiddenInputEl) {
+                if (!levelSelectEl || !selectEl || !customInputEl || !hiddenInputEl) {
                     return;
                 }
 
@@ -858,30 +1125,70 @@
                 const initialPresetBlocked = isDisallowedElementaryOnlyPreset(initialCareerValue);
 
                 if (initialPresetBlocked) {
+                    levelSelectEl.value = CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE;
                     selectEl.value = '';
                     hiddenInputEl.value = '';
                     customInputEl.value = '';
                     customInputEl.classList.add('hidden');
                     customInputEl.required = false;
                 } else if (matchedPreset) {
+                    levelSelectEl.value = matchedPreset.level;
+                    selectEl.innerHTML = renderCivilServiceEligibilityOptions(matchedPreset.name, matchedPreset.level);
                     selectEl.value = matchedPreset.name;
                     hiddenInputEl.value = matchedPreset.name;
                     customInputEl.value = '';
                     customInputEl.classList.add('hidden');
                     customInputEl.required = false;
                 } else if (String(initialCareerValue || '').trim() !== '') {
+                    levelSelectEl.value = CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE;
+                    selectEl.innerHTML = renderCivilServiceEligibilityOptions(initialCareerValue, CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE);
                     selectEl.value = CIVIL_SERVICE_ELIGIBILITY_OTHERS_VALUE;
                     customInputEl.value = String(initialCareerValue || '').trim();
                     customInputEl.classList.remove('hidden');
                     customInputEl.required = true;
                     hiddenInputEl.value = customInputEl.value;
                 } else {
+                    levelSelectEl.value = CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE;
                     selectEl.value = '';
                     customInputEl.value = '';
                     customInputEl.classList.add('hidden');
                     customInputEl.required = false;
                     hiddenInputEl.value = '';
                 }
+
+                const syncLevelFilteredOptions = () => {
+                    const currentCareerValue = String(hiddenInputEl.value || '').trim();
+                    const selectedLevel = String(levelSelectEl.value || '').trim() || CIVIL_SERVICE_ELIGIBILITY_LEVEL_ALL_VALUE;
+                    const isOthersSelected = String(selectEl.value || '').trim() === CIVIL_SERVICE_ELIGIBILITY_OTHERS_VALUE;
+                    selectEl.innerHTML = renderCivilServiceEligibilityOptions(
+                        isOthersSelected ? currentCareerValue : selectEl.value,
+                        selectedLevel
+                    );
+
+                    if (isOthersSelected) {
+                        selectEl.value = CIVIL_SERVICE_ELIGIBILITY_OTHERS_VALUE;
+                        customInputEl.classList.remove('hidden');
+                        customInputEl.required = true;
+                        hiddenInputEl.value = currentCareerValue;
+                        return;
+                    }
+
+                    const hasMatchingOption = Array.from(selectEl.options).some(
+                        (option) => String(option.value || '').trim() === currentCareerValue
+                    );
+
+                    if (hasMatchingOption && currentCareerValue !== '') {
+                        selectEl.value = currentCareerValue;
+                        hiddenInputEl.value = currentCareerValue;
+                        return;
+                    }
+
+                    selectEl.value = '';
+                    hiddenInputEl.value = '';
+                    customInputEl.value = '';
+                    customInputEl.classList.add('hidden');
+                    customInputEl.required = false;
+                };
 
                 const syncHiddenValue = () => {
                     const selectedValue = String(selectEl.value || '').trim();
@@ -898,6 +1205,7 @@
                     hiddenInputEl.value = selectedValue;
                 };
 
+                levelSelectEl.addEventListener('change', syncLevelFilteredOptions);
                 selectEl.addEventListener('change', syncHiddenValue);
                 customInputEl.addEventListener('input', function () {
                     if (String(selectEl.value || '').trim() === CIVIL_SERVICE_ELIGIBILITY_OTHERS_VALUE) {
@@ -989,12 +1297,25 @@
 
             const autosaveUrl = @json(route('pds.autosave', ['section' => 'c2']));
             const AUTOSAVE_INTERVAL_MS = 30000;
+            const AUTOSAVE_DEBOUNCE_MS = 600;
             let isDirty = false;
             let isSubmitting = false;
             let inFlight = false;
             let queued = false;
+            let autosaveTimer = null;
 
-            const markDirty = () => { isDirty = true; };
+            const scheduleAutosave = () => {
+                if (isSubmitting) return;
+                window.clearTimeout(autosaveTimer);
+                autosaveTimer = window.setTimeout(() => {
+                    saveDraft(false);
+                }, AUTOSAVE_DEBOUNCE_MS);
+            };
+
+            const markDirty = () => {
+                isDirty = true;
+                scheduleAutosave();
+            };
             form.addEventListener('input', markDirty);
             form.addEventListener('change', markDirty);
             form.addEventListener('click', (event) => {
@@ -1004,6 +1325,7 @@
             });
             form.dataset.finalSubmit = form.dataset.finalSubmit || '0';
             form.addEventListener('submit', () => {
+                window.clearTimeout(autosaveTimer);
                 if (form.dataset.finalSubmit === '1') {
                     isSubmitting = true;
                 }
@@ -1081,17 +1403,20 @@
 
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden && isDirty) {
+                    window.clearTimeout(autosaveTimer);
                     saveDraft(true);
                 }
             });
 
             window.addEventListener('pagehide', () => {
+                window.clearTimeout(autosaveTimer);
                 if (!isDirty || isSubmitting || !navigator.sendBeacon) return;
                 const formData = new FormData(form);
                 navigator.sendBeacon(autosaveUrl, formData);
             });
 
             window.addEventListener('beforeunload', () => {
+                window.clearTimeout(autosaveTimer);
                 if (!isDirty || isSubmitting || !navigator.sendBeacon) return;
                 const formData = new FormData(form);
                 navigator.sendBeacon(autosaveUrl, formData);

@@ -7963,6 +7963,7 @@ return array(
     'Tests\\Feature\\PdfUploadTest' => $baseDir . '/tests/Feature/PdfUploadTest.php',
     'Tests\\Feature\\PdsLoadingOverlayTest' => $baseDir . '/tests/Feature/PdsLoadingOverlayTest.php',
     'Tests\\Feature\\ProfileTest' => $baseDir . '/tests/Feature/ProfileTest.php',
+    'Tests\\Feature\\PsgcAddressServiceTest' => $baseDir . '/tests/Feature/PsgcAddressServiceTest.php',
     'Tests\\Feature\\QualificationGatePolicyTest' => $baseDir . '/tests/Feature/QualificationGatePolicyTest.php',
     'Tests\\Feature\\StoreVacancyTest' => $baseDir . '/tests/Feature/StoreVacancyTest.php',
     'Tests\\TestCase' => $baseDir . '/tests/TestCase.php',

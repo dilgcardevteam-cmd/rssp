@@ -8664,6 +8664,7 @@ class ComposerStaticInit3e9315af42cfd31a3e8fa407a23072d2
         'Tests\\Feature\\PdfUploadTest' => __DIR__ . '/../..' . '/tests/Feature/PdfUploadTest.php',
         'Tests\\Feature\\PdsLoadingOverlayTest' => __DIR__ . '/../..' . '/tests/Feature/PdsLoadingOverlayTest.php',
         'Tests\\Feature\\ProfileTest' => __DIR__ . '/../..' . '/tests/Feature/ProfileTest.php',
+        'Tests\\Feature\\PsgcAddressServiceTest' => __DIR__ . '/../..' . '/tests/Feature/PsgcAddressServiceTest.php',
         'Tests\\Feature\\QualificationGatePolicyTest' => __DIR__ . '/../..' . '/tests/Feature/QualificationGatePolicyTest.php',
         'Tests\\Feature\\StoreVacancyTest' => __DIR__ . '/../..' . '/tests/Feature/StoreVacancyTest.php',
         'Tests\\TestCase' => __DIR__ . '/../..' . '/tests/TestCase.php',

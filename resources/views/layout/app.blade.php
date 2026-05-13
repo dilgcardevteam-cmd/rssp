@@ -165,7 +165,7 @@
         </div>
 
         <!-- Main Content -->
-        <main id="page-shell" class="page-enter flex-1 overflow-y-auto pt-0 lg:ml-[20.5rem] transition-all duration-300">
+        <main id="page-shell" data-sidebar-offset data-sidebar-offset-breakpoint="lg" data-sidebar-offset-open="20.5rem" data-sidebar-offset-closed="5.5rem" class="page-enter flex-1 overflow-y-auto pt-0 lg:ml-[20.5rem] transition-all duration-300">
             <header
                 class="sticky top-0 z-40 bg-[#F3F8FF] backdrop-blur px-4 sm:px-8 py-3 flex items-center justify-end gap-6">
                 <div id="notifBell" class="relative group">

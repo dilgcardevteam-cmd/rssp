@@ -1204,15 +1204,23 @@
             let originTop = 0;
             let suppressClick = false;
 
+            const DRAG_PADDING = 16;
             const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
             const getViewportBounds = () => {
                 const rect = button.getBoundingClientRect();
+                const layoutWidth = document.documentElement.clientWidth || window.innerWidth;
+                const layoutHeight = document.documentElement.clientHeight || window.innerHeight;
+                const viewport = window.visualViewport;
+                const viewportLeft = viewport?.offsetLeft ?? 0;
+                const viewportTop = viewport?.offsetTop ?? 0;
+                const viewportWidth = Math.min(layoutWidth, viewport?.width ?? layoutWidth);
+                const viewportHeight = Math.min(layoutHeight, viewport?.height ?? layoutHeight);
                 return {
-                    minLeft: 8,
-                    minTop: 8,
-                    maxLeft: Math.max(8, window.innerWidth - rect.width - 8),
-                    maxTop: Math.max(8, window.innerHeight - rect.height - 8),
+                    minLeft: viewportLeft + DRAG_PADDING,
+                    minTop: viewportTop + DRAG_PADDING,
+                    maxLeft: Math.max(viewportLeft + DRAG_PADDING, viewportLeft + viewportWidth - rect.width - DRAG_PADDING),
+                    maxTop: Math.max(viewportTop + DRAG_PADDING, viewportTop + viewportHeight - rect.height - DRAG_PADDING),
                 };
             };
 
@@ -1223,6 +1231,19 @@
                 button.style.bottom = 'auto';
             };
 
+            const resetToDefaultPosition = () => {
+                button.style.removeProperty('left');
+                button.style.removeProperty('top');
+                button.style.removeProperty('right');
+                button.style.removeProperty('bottom');
+                button.style.removeProperty('inset');
+            };
+
+            const pinToViewportCorner = () => {
+                const bounds = getViewportBounds();
+                applyPosition(bounds.maxLeft, bounds.maxTop);
+            };
+
             const syncToViewport = () => {
                 const rect = button.getBoundingClientRect();
                 const bounds = getViewportBounds();
@@ -1230,6 +1251,26 @@
                     clamp(rect.left, bounds.minLeft, bounds.maxLeft),
                     clamp(rect.top, bounds.minTop, bounds.maxTop)
                 );
+            };
+
+            const scheduleViewportSync = () => {
+                window.requestAnimationFrame(() => {
+                    window.requestAnimationFrame(() => {
+                        pinToViewportCorner();
+                        syncToViewport();
+                    });
+                });
+            };
+
+            const initializePosition = () => {
+                resetToDefaultPosition();
+                scheduleViewportSync();
+                window.setTimeout(() => {
+                    scheduleViewportSync();
+                }, 120);
+                window.setTimeout(() => {
+                    scheduleViewportSync();
+                }, 420);
             };
 
             button.addEventListener('pointerdown', (event) => {
@@ -1301,6 +1342,12 @@
             }, true);
 
             window.addEventListener('resize', syncToViewport);
+            window.addEventListener('scroll', syncToViewport, { passive: true });
+            window.addEventListener('load', initializePosition);
+            window.visualViewport?.addEventListener('resize', syncToViewport);
+            window.visualViewport?.addEventListener('scroll', syncToViewport);
+            window.addEventListener('pageshow', initializePosition);
+            initializePosition();
         }
 
         if (document.readyState === 'loading') {

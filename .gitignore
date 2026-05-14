@@ -1,7 +1,10 @@
+.env
 *.log
 .env
 <<<<<<< HEAD
 =======
+.env
+.env
 .env.backup
 .env.production
 .env

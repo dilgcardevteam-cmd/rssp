@@ -77,6 +77,21 @@ class ExportPDSController
         })->values();
     }
 
+    private function resolveWorkExperienceForExport(Request $request, User $user): Collection
+    {
+        $sessionRows = $request->session()->get('form.c2.all_user_work_exps');
+        $isOwnAuthenticatedExport = Auth::guard('admin')->guest() && Auth::id() === $user->id;
+
+        if ($isOwnAuthenticatedExport && is_array($sessionRows)) {
+            return $this->sortByDateAscendingForExport(collect($sessionRows), 'work_exp_from');
+        }
+
+        return $this->sortByDateAscendingForExport(
+            WorkExperience::where('user_id', $user->id)->get(),
+            'work_exp_from'
+        );
+    }
+
     private function sortByDateDescendingForExport(Collection $rows, string $dateField): Collection
     {
         return $rows->sort(function ($a, $b) use ($dateField) {
@@ -248,10 +263,7 @@ class ExportPDSController
             CivilServiceEligibility::where('user_id', $user->id)->get()
         );
 
-        $workExperience = $this->sortByDateAscendingForExport(
-            WorkExperience::where('user_id', $user->id)->get(),
-            'work_exp_from'
-        );
+        $workExperience = $this->resolveWorkExperienceForExport($request, $user);
 
         // C3
         $voluntaryWork = $this->sortByDateDescendingForExport(
@@ -948,6 +960,10 @@ class ExportPDSController
         $text = trim((string) ($value ?? ''));
         if ($text === '' || strtolower($text) === 'null') {
             return 'N/A';
+        }
+
+        if (strtolower($text) === 'present') {
+            return 'PRESENT';
         }
 
         try {

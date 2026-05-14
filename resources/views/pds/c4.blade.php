@@ -265,7 +265,9 @@
             $hasWorkExperience = !empty($data['work_experience'] ?? []) || !empty($data['work_exp'] ?? []) || !empty($data['work_exps'] ?? []);
         @endphp
         @php
-            $c4GoTo = (request()->boolean('simple') || request()->boolean('open_docs')) ? 'display_wes' : 'display_c5';
+            $c4GoTo = request()->boolean('open_docs')
+                ? 'display_wes'
+                : (request()->boolean('simple') ? 'display_c4' : 'display_c5');
             $c4RouteParams = ['go_to' => $c4GoTo];
             if (request()->boolean('open_docs')) { $c4RouteParams['open_docs'] = 1; }
             if (request()->boolean('simple'))    { $c4RouteParams['simple'] = 1; }
@@ -924,6 +926,32 @@
             </div>
         </div>
 
+        <div id="other-info-success-modal" class="hidden fixed inset-0 z-[2147483002] flex items-center justify-center px-4 pointer-events-none">
+            <div class="absolute inset-0 z-0 bg-slate-900/45 backdrop-blur-sm pointer-events-none"></div>
+            <div class="relative z-10 w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl border border-blue-100 animate-fade-in pointer-events-auto" role="dialog" aria-modal="true" aria-labelledby="other-info-success-title">
+                <div class="bg-gradient-to-br from-[#001a45] via-[#002c76] to-[#0b4ea8] px-6 py-5 text-white sm:px-8">
+                    <div class="flex items-center gap-4">
+                        <span class="material-icons flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-3xl ring-1 ring-white/25">task_alt</span>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-blue-100">PDS Completed</p>
+                            <h3 id="other-info-success-title" class="text-xl font-bold leading-tight sm:text-2xl">Personal Data Sheet created successfully</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-5 px-6 py-6 sm:px-8">
+                    <div class="rounded-xl border border-emerald-100 bg-emerald-50/80 px-4 py-4 text-sm leading-relaxed text-slate-700">
+                        <p class="font-semibold text-slate-900">Preview opened in a new tab.</p>
+                        <p class="mt-2">You may download your generated documents from the <strong>Download Documents</strong> menu.</p>
+                    </div>
+                    <div class="flex justify-end border-t border-slate-100 pt-5">
+                        <button type="button" id="other-info-success-close" class="inline-flex items-center justify-center rounded-lg bg-[#002c76] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/20 hover:bg-[#001f54]">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Warning Footer -->
         <footer class="pds-warning-footer mt-12 text-center text-sm text-gray-600 px-4 py-4">
             <p class="mb-2">
@@ -1265,9 +1293,13 @@
             const modal = document.getElementById('other-info-modal');
             const modalConfirm = document.getElementById('other-info-confirm');
             const modalCancel = document.getElementById('other-info-cancel');
+            const successModal = document.getElementById('other-info-success-modal');
+            const successClose = document.getElementById('other-info-success-close');
+            const successRedirectUrl = @json(route('display_wes', ['simple' => 1]));
             const modalAckOath = document.getElementById('other-info-ack-oath');
             const modalAckLegal = document.getElementById('other-info-ack-legal');
             const focusTargets = [modalConfirm, modalCancel];
+            const successFocusTargets = [successClose];
             const modalConfirmBaseLabel = 'I Declare';
             const modalConfirmDelaySeconds = 5;
             let modalConfirmCountdownTimer = null;
@@ -1293,6 +1325,26 @@
                 if (loaderLive) {
                     loaderLive.textContent = message;
                 }
+            };
+            const hideSystemLoader = () => {
+                const loader = document.getElementById('loader');
+                if (!loader) return;
+
+                loader.classList.add('hidden');
+                loader.classList.remove('pds-loading-nonblocking');
+                loader.removeAttribute('aria-busy');
+            };
+            const showErrorToast = (message) => {
+                if (!message) return;
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification(message, 'error');
+                    return;
+                }
+                if (typeof window.showAppToast === 'function') {
+                    window.showAppToast(message, 'error', 6000);
+                    return;
+                }
+                window.alert(message);
             };
             const canEnableModalConfirm = () => {
                 return Boolean(
@@ -1351,6 +1403,20 @@
                     if (modalCancel) modalCancel.textContent = 'Review';
                 }
             };
+            const toggleSuccessModal = (show) => {
+                if (!successModal) return;
+                successModal.classList.toggle('hidden', !show);
+                document.body.classList.toggle('modal-open', show);
+                if (show) {
+                    try {
+                        successClose?.focus({ preventScroll: true });
+                    } catch (error) {
+                        successClose?.focus();
+                    }
+                } else {
+                    nextBtn?.focus();
+                }
+            };
             if (nextBtn) {
                 nextBtn.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -1360,13 +1426,102 @@
                     toggleModal(true);
                 });
             }
-            const submitOtherInfoForm = () => {
+            const extractErrorMessage = async (response) => {
+                const contentType = response.headers.get('content-type') || '';
+
+                if (contentType.includes('application/json')) {
+                    const payload = await response.json();
+                    if (payload?.message) {
+                        return payload.message;
+                    }
+                    const firstError = payload?.errors && Object.values(payload.errors)[0]?.[0];
+                    if (firstError) {
+                        return firstError;
+                    }
+                } else {
+                    const text = await response.text();
+                    const titleMatch = text.match(/<title>(.*?)<\/title>/i);
+                    if (titleMatch && titleMatch[1]) {
+                        return titleMatch[1].trim();
+                    }
+                }
+
+                return 'Unable to save your Personal Data Sheet right now.';
+            };
+            const submitOtherInfoForm = async () => {
                 if (!form) return;
-                if (typeof form.requestSubmit === 'function') {
-                    form.requestSubmit();
+
+                referenceContactInputs.forEach((input) => validateReferenceContactInput(input));
+
+                if (!form.checkValidity()) {
+                    form.reportValidity();
                     return;
                 }
-                form.submit();
+
+                const previewUrl = @json(route('pds.preview'));
+                const previewWindow = window.open('about:blank', '_blank');
+                const previousConfirmContent = modalConfirm?.innerHTML;
+                const previousNextContent = nextBtn?.innerHTML;
+                const previousCancelDisabled = modalCancel?.disabled ?? false;
+
+                if (nextBtn) {
+                    nextBtn.disabled = true;
+                    nextBtn.innerHTML = '<span class="material-icons mr-2 animate-spin">refresh</span>Saving...';
+                }
+                if (modalConfirm) {
+                    modalConfirm.disabled = true;
+                    modalConfirm.innerHTML = '<span class="material-icons text-base animate-spin">refresh</span>Saving...';
+                }
+                if (modalCancel) {
+                    modalCancel.disabled = true;
+                }
+
+                toggleModal(false);
+                showSystemLoader('Saving changes...');
+
+                try {
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json',
+                        },
+                        credentials: 'same-origin',
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(await extractErrorMessage(response));
+                    }
+
+                    if (previewWindow && !previewWindow.closed) {
+                        previewWindow.location.href = previewUrl;
+                    } else {
+                        window.open(previewUrl, '_blank');
+                    }
+
+                    toggleSuccessModal(true);
+                } catch (error) {
+                    if (previewWindow && !previewWindow.closed) {
+                        previewWindow.close();
+                    }
+
+                    showErrorToast(error?.message || 'Unable to save your Personal Data Sheet right now.');
+                } finally {
+                    hideSystemLoader();
+
+                    if (nextBtn) {
+                        nextBtn.disabled = false;
+                        nextBtn.innerHTML = previousNextContent || 'Save';
+                    }
+                    if (modalConfirm) {
+                        modalConfirm.disabled = !canEnableModalConfirm();
+                        modalConfirm.innerHTML = previousConfirmContent || '<span class="material-icons text-base">verified</span>I Declare';
+                    }
+                    if (modalCancel) {
+                        modalCancel.disabled = previousCancelDisabled;
+                    }
+                }
             };
 
             if (modalCancel) {
@@ -1377,15 +1532,19 @@
             }
 
             if (modalConfirm) {
-                modalConfirm.addEventListener('click', (event) => {
+                modalConfirm.addEventListener('click', async (event) => {
                     event.preventDefault();
                     if (modalConfirm.disabled) {
                         return;
                     }
-                    toggleModal(false);
-                    submitOtherInfoForm();
+                    await submitOtherInfoForm();
                 });
             }
+
+            successClose?.addEventListener('click', (event) => {
+                event.preventDefault();
+                window.location.href = successRedirectUrl;
+            });
 
             [modalAckOath, modalAckLegal].forEach((checkbox) => {
                 if (!checkbox) return;
@@ -1395,12 +1554,27 @@
             });
 
             document.addEventListener('keydown', (ev) => {
-                if (modal && modal.classList.contains('hidden')) return;
+                const modalHidden = !modal || modal.classList.contains('hidden');
+                const successModalHidden = !successModal || successModal.classList.contains('hidden');
+
+                if (modalHidden && successModalHidden) return;
+
                 if (ev.key === 'Escape') {
+                    if (!successModalHidden) {
+                        toggleSuccessModal(false);
+                        return;
+                    }
                     toggleModal(false);
                 }
-                if (ev.key === 'Tab' && focusTargets.filter(Boolean).length) {
-                    const focusable = focusTargets.filter(Boolean);
+                if (ev.key === 'Tab') {
+                    const focusable = successModalHidden
+                        ? focusTargets.filter(Boolean)
+                        : successFocusTargets.filter(Boolean);
+
+                    if (!focusable.length) {
+                        return;
+                    }
+
                     const current = document.activeElement;
                     const idx = focusable.indexOf(current);
                     if (idx === -1) {

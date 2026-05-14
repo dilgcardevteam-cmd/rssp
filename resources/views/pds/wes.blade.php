@@ -5,7 +5,7 @@
     $simple = in_array(request()->input('simple'), [1, '1', true, 'true'], true);
     $isSimpleMode = request()->boolean('simple');
     $isOpenDocs   = request()->boolean('open_docs');
-    $wesAfterAction = $isSimpleMode ? 'preview' : 'next';
+    $wesAfterAction = $isSimpleMode ? 'stay' : 'next';
   @endphp
   <style>
     .wes-page {
@@ -245,6 +245,7 @@
   <form id="workExperienceForm" action="{{ route('work_experience_store') }}" method="POST">
     @csrf
     <input type="hidden" name="simple_mode" value="{{ $isSimpleMode ? 1 : 0 }}">
+    <input type="hidden" name="open_docs_mode" value="{{ $isOpenDocs ? 1 : 0 }}">
     <input type="hidden" name="after_action" id="after_action" value="{{ $wesAfterAction }}">
 
     <main class="wes-page {{ $simple ? 'w-full max-w-none' : 'max-w-full md:max-w-6xl mx-auto' }}" x-data="{
@@ -346,7 +347,7 @@
               <div class="wes-entry-number flex items-center justify-center font-bold"
                 x-text="index + 1"></div>
               <div>
-                <div class="text-sm font-semibold text-slate-700">Entry</div>
+                <div class="text-base md:text-lg font-semibold text-slate-700" x-text="(() => { const title = [(entry.position || '').trim(), (entry.agency || '').trim()].filter(Boolean).join(' - ') || 'Position - Name of Agency'; const start = (entry.start_date || '').trim() || 'Start Date'; const end = entry.present ? 'Present' : ((entry.end_date || '').trim() || 'End Date'); return `${title} (${start} to ${end})`; })()"></div>
                 <label class="flex items-center gap-2 text-xs text-slate-500">
                   <input type="checkbox" x-model="entry.isDisplayed">
                   <span x-text="entry.isDisplayed ? 'Shown when exported' : 'Hidden at export'"></span>
@@ -512,7 +513,7 @@
       <div class="px-6 py-5">
         <div class="rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3">
           <p class="text-sm leading-relaxed text-slate-700">
-            You have successfully filled out the Work Experience Sheet. The preview opened in a new tab.
+            Your Work Experience Sheet changes were saved. Use the Preview button any time to review the latest WES.
           </p>
         </div>
         <div class="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -906,7 +907,6 @@
         const successClose = document.getElementById('wesSaveSuccessClose');
         if (!form || !saveBtn || !afterAction || !successModal || !successClose) return;
 
-        const previewUrl = @json(route('wes.preview'));
         const notify = (message, type = 'error', duration = 6000) => {
           if (!message) return;
           if (typeof window.showNotification === 'function') {
@@ -934,10 +934,9 @@
         });
 
         let isSaving = false;
-        const saveAndOpenPreview = async () => {
+        const saveCurrentPage = async () => {
           if (isSaving) return;
           isSaving = true;
-          const previewWindow = window.open('about:blank', '_blank');
           afterAction.value = 'stay';
           const originalText = saveBtn.innerHTML;
           saveBtn.disabled = true;
@@ -956,27 +955,14 @@
             });
 
             if (!response.ok) {
-              if (previewWindow && !previewWindow.closed) {
-                previewWindow.close();
-              }
-
               const payload = await response.json().catch(() => ({}));
               const errors = payload?.errors ? Object.values(payload.errors).flat() : [];
               notify(errors[0] || payload?.message || 'Unable to save the Work Experience Sheet. Please review the form and try again.');
               return;
             }
 
-            if (previewWindow) {
-              previewWindow.location = previewUrl;
-            } else {
-              notify('The Work Experience Sheet was saved. Please allow pop-ups so the preview can open.', 'warning');
-            }
-
             openSuccessModal();
           } catch (error) {
-            if (previewWindow && !previewWindow.closed) {
-              previewWindow.close();
-            }
             notify('Unable to save the Work Experience Sheet due to a network or server error. Please try again.');
           } finally {
             saveBtn.disabled = false;
@@ -986,11 +972,11 @@
           }
         };
 
-        saveBtn.addEventListener('click', saveAndOpenPreview);
+        saveBtn.addEventListener('click', saveCurrentPage);
         form.addEventListener('submit', (event) => {
           event.preventDefault();
           event.stopImmediatePropagation();
-          saveAndOpenPreview();
+          saveCurrentPage();
         }, true);
       }
 

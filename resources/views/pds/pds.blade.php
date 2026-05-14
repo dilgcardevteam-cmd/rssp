@@ -434,6 +434,9 @@
 @endphp
 <form id="myForm" class="pds-form-shell no-spinner space-y-4 sm:space-y-8" action="{{ route('submit_c1', $c1RouteParams) }}" method="POST" x-data="{ civilStatus: '{{ old('civil_status', session('form.c1.civil_status')) }}' }">
             @csrf
+            @if(request()->boolean('simple'))
+                <input type="hidden" name="simple" value="1">
+            @endif
             <div class="pds-form-banner">
                 <div class="pds-form-banner-title">
                     <span class="material-icons">badge</span>

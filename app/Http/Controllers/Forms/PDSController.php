@@ -1987,7 +1987,7 @@ class PDSController extends Controller
         \App\Models\User::query()->whereKey(Auth::id())->update(['updated_at' => now()]);
         //dd(session('form.c1'));
         $routeParams = [];
-        if ($request->query('simple')) {
+        if ($request->boolean('simple') || $request->query('simple')) {
             $routeParams['simple'] = 1;
         }
         return redirect()->route($go_to, $routeParams);
@@ -3166,7 +3166,7 @@ class PDSController extends Controller
             'work_exp_department' => 'nullable|array',
             'work_exp_department.*' => 'nullable|string|max:255',
             'work_exp_status' => 'nullable|array',
-            'work_exp_status.*' => 'nullable|in:Permanent,Temporary,Casual,Contractual,Contract of Service',
+            'work_exp_status.*' => 'nullable|in:Permanent,Temporary,Casual,Contractual,Contract of Service,Job Order',
             'work_exp_govt_service' => 'nullable|array',
             'work_exp_govt_service.*' => 'nullable|in:Y,N',
 
@@ -3367,7 +3367,9 @@ class PDSController extends Controller
             $data_work_exp['updated_at'] = now();
 
             if (!empty($data_work_exp['id'])) {
-                WorkExperience::where('id', $data_work_exp['id'])->update($data_work_exp);
+                WorkExperience::where('id', $data_work_exp['id'])
+                    ->where('user_id', Auth::id())
+                    ->update($data_work_exp);
             } else {
                 $newRecord = WorkExperience::create($data_work_exp);
                 $data_work_exp['id'] = $newRecord->id;
@@ -3468,7 +3470,7 @@ class PDSController extends Controller
 
         \App\Models\User::query()->whereKey(Auth::id())->update(['updated_at' => now()]);
         $routeParams = [];
-        if ($request->query('simple')) {
+        if ($request->boolean('simple') || $request->query('simple')) {
             $routeParams['simple'] = 1;
         }
         return redirect()->route($go_to, $routeParams);

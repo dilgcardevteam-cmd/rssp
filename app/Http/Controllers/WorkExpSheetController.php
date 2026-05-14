@@ -75,11 +75,14 @@ class WorkExpSheetController extends Controller
 
             foreach ($entries as $work) {
                 $isPresent = (bool) ($work['present'] ?? false);
-                $endDate = $isPresent ? null : ($work['end_date'] ?? null);
+                $startDate = ($work['start_date'] ?? '') !== '' ? $work['start_date'] : null;
+                $endDate = $isPresent
+                    ? null
+                    : (($work['end_date'] ?? '') !== '' ? $work['end_date'] : null);
 
                 WorkExpSheet::create([
                     'user_id' => $user_id,
-                    'start_date' => $work['start_date'],
+                    'start_date' => $startDate,
                     'end_date' => $endDate,
                     'position' => trim((string) ($work['position'] ?? '')),
                     'office' => trim((string) ($work['office'] ?? '')),
@@ -110,6 +113,22 @@ class WorkExpSheetController extends Controller
         if ($request->input('after_action') === 'preview') {
             return redirect()
                 ->route('pds.preview')
+                ->with('success', 'Work Experience Sheet Saved!');
+        }
+
+        if ($request->input('after_action') === 'stay') {
+            $routeParams = [];
+
+            if ($request->boolean('simple_mode')) {
+                $routeParams['simple'] = 1;
+            }
+
+            if ($request->boolean('open_docs_mode')) {
+                $routeParams['open_docs'] = 1;
+            }
+
+            return redirect()
+                ->route('display_wes', $routeParams)
                 ->with('success', 'Work Experience Sheet Saved!');
         }
 

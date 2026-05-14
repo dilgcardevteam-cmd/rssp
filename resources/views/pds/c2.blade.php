@@ -221,8 +221,19 @@
 </style>
 <!-- Main Content -->
 <main class="pds-flow-page {{ $simple ? 'w-full max-w-none' : 'max-w-7xl mx-auto' }} -mt-6 sm:-mt-8 px-4 sm:px-6 lg:px-8 pt-0 pb-8">
-        <form id="myForm" class="space-y-8" method="POST" action='/pds/submit_c2/display_c3'>
+        @php
+            $c2RouteParams = ['go_to' => 'display_c3'];
+            if ($simple) {
+                $c2RouteParams['simple'] = 1;
+            }
+        @endphp
+        <form id="myForm" class="space-y-8" method="POST" action="{{ route('submit_c2', $c2RouteParams) }}">
             @csrf
+            @if ($simple)
+                <input type="hidden" name="simple" value="1">
+            @endif
+            <input type="hidden" name="work_exp_count" id="work_exp_count" value="0">
+            <input type="hidden" name="civil_service_count" id="civil_service_count" value="0">
             <div class="pds-flow-banner">
                 <div class="pds-flow-banner-title">
                     <span class="material-icons">workspace_premium</span>
@@ -785,6 +796,8 @@
             const civilServiceTable = document.getElementById('civil-service-table');
             const workExpEmpty = document.getElementById('work-exp-empty');
             const civilServiceEmpty = document.getElementById('civil-service-empty');
+            const workExpCountInput = document.getElementById('work_exp_count');
+            const civilServiceCountInput = document.getElementById('civil_service_count');
             let finalSubmitRequested = false;
 
             await loadCivilServiceEligibilityOptions();
@@ -850,6 +863,7 @@
             if (civilServiceTable.querySelector('tbody').children.length === 0) {
                 addCivilServiceRow();
             }
+            syncRowCounts();
 
             // Remove row functionality using event delegation
             document.addEventListener('click', function(e) {
@@ -887,6 +901,7 @@
                                 row.classList.add('removing');
                                 setTimeout(() => {
                                     row.remove();
+                                    syncRowCounts();
                                     updateEmptyState();
                                 }, 200);
                             }
@@ -900,6 +915,7 @@
                         row.classList.add('removing');
                         setTimeout(() => {
                             row.remove();
+                            syncRowCounts();
                             updateEmptyState();
                         }, 200);
                     }
@@ -1059,13 +1075,9 @@
                 const isPresentValue = (!is_new && typeof work_exp_to === 'string' && work_exp_to.toLowerCase() === 'present');
 
 
-                // the <input..$rowCount is for the C2Controller for monitoring the rowCount :: FOR DATABASE
                 newRow.innerHTML = `
-                    <input type="hidden" name="work_exp_count" value="${rowCount + 1}">
-
-                    <input type="hidden" name="work_exp_id[]" value="${(!is_new && work_exp_id !== null && work_exp_id !== undefined && String(work_exp_id).toLowerCase() !== 'null') ? work_exp_id : ''}">
-                    <!-- <td class="font-medium text-center">${rowCount + 1}</td> -->
                     <td>
+                        <input type="hidden" name="work_exp_id[]" value="${(!is_new && work_exp_id !== null && work_exp_id !== undefined && String(work_exp_id).toLowerCase() !== 'null') ? work_exp_id : ''}">
                         <input type="date" name="work_exp_from[]" class="form-input" value="${(!is_new) ? work_exp_from : ''}" />
                     </td>
                     <td>
@@ -1115,6 +1127,7 @@
                     applyPresentState(newRow, isPresentValue);
                 }
                 attachWorkExperienceDateValidation(newRow);
+                syncRowCounts();
                 updateEmptyState();
 
                 // Scroll to the new row
@@ -1141,13 +1154,10 @@
                 const newRow = document.createElement('tr');
                 newRow.className = 'animate-fade-in';
 
-                // the <input..$rowCount is for the C2Controller for monitoring the rowCount :: FOR DATABASE
                 newRow.innerHTML = `
-                    <input type="hidden" name="civil_service_count" value="${rowCount + 1}">
-
-                    <input type="hidden" name="cs_eligibility_id[]" value="${(!is_new && cs_eligibility_id !== null && cs_eligibility_id !== undefined && String(cs_eligibility_id).toLowerCase() !== 'null') ? cs_eligibility_id : ''}">
                     <td>
                         <div class="space-y-2">
+                            <input type="hidden" name="cs_eligibility_id[]" value="${(!is_new && cs_eligibility_id !== null && cs_eligibility_id !== undefined && String(cs_eligibility_id).toLowerCase() !== 'null') ? cs_eligibility_id : ''}">
                             <div class="grid gap-2 sm:grid-cols-[11rem_minmax(0,1fr)]">
                                 <select class="form-input" data-cs-career-level-select>
                                     ${renderCivilServiceEligibilityLevelOptions()}
@@ -1184,6 +1194,7 @@
 
                 tbody.appendChild(newRow);
                 initializeCivilServiceCareerInput(newRow, (!is_new) ? cs_eligibility_career : '');
+                syncRowCounts();
                 updateEmptyState();
 
                 // Scroll to the new row
@@ -1363,6 +1374,16 @@
                 } else {
                     civilServiceTable.parentElement.classList.remove('hidden');
                     civilServiceEmpty.classList.add('hidden');
+                }
+            }
+
+            function syncRowCounts() {
+                if (workExpCountInput) {
+                    workExpCountInput.value = workExpTable.querySelector('tbody').children.length;
+                }
+
+                if (civilServiceCountInput) {
+                    civilServiceCountInput.value = civilServiceTable.querySelector('tbody').children.length;
                 }
             }
         });

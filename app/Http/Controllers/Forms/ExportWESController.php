@@ -107,15 +107,13 @@ class ExportWESController extends Controller
         }
 
         $allWesEntries = WorkExpSheet::where('user_id', $userId)->get();
-        $shownWesEntries = $allWesEntries->filter(static fn ($row): bool => (bool) data_get($row, 'isDisplayed'));
-
-        // If there are at least 2 shown entries, keep respecting the toggle.
-        // Otherwise, export all saved WES entries so the 2nd box gets filled when records exist.
-        $experiences = $shownWesEntries->count() >= 2 ? $shownWesEntries->values() : $allWesEntries;
+        $experiences = $allWesEntries
+            ->filter(static fn ($row): bool => (bool) data_get($row, 'isDisplayed'))
+            ->values();
 
         $experiences = $this->sortWesEntriesByStartDate($experiences, 'start_date');
 
-        if ($experiences->isEmpty()) {
+        if ($allWesEntries->isEmpty() && $experiences->isEmpty()) {
             $experiences = WorkExperience::where('user_id', $userId)
                 ->get()
                 ->map(function ($row) {

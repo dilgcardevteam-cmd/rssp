@@ -189,10 +189,10 @@
       background: linear-gradient(135deg, #0d5bd7 0%, #002c76 100%) !important;
     }
 
-    .wes-preview-fab {
+    .pds-preview-fab {
       position: fixed;
       right: 1.25rem;
-      bottom: 1.25rem;
+      bottom: 20px;
       z-index: 70;
       display: inline-flex;
       align-items: center;
@@ -215,17 +215,17 @@
       user-select: none;
     }
 
-    .wes-preview-fab:hover:not(:disabled) {
+    .pds-preview-fab:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 22px 42px rgba(7, 26, 67, 0.34);
     }
 
-    .wes-preview-fab.is-dragging,
-    .wes-preview-fab:active {
+    .pds-preview-fab.is-dragging,
+    .pds-preview-fab:active {
       cursor: grabbing;
     }
 
-    .wes-preview-fab:disabled {
+    .pds-preview-fab:disabled {
       cursor: not-allowed;
       opacity: 0.72;
       background: linear-gradient(135deg, #8a97ad 0%, #a7b2c6 100%);
@@ -234,7 +234,7 @@
     }
 
     @media (max-width: 640px) {
-      .wes-preview-fab {
+      .pds-preview-fab {
         left: 1rem;
         right: 1rem;
         bottom: calc(6.25rem + env(safe-area-inset-bottom, 0px));
@@ -513,7 +513,7 @@
       <div class="px-6 py-5">
         <div class="rounded-xl border border-blue-100 bg-blue-50/70 px-4 py-3">
           <p class="text-sm leading-relaxed text-slate-700">
-            Your Work Experience Sheet changes were saved. Use the Preview button any time to review the latest WES.
+            Your Work Experience Sheet changes were saved. The latest WES preview was opened in a new tab.
           </p>
         </div>
         <div class="mt-5 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -529,7 +529,7 @@
   <button
     type="button"
     id="wesPreviewBtn"
-    class="wes-preview-fab"
+    class="pds-preview-fab"
     aria-controls="wesPreviewOverlay"
     aria-haspopup="dialog"
   >
@@ -791,15 +791,23 @@
         let originTop = 0;
         let suppressClick = false;
 
+        const DRAG_SIDE_PADDING = 20;
+        const DRAG_TOP_PADDING = 20;
+        const DRAG_BOTTOM_PADDING = 20;
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+        const hasManualPosition = () => {
+          return Boolean(button.style.left || button.style.top || button.style.inset);
+        };
 
         const getViewportBounds = () => {
           const rect = button.getBoundingClientRect();
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
           return {
-            minLeft: 8,
-            minTop: 8,
-            maxLeft: Math.max(8, window.innerWidth - rect.width - 8),
-            maxTop: Math.max(8, window.innerHeight - rect.height - 8),
+            minLeft: DRAG_SIDE_PADDING,
+            minTop: DRAG_TOP_PADDING,
+            maxLeft: Math.max(DRAG_SIDE_PADDING, viewportWidth - rect.width - DRAG_SIDE_PADDING),
+            maxTop: Math.max(DRAG_TOP_PADDING, viewportHeight - rect.height - DRAG_BOTTOM_PADDING),
           };
         };
 
@@ -810,13 +818,42 @@
           button.style.bottom = 'auto';
         };
 
+        const resetToDefaultPosition = () => {
+          button.style.removeProperty('left');
+          button.style.removeProperty('top');
+          button.style.removeProperty('right');
+          button.style.removeProperty('bottom');
+          button.style.removeProperty('inset');
+        };
+
+        const pinToViewportCorner = () => {
+          const bounds = getViewportBounds();
+          applyPosition(bounds.maxLeft, bounds.maxTop);
+        };
+
         const syncToViewport = () => {
+          if (!hasManualPosition()) {
+            return;
+          }
+
           const rect = button.getBoundingClientRect();
           const bounds = getViewportBounds();
           applyPosition(
             clamp(rect.left, bounds.minLeft, bounds.maxLeft),
             clamp(rect.top, bounds.minTop, bounds.maxTop)
           );
+        };
+
+        const scheduleViewportSync = () => {
+          window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+              syncToViewport();
+            });
+          });
+        };
+
+        const initializePosition = () => {
+          resetToDefaultPosition();
         };
 
         button.addEventListener('pointerdown', (event) => {
@@ -888,6 +925,12 @@
         }, true);
 
         window.addEventListener('resize', syncToViewport);
+        window.addEventListener('scroll', syncToViewport, { passive: true });
+        window.addEventListener('load', initializePosition);
+        window.visualViewport?.addEventListener('resize', syncToViewport);
+        window.visualViewport?.addEventListener('scroll', syncToViewport);
+        window.addEventListener('pageshow', initializePosition);
+        initializePosition();
       }
 
       if (document.readyState === 'loading') {
@@ -905,6 +948,7 @@
         const afterAction = document.getElementById('after_action');
         const successModal = document.getElementById('wesSaveSuccessModal');
         const successClose = document.getElementById('wesSaveSuccessClose');
+        const previewUrl = @json(route('wes.preview'));
         if (!form || !saveBtn || !afterAction || !successModal || !successClose) return;
 
         const notify = (message, type = 'error', duration = 6000) => {
@@ -939,6 +983,7 @@
           isSaving = true;
           afterAction.value = 'stay';
           const originalText = saveBtn.innerHTML;
+          const previewWindow = window.open('about:blank', '_blank');
           saveBtn.disabled = true;
           saveBtn.innerHTML = '<span class="material-icons text-sm animate-spin">autorenew</span>Saving...';
 
@@ -957,12 +1002,24 @@
             if (!response.ok) {
               const payload = await response.json().catch(() => ({}));
               const errors = payload?.errors ? Object.values(payload.errors).flat() : [];
+              if (previewWindow && !previewWindow.closed) {
+                previewWindow.close();
+              }
               notify(errors[0] || payload?.message || 'Unable to save the Work Experience Sheet. Please review the form and try again.');
               return;
             }
 
+            if (previewWindow && !previewWindow.closed) {
+              previewWindow.location.href = previewUrl;
+            } else {
+              window.open(previewUrl, '_blank');
+            }
+
             openSuccessModal();
           } catch (error) {
+            if (previewWindow && !previewWindow.closed) {
+              previewWindow.close();
+            }
             notify('Unable to save the Work Experience Sheet due to a network or server error. Please try again.');
           } finally {
             saveBtn.disabled = false;

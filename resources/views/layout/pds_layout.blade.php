@@ -629,16 +629,37 @@
                     <span class="material-icons text-[20px]">expand_more</span>
                 </button>
                 <div id="profileMenu"
-                    class="hidden absolute right-0 mt-2 w-56 bg-white shadow-lg rounded-lg border border-gray-200 p-2">
-                    <a href="{{ route('account.settings') }}"
-                        class="block px-3 py-2 text-sm rounded hover:bg-gray-100">
-                        <span class="material-icons text-[18px] align-middle mr-2">settings</span> Account Settings
-                    </a>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit"
-                            class="w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100">Logout</button>
-                    </form>
+                    class="hidden absolute right-0 mt-3 w-72 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_22px_45px_rgba(15,23,42,0.16)] ring-1 ring-slate-100 backdrop-blur">
+                    <div class="border-b border-slate-100 bg-gradient-to-r from-slate-50 via-white to-blue-50 px-4 py-4">
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">Signed In As</p>
+                        <p class="mt-1 truncate text-sm font-semibold text-slate-900">{{ $displayName }}</p>
+                    </div>
+                    <div class="p-2">
+                        <a href="{{ route('account.settings') }}"
+                            class="group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:text-[#002c76]">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#002c76] transition group-hover:bg-blue-100">
+                                <span class="material-icons text-[20px]">settings</span>
+                            </span>
+                            <span class="flex-1">
+                                <span class="block font-semibold">Account Settings</span>
+                                <span class="block text-xs text-slate-500">Manage your profile and security</span>
+                            </span>
+                        </a>
+                        <div class="my-2 border-t border-slate-100"></div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit"
+                                class="group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium text-rose-600 transition hover:bg-rose-50 hover:text-rose-700">
+                                <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600 transition group-hover:bg-rose-100">
+                                    <span class="material-icons text-[20px]">logout</span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="block font-semibold">Logout</span>
+                                    <span class="block text-xs text-rose-400">End your current session</span>
+                                </span>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

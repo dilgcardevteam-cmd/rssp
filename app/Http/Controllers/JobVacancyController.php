@@ -1395,7 +1395,7 @@ class JobVacancyController extends Controller
             'salary_grade' => ['required', 'regex:/^SG-\\d{2}$/'],
             'pcn_no' => 'nullable|string',
             'plantilla_item_no' => 'nullable|string',
-            'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:51200'],
         ]);
 
         if (!$this->hrDivisionCanManageVacancy($vacancy)) {
@@ -1620,7 +1620,7 @@ class JobVacancyController extends Controller
                 'to_position' => 'nullable|string',
                 'to_office' => 'nullable|string',
                 'to_office_address' => 'nullable|string',
-                'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+                'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:51200'],
             ]);
 
             if ($this->isHrDivisionAdmin() && strcasecmp((string) ($validated['vacancy_type'] ?? ''), 'COS') !== 0) {
@@ -1689,7 +1689,7 @@ class JobVacancyController extends Controller
             'to_office_address' => 'required|string',
 
             // CSC Form
-            'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:10240'],
+            'csc_form' => ['nullable', 'file', 'mimes:pdf,doc,docx', 'max:51200'],
         ]);
 
         if ($this->isHrDivisionAdmin() && strcasecmp((string) ($validated['vacancy_type'] ?? ''), 'COS') !== 0) {
@@ -3052,7 +3052,7 @@ class JobVacancyController extends Controller
         $labelMap = [
             'application_letter' => 'Application Letter',
             'signed_pds' => 'Signed and Subscribed Personal Data Sheet',
-            'signed_work_exp_sheet' => 'Signed Work Experience Sheet',
+            'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
             'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
             'cert_eligibility' => 'Certificate of Eligibility / Board Rating',
             'ipcr' => 'Performance Rating/IPCR in the last period (if applicable)',
@@ -3342,7 +3342,7 @@ class JobVacancyController extends Controller
         $labelMap = [
             'application_letter' => 'Application Letter',
             'signed_pds' => 'Signed and Subscribed Personal Data Sheet',
-            'signed_work_exp_sheet' => 'Signed Work Experience Sheet',
+            'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
             'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
             'cert_eligibility' => 'Certificate of Eligibility / Board Rating',
             'ipcr' => 'Performance Rating/IPCR in the last period (if applicable)',
@@ -3814,7 +3814,7 @@ class JobVacancyController extends Controller
       'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned',
       'photocopy_diploma' => 'Duly Authenticated Diploma',
       'signed_pds' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)',
-      'signed_work_exp_sheet' => 'Fully accomplished and subcribed/notarized Work Experience Sheet (for position/s requiring relevant Experience)',
+      'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
       'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
       'passport_photo' => 'Passport-Sized Picture',
       'cert_eligibility' => 'Certificate of Eligibility/Board Rating License',

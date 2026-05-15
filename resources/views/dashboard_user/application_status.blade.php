@@ -346,7 +346,7 @@
 
 
         <script>
-          const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+          const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
           let documents = @json($documents);
           const requiredDocumentIds = @json($requiredDocumentIds ?? []);
           let requiredDocumentSet = new Set(requiredDocumentIds);
@@ -614,7 +614,7 @@
               const selectedFile = uploadInput.files[0];
               if (selectedFile && selectedFile.size > MAX_UPLOAD_BYTES) {
                 uploadInput.value = '';
-                const message = 'Each file must be 10MB or smaller.';
+                const message = 'Each file must be 50MB or smaller.';
                 if (typeof showAppToast === 'function') {
                   showAppToast(message);
                 } else {

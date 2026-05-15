@@ -278,7 +278,7 @@ class ProfileController extends Controller
     {
         $documentTypeOptions = $this->getDocumentGalleryViewData(Auth::user())['documentTypeOptions'];
         $validator = Validator::make($request->all(), [
-            'gallery_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'gallery_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:51200'],
             'document_type' => ['required', 'string', 'in:' . implode(',', $documentTypeOptions)],
         ]);
         if ($validator->fails()) {
@@ -320,7 +320,7 @@ class ProfileController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'replacement_gallery_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'replacement_gallery_document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:51200'],
         ]);
         if ($validator->fails()) {
             return $this->documentGalleryValidationResponse($request, $validator->errors()->toArray());

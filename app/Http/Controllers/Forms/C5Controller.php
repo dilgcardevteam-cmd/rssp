@@ -15,21 +15,21 @@ class C5Controller extends Controller
 
         // ✅ Validate uploaded PDF files (all are optional)
         $request->validate([
-            'cert_uploads.application_letter' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.pqe_result' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.cert_eligibility' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.ipcr' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.non_academic' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.cert_training' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.designation_order' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.transcript_records' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.photocopy_diploma' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.cert_employment' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.other_documents' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.signed_pds' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.signed_work_exp_sheet' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.cert_lgoo_induction' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.passport_photo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'cert_uploads.application_letter' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.pqe_result' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.cert_eligibility' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.ipcr' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.non_academic' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.cert_training' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.designation_order' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.transcript_records' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.photocopy_diploma' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.cert_employment' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.other_documents' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.signed_pds' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.signed_work_exp_sheet' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.cert_lgoo_induction' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.passport_photo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:51200',
         ]);
 
         $data = [];
@@ -87,21 +87,21 @@ class C5Controller extends Controller
     $user = \Illuminate\Support\Facades\Auth::user();
 
     $request->validate([
-        'cert_uploads.application_letter' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.pqe_result' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.cert_eligibility' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.ipcr' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.non_academic' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.cert_training' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.designation_order' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.transcript_records' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.photocopy_diploma' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.cert_employment' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.other_documents' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.signed_pds' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.signed_work_exp_sheet' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.cert_lgoo_induction' => 'nullable|file|mimes:pdf|max:10240',
-        'cert_uploads.passport_photo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+        'cert_uploads.application_letter' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.pqe_result' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.cert_eligibility' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.ipcr' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.non_academic' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.cert_training' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.designation_order' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.transcript_records' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.photocopy_diploma' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.cert_employment' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.other_documents' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.signed_pds' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.signed_work_exp_sheet' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.cert_lgoo_induction' => 'nullable|file|mimes:pdf|max:51200',
+        'cert_uploads.passport_photo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:51200',
     ]);
 
     $fields = [

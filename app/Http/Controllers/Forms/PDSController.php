@@ -53,7 +53,7 @@ class PDSController extends Controller
         'image/png',
     ];
     private const SMALLINT_MAX = 32767;
-    private const MAX_UPLOAD_BYTES = 10485760; // 10MB
+    private const MAX_UPLOAD_BYTES = 52428800; // 50MB
     private const DOCUMENT_TYPE_ALIASES = [
         'cert_eligibility' => ['cert_elegibility'],
         'cert_employment' => ['certificate_employment'],
@@ -1000,12 +1000,12 @@ class PDSController extends Controller
     public function importC1Excel(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'pds_excel' => 'required|file|mimes:xlsx,xls|max:10240',
+            'pds_excel' => 'required|file|mimes:xlsx,xls|max:51200',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Please upload a valid Excel file (.xlsx or .xls) up to 10MB.',
+                'message' => 'Please upload a valid Excel file (.xlsx or .xls) up to 50MB.',
                 'errors' => $validator->errors(),
             ], 422);
         }
@@ -3049,7 +3049,7 @@ class PDSController extends Controller
         try {
             $rows = EligibilityPreset::query()->get(['name', 'level']);
             if ($rows->isEmpty()) {
-                return $fallback;
+                return [];
             }
 
             $mapped = [];
@@ -3062,7 +3062,7 @@ class PDSController extends Controller
                 $mapped[$name] = trim((string) ($row->level ?? ''));
             }
 
-            return !empty($mapped) ? $mapped : $fallback;
+            return $mapped;
         } catch (\Throwable $e) {
             return $fallback;
         }
@@ -3886,8 +3886,8 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
         $hasUploadedPhoto = session()->has('form.c4.photo_upload');
         $request->validate([
             'photo_upload' => $hasUploadedPhoto
-                ? 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240'
-                : 'required|image|mimes:jpeg,png,jpg,gif|max:10240',
+                ? 'nullable|image|mimes:jpeg,png,jpg,gif|max:51200'
+                : 'required|image|mimes:jpeg,png,jpg,gif|max:51200',
         ]);
         $temp_photo_path = session('form.c4.photo_upload'); // default to existing photo
         //Handle the photo upload (store in photo/pds-img inside public disk)
@@ -5446,26 +5446,26 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
          ********************************/
         // User is allowed to not upload any file
         $request->validate([
-            'cert_uploads.application_letter' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.pqe_result' => 'nullable|file|mimes:pdf|max:10240',
+            'cert_uploads.application_letter' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.pqe_result' => 'nullable|file|mimes:pdf|max:51200',
             'pqe_result_status' => 'nullable|in:taken_passed,none',
-            'cert_uploads.cert_eligibility' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.cert_elegibility' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.ipcr' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.non_academic' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.cert_training' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.designation_order' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.transcript_records' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.photocopy_diploma' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.cert_employment' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.other_documents' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.signed_pds' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.signed_work_exp_sheet' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.cert_lgoo_induction' => 'nullable|file|mimes:pdf|max:10240',
-            'cert_uploads.passport_photo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240'
+            'cert_uploads.cert_eligibility' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.cert_elegibility' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.ipcr' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.non_academic' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.cert_training' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.designation_order' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.transcript_records' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.photocopy_diploma' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.cert_employment' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.other_documents' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.signed_pds' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.signed_work_exp_sheet' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.cert_lgoo_induction' => 'nullable|file|mimes:pdf|max:51200',
+            'cert_uploads.passport_photo' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:51200'
         ], [
             'cert_uploads.*.mimes' => 'Only PDF files are allowed.',
-            'cert_uploads.*.max' => 'Each file must be 10MB or smaller.',
+            'cert_uploads.*.max' => 'Each file must be 50MB or smaller.',
         ]);
 
         $existingDocs = $this->loadDocumentGalleryMap((int) Auth::id());
@@ -6459,7 +6459,7 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
         }
 
         if ((int) $file->getSize() > self::MAX_UPLOAD_BYTES) {
-            return [false, 'Each file must be 10MB or smaller.'];
+            return [false, 'Each file must be 50MB or smaller.'];
         }
 
         $mimeType = $this->resolveMimeType($path) ?: $file->getClientMimeType();
@@ -6482,7 +6482,7 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
     private function resolveUploadErrorMessage(UploadedFile $file): string
     {
         return match ($file->getError()) {
-            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Each file must be 10MB or smaller.',
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Each file must be 50MB or smaller.',
             UPLOAD_ERR_PARTIAL => 'Upload was interrupted. Please try again.',
             UPLOAD_ERR_NO_FILE => 'No file was uploaded.',
             UPLOAD_ERR_NO_TMP_DIR => 'Upload failed because the server temporary folder is missing.',
@@ -6572,7 +6572,7 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
             'transcript_records' => 'Transcript of Records (Baccalaureate Degree)',
             'photocopy_diploma' => 'Diploma',
             'signed_pds' => 'Signed and Subscribed Personal Data Sheet',
-            'signed_work_exp_sheet' => 'Signed Work Experience Sheet',
+            'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
             'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training',
             'passport_photo' => '2\" x 2\" or Passport Size Picture',
             'cert_eligibility' => 'Certificate of Eligibility/Board Rating',
@@ -6664,10 +6664,10 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
     {
         //dd($request->all());
         $request->validate([
-            'cert_uploads.*' => 'nullable|file|mimes:pdf|max:10240'
+            'cert_uploads.*' => 'nullable|file|mimes:pdf|max:51200'
         ], [
             'cert_uploads.*.mimes' => 'Only PDF files are allowed.',
-            'cert_uploads.*.max' => 'Each file must be 10MB or smaller.',
+            'cert_uploads.*.max' => 'Each file must be 50MB or smaller.',
         ]);
 
         $application = Applications::where('user_id', $user_id)

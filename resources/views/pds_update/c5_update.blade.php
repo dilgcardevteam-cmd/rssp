@@ -289,7 +289,7 @@
       'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned',
       'photocopy_diploma' => 'Duly Authenticated Diploma',
       'signed_pds' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)',
-      'signed_work_exp_sheet' => 'Fully accomplished and subcribed/notarized Work Experience Sheet (for position/s requiring relevant Experience)',
+      'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
       'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
       'passport_photo' => 'Passport-Sized Picture',
       'cert_eligibility' => 'Certificate of Eligibility/Board Rating License',

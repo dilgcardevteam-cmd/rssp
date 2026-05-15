@@ -8,7 +8,7 @@
         'transcript_records' => ['label' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned', 'accept' => 'application/pdf'],
         'photocopy_diploma' => ['label' => 'Duly Authenticated Diploma', 'accept' => 'application/pdf'],
         'signed_pds' => ['label' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)', 'accept' => 'application/pdf'],
-        'signed_work_exp_sheet' => ['label' => 'Fully accomplished and subcribed/notarized Work Experience Sheet (for position/s requiring relevant Experience)', 'accept' => 'application/pdf'],
+        'signed_work_exp_sheet' => ['label' => 'Work Experience Sheet (for position/s requiring relevant Experience)', 'accept' => 'application/pdf'],
         'cert_lgoo_induction' => ['label' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)', 'accept' => 'application/pdf'],
         'passport_photo' => ['label' => 'Passport-Sized Picture', 'accept' => 'application/pdf,image/*'],
         'cert_eligibility' => ['label' => 'Certificate of Eligibility/Board Rating License', 'accept' => 'application/pdf'],
@@ -353,7 +353,7 @@
 @endsection
 
 <script>
-    const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+    const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
     const lockDocTrack = @json($isApplicationFlow);
     const lockedTrack = @json($activeTrack);
@@ -553,7 +553,7 @@
                 const selectedFile = input.files && input.files[0] ? input.files[0] : null;
                 if (selectedFile && selectedFile.size > MAX_UPLOAD_BYTES) {
                     input.value = '';
-                    const message = 'Each file must be 10MB or smaller.';
+                    const message = 'Each file must be 50MB or smaller.';
                     if (typeof showAppToast === 'function') {
                         showAppToast(message);
                     } else {

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\EligibilityPreset;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Validator;
 
 class EligibilityPresetController extends Controller
 {
@@ -136,21 +138,56 @@ class EligibilityPresetController extends Controller
                 ->withErrors(['eligibility_presets' => 'Eligibility presets table is missing. Run migrations first.']);
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:eligibility_presets,name',
-            'legal_basis' => 'nullable|string|max:255',
-            'level' => 'nullable|string|max:255',
-        ]);
+        $items = collect((array) $request->input('items', []))
+            ->map(function ($item) {
+                $row = is_array($item) ? $item : [];
 
-        EligibilityPreset::query()->create([
-            'name' => trim((string) ($validated['name'] ?? '')),
-            'legal_basis' => trim((string) ($validated['legal_basis'] ?? '')),
-            'level' => trim((string) ($validated['level'] ?? '')),
-        ]);
+                return [
+                    'name' => trim((string) ($row['name'] ?? '')),
+                    'legal_basis' => trim((string) ($row['legal_basis'] ?? '')),
+                    'level' => trim((string) ($row['level'] ?? '')),
+                ];
+            })
+            ->filter(function (array $item): bool {
+                return $item['name'] !== ''
+                    || $item['legal_basis'] !== ''
+                    || $item['level'] !== '';
+            })
+            ->values()
+            ->all();
+
+        $validator = Validator::make(
+            ['items' => $items],
+            [
+                'items' => ['required', 'array', 'min:1'],
+                'items.*.name' => ['required', 'string', 'max:255', 'distinct:ignore_case', 'unique:eligibility_presets,name'],
+                'items.*.legal_basis' => ['nullable', 'string', 'max:255'],
+                'items.*.level' => ['nullable', 'string', 'max:255'],
+            ],
+            [
+                'items.required' => 'Add at least one eligibility entry.',
+                'items.min' => 'Add at least one eligibility entry.',
+                'items.*.name.required' => 'Each eligibility row requires a name.',
+                'items.*.name.distinct' => 'Duplicate eligibility names were found in the batch.',
+                'items.*.name.unique' => 'One of the eligibility names already exists.',
+            ]
+        );
+
+        $validated = $validator->validate();
+
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['items'] as $item) {
+                EligibilityPreset::query()->create([
+                    'name' => $item['name'],
+                    'legal_basis' => $item['legal_basis'],
+                    'level' => $item['level'],
+                ]);
+            }
+        });
 
         return redirect()
             ->route('admin.eligibilities.index')
-            ->with('success', 'Eligibility added successfully.');
+            ->with('success', count($validated['items']) . ' eligibilit' . (count($validated['items']) === 1 ? 'y was' : 'ies were') . ' added successfully.');
     }
 
     public function update(Request $request, int $id)

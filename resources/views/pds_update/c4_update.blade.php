@@ -545,7 +545,7 @@
                     <span class="material-icons text-6xl text-blue-400 mb-4 block">cloud_upload</span>
                     <p class="text-gray-700 font-medium mb-2">Click to upload or drag and drop</p>
                     <p class="text-sm text-gray-500">Passport size photo (4.5cm x 3.5cm)</p>
-                    <p class="text-xs text-gray-400 mt-2">PNG, JPG, GIF up to 10MB</p>
+                    <p class="text-xs text-gray-400 mt-2">PNG, JPG, GIF up to 50MB</p>
                     <img id="photo-preview" alt="Preview" class="mt-4" src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/6a2ab7dd-3bd3-47b1-9901-acc999fb4e67.png">
                 </div>
                 
@@ -656,8 +656,8 @@
             });
             
             function handlePhotoUpload(file) {
-                if (file.size > 10 * 1024 * 1024) {
-                    showAppToast('File size must be less than 10MB');
+                if (file.size > 50 * 1024 * 1024) {
+                    showAppToast('File size must be less than 50MB');
                     return;
                 }
                 

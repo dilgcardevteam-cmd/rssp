@@ -192,7 +192,7 @@
     .pds-preview-fab {
       position: fixed;
       right: 1.25rem;
-      bottom: 20px;
+      bottom: 1.25rem;
       z-index: 70;
       display: inline-flex;
       align-items: center;
@@ -528,20 +528,20 @@
 
   <button
     type="button"
-    id="wesPreviewBtn"
+    id="pdsPreviewBtn"
     class="pds-preview-fab"
-    aria-controls="wesPreviewOverlay"
+    aria-controls="pdsPreviewOverlay"
     aria-haspopup="dialog"
   >
     <span class="material-icons !text-base">visibility</span>
     WES Preview
   </button>
 
-  <div id="wesPreviewOverlay" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-50 p-4 sm:p-8 flex items-center justify-center">
+  <div id="pdsPreviewOverlay" class="hidden fixed inset-0 z-[100] bg-black bg-opacity-50 p-4 sm:p-8 flex items-center justify-center">
     <div class="bg-white w-full max-w-6xl h-[90vh] overflow-hidden rounded-xl shadow-2xl flex flex-col">
       <div class="flex items-center justify-between px-4 sm:px-6 py-3 border-b shrink-0">
         <h3 class="text-base sm:text-lg font-semibold text-gray-900">Work Experience Sheet Preview</h3>
-        <button id="wesPreviewClose" class="p-2 rounded hover:bg-gray-100">
+        <button id="pdsPreviewClose" class="p-2 rounded hover:bg-gray-100">
           <span class="material-icons">close</span>
         </button>
       </div>
@@ -549,7 +549,7 @@
         <div class="mb-3 text-xs text-gray-500">Preview is rendered from the PDF template and auto-filled from your saved WES data.</div>
         <div class="w-full h-[calc(100%-1.75rem)] border border-gray-200 rounded-lg overflow-hidden bg-gray-50">
           <iframe
-            id="wesPdfPreviewFrame"
+            id="pdsPdfPreviewFrame"
             title="WES PDF Preview"
             src="about:blank"
             data-preview-src="{{ route('wes.preview', ['embedded' => 1]) }}"
@@ -720,11 +720,11 @@
   </script>
   <script>
     (function () {
-      function initWesPreview() {
-        const openBtn = document.getElementById('wesPreviewBtn');
-        const overlay = document.getElementById('wesPreviewOverlay');
-        const closeBtn = document.getElementById('wesPreviewClose');
-        const frame = document.getElementById('wesPdfPreviewFrame');
+      function initPdsPreview() {
+        const openBtn = document.getElementById('pdsPreviewBtn');
+        const overlay = document.getElementById('pdsPreviewOverlay');
+        const closeBtn = document.getElementById('pdsPreviewClose');
+        const frame = document.getElementById('pdsPdfPreviewFrame');
         if (!openBtn || !overlay || !closeBtn || !frame) return;
 
         const closeOverlay = () => overlay.classList.add('hidden');
@@ -770,16 +770,16 @@
       }
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initWesPreview, { once: true });
+        document.addEventListener('DOMContentLoaded', initPdsPreview, { once: true });
       } else {
-        initWesPreview();
+        initPdsPreview();
       }
     })();
   </script>
   <script>
     (function () {
-      function initDraggableWesPreviewButton() {
-        const button = document.getElementById('wesPreviewBtn');
+      function initDraggablePdsPreviewButton() {
+        const button = document.getElementById('pdsPreviewBtn');
         if (!button) return;
 
         let isPointerDown = false;
@@ -791,23 +791,26 @@
         let originTop = 0;
         let suppressClick = false;
 
-        const DRAG_SIDE_PADDING = 20;
-        const DRAG_TOP_PADDING = 20;
-        const DRAG_BOTTOM_PADDING = 20;
+        const DRAG_PADDING = 16;
         const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
         const hasManualPosition = () => {
-          return Boolean(button.style.left || button.style.top || button.style.inset);
+          return Boolean(button.style.left || button.style.top);
         };
 
         const getViewportBounds = () => {
           const rect = button.getBoundingClientRect();
-          const viewportWidth = window.innerWidth;
-          const viewportHeight = window.innerHeight;
+          const layoutWidth = document.documentElement.clientWidth || window.innerWidth;
+          const layoutHeight = document.documentElement.clientHeight || window.innerHeight;
+          const viewport = window.visualViewport;
+          const viewportLeft = viewport?.offsetLeft ?? 0;
+          const viewportTop = viewport?.offsetTop ?? 0;
+          const viewportWidth = Math.min(layoutWidth, viewport?.width ?? layoutWidth);
+          const viewportHeight = Math.min(layoutHeight, viewport?.height ?? layoutHeight);
           return {
-            minLeft: DRAG_SIDE_PADDING,
-            minTop: DRAG_TOP_PADDING,
-            maxLeft: Math.max(DRAG_SIDE_PADDING, viewportWidth - rect.width - DRAG_SIDE_PADDING),
-            maxTop: Math.max(DRAG_TOP_PADDING, viewportHeight - rect.height - DRAG_BOTTOM_PADDING),
+            minLeft: viewportLeft + DRAG_PADDING,
+            minTop: viewportTop + DRAG_PADDING,
+            maxLeft: Math.max(viewportLeft + DRAG_PADDING, viewportLeft + viewportWidth - rect.width - DRAG_PADDING),
+            maxTop: Math.max(viewportTop + DRAG_PADDING, viewportTop + viewportHeight - rect.height - DRAG_PADDING),
           };
         };
 
@@ -816,19 +819,15 @@
           button.style.top = `${top}px`;
           button.style.right = 'auto';
           button.style.bottom = 'auto';
-        };
-
-        const resetToDefaultPosition = () => {
-          button.style.removeProperty('left');
-          button.style.removeProperty('top');
-          button.style.removeProperty('right');
-          button.style.removeProperty('bottom');
           button.style.removeProperty('inset');
         };
 
-        const pinToViewportCorner = () => {
-          const bounds = getViewportBounds();
-          applyPosition(bounds.maxLeft, bounds.maxTop);
+        const applyDefaultAnchor = () => {
+          button.style.removeProperty('left');
+          button.style.removeProperty('top');
+          button.style.right = '1.25rem';
+          button.style.bottom = '1.25rem';
+          button.style.removeProperty('inset');
         };
 
         const syncToViewport = () => {
@@ -844,16 +843,8 @@
           );
         };
 
-        const scheduleViewportSync = () => {
-          window.requestAnimationFrame(() => {
-            window.requestAnimationFrame(() => {
-              syncToViewport();
-            });
-          });
-        };
-
         const initializePosition = () => {
-          resetToDefaultPosition();
+          applyDefaultAnchor();
         };
 
         button.addEventListener('pointerdown', (event) => {
@@ -926,7 +917,6 @@
 
         window.addEventListener('resize', syncToViewport);
         window.addEventListener('scroll', syncToViewport, { passive: true });
-        window.addEventListener('load', initializePosition);
         window.visualViewport?.addEventListener('resize', syncToViewport);
         window.visualViewport?.addEventListener('scroll', syncToViewport);
         window.addEventListener('pageshow', initializePosition);
@@ -934,9 +924,9 @@
       }
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initDraggableWesPreviewButton, { once: true });
+        document.addEventListener('DOMContentLoaded', initDraggablePdsPreviewButton, { once: true });
       } else {
-        initDraggableWesPreviewButton();
+        initDraggablePdsPreviewButton();
       }
     })();
   </script>

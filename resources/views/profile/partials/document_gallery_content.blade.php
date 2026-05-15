@@ -137,7 +137,7 @@ class="w-full max-w-md z-[10000] transform overflow-hidden rounded-2xl bg-white 
         <div class="rounded-xl border border-white/80 bg-white/90 p-3 shadow-sm">
             <p class="text-xs font-bold uppercase tracking-wide text-blue-700">Step 2</p>
             <p class="mt-1 text-sm font-semibold text-slate-800">Select the file from your device</p>
-            <p class="mt-1 text-xs leading-5 text-slate-600">Choose a PDF, JPG, JPEG, or PNG file that is 10MB or smaller.</p>
+            <p class="mt-1 text-xs leading-5 text-slate-600">Choose a PDF, JPG, JPEG, or PNG file that is 50MB or smaller.</p>
         </div>
         <div class="rounded-xl border border-white/80 bg-white/90 p-3 shadow-sm">
             <p class="text-xs font-bold uppercase tracking-wide text-blue-700">Step 3</p>
@@ -311,7 +311,7 @@ class="w-full max-w-md z-[10000] transform overflow-hidden rounded-2xl bg-white 
         </div>
     </div>
     <div class="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-600">
-        Allowed files: PDF, JPG, JPEG, PNG. Maximum size: 10MB.
+        Allowed files: PDF, JPG, JPEG, PNG. Maximum size: 50MB.
     </div>
     @error('gallery_document')
         <p class="mt-2 text-sm text-rose-600">{{ $message }}</p>

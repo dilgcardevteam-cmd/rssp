@@ -106,7 +106,7 @@ class ExportWESController extends Controller
             $fullName = strtoupper($user->name ?? 'N/A');
         }
 
-        $allWesEntries = WorkExpSheet::where('user_id', $userId)->get();
+        $allWesEntries = $this->resolveWesEntries($userId);
         $experiences = $allWesEntries
             ->filter(static fn ($row): bool => (bool) data_get($row, 'isDisplayed'))
             ->values();
@@ -151,6 +151,45 @@ class ExportWESController extends Controller
             'full_name' => $fullName,
             'experiences' => $experiences,
         ];
+    }
+
+    private function resolveWesEntries(int $userId): Collection
+    {
+        if (request()->session()->has('form.wes.entries')) {
+            $sessionEntries = request()->session()->get('form.wes.entries', []);
+
+            if (!is_array($sessionEntries)) {
+                return collect();
+            }
+
+            return collect($sessionEntries)
+                ->map(function ($entry) {
+                    if (!is_array($entry)) {
+                        return null;
+                    }
+
+                    return (object) [
+                        'start_date' => $entry['start_date'] ?? null,
+                        'end_date' => $entry['end_date'] ?? null,
+                        'present' => (bool) ($entry['present'] ?? false),
+                        'position' => $entry['position'] ?? '',
+                        'office' => $entry['office'] ?? '',
+                        'supervisor' => $entry['supervisor'] ?? '',
+                        'agency' => $entry['agency'] ?? '',
+                        'accomplishments' => is_array($entry['accomplishments'] ?? null)
+                            ? $entry['accomplishments']
+                            : [''],
+                        'duties' => is_array($entry['duties'] ?? null)
+                            ? $entry['duties']
+                            : [''],
+                        'isDisplayed' => (bool) ($entry['isDisplayed'] ?? true),
+                    ];
+                })
+                ->filter()
+                ->values();
+        }
+
+        return WorkExpSheet::where('user_id', $userId)->get();
     }
 
     private function sortWesEntriesByStartDate(Collection $entries, string $field): Collection
@@ -458,9 +497,7 @@ class ExportWESController extends Controller
         $startBaselineY = $boxY + 10.0;
         $rowGap = 6.2;
 
-        $durationFrom = $this->formatMonthYear($exp->start_date);
-        $durationTo = $exp->end_date ? $this->formatMonthYear($exp->end_date) : 'Present';
-        $duration = trim(($durationFrom !== '' ? $durationFrom : 'N/A') . ' to ' . ($durationTo !== '' ? $durationTo : 'N/A'));
+        $duration = $this->formatWesDuration($exp);
 
         $values = [
             $duration,
@@ -1364,6 +1401,35 @@ PS;
         } catch (\Throwable $e) {
             return '';
         }
+    }
+
+    private function formatWesDuration($exp): string
+    {
+        $durationFrom = $this->formatMonthYear(data_get($exp, 'start_date'));
+        $durationToRaw = data_get($exp, 'end_date');
+        $isPresent = (bool) data_get($exp, 'present', false);
+
+        if ($durationFrom === '' && ($durationToRaw === null || trim((string) $durationToRaw) === '') && !$isPresent) {
+            return 'N/A';
+        }
+
+        $durationTo = $isPresent
+            ? 'Present'
+            : ($durationToRaw ? $this->formatMonthYear($durationToRaw) : '');
+
+        if ($durationFrom === '' && $durationTo === '') {
+            return 'N/A';
+        }
+
+        if ($durationFrom === '') {
+            return $durationTo !== '' ? $durationTo : 'N/A';
+        }
+
+        if ($durationTo === '') {
+            return $durationFrom;
+        }
+
+        return trim($durationFrom . ' to ' . $durationTo);
     }
 
     private function toPdfText(string $text): string

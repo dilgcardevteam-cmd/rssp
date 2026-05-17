@@ -26,7 +26,7 @@
             {{ $vacancy->status }}
         </span>
         <span class="text-gray-500 text-base">Closes
-            {{ \Carbon\Carbon::parse($vacancy->closing_date)->subMinute()->format('n/j/Y g:i A') }},</span>
+            {{ optional($vacancy->closing_at)->format('n/j/Y g:i A') ?? 'Not specified' }},</span>
         <span class="text-gray-500 text-base">Last Updated
             {{ date('n/j/Y g:i A', strtotime($vacancy->updated_at)) }}</span>
     </div>

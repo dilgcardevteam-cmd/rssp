@@ -38,7 +38,7 @@
             <span class="lg:hidden text-xs font-bold text-slate-400 uppercase tracking-wide w-24 shrink-0">Deadline</span>
             <div class="flex lg:flex-col lg:items-center gap-2 lg:gap-0">
                 @php
-                    $closing = \Carbon\Carbon::parse($vacancy->closing_date);
+                    $closing = $vacancy->closing_at ?? \Carbon\Carbon::parse($vacancy->closing_date);
                     $daysLeft = now()->diffInDays($closing, false);
                     $isUrgent = $effectiveVacancyStatus === 'OPEN' && $daysLeft >= 0 && $daysLeft <= 7;
                 @endphp
@@ -52,7 +52,7 @@
                             <i data-feather="alert-circle" class="w-4 h-4"></i>
                         </span>
                     @endif
-                    <span class="font-semibold text-xs lg:text-xs">{{ $closing->format('M d, Y') }}</span>
+                    <span class="font-semibold text-xs lg:text-xs">{{ $closing->format('M d, Y g:i A') }}</span>
                 </div>
 
             </div>
@@ -85,4 +85,3 @@
         <p class="text-sm text-gray-400 mt-1">Try adjusting your search or filters.</p>
     </div>
 @endforelse
-

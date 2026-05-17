@@ -119,6 +119,22 @@ class JobVacancyController extends Controller
         return (($this->currentAdmin()->role ?? null) === 'hr_division');
     }
 
+    private function combineClosingDateAndTime(?string $date, ?string $time): ?Carbon
+    {
+        $date = trim((string) $date);
+        $time = trim((string) $time);
+
+        if ($date === '' || $time === '') {
+            return null;
+        }
+
+        try {
+            return Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $time);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     private function supportsVacancyCreatorColumn(): bool
     {
         static $hasColumn = null;
@@ -1372,6 +1388,7 @@ class JobVacancyController extends Controller
             'place_of_assignment' => 'required|string',
             //'vacancies' => 'required|integer|min:1',
             'closing_date' => 'required|date',
+            'closing_time' => 'required|date_format:H:i',
             'qualification_education' => $this->strictEducationRequirementValidationRules(),
             'qualification_education_config' => $this->educationRequirementConfigValidationRules(),
             'qualification_experience' => 'required|string',
@@ -1416,19 +1433,30 @@ class JobVacancyController extends Controller
             $validated['qualification_education_config'] ?? null
         );
 
+        $closingAt = $this->combineClosingDateAndTime(
+            $validated['closing_date'] ?? null,
+            $validated['closing_time'] ?? null
+        );
+        $normalizedClosingDateTime = $closingAt?->format('Y-m-d H:i:s');
+
         $changes = [];
         foreach ($validated as $key => $value) {
-            if ($vacancy->$key != $value) {
+            if ($key === 'closing_time') {
+                continue;
+            }
+
+            $currentValue = $key === 'closing_date'
+                ? optional($vacancy->closing_at)->format('Y-m-d H:i:s')
+                : $vacancy->$key;
+            $nextValue = $key === 'closing_date' ? $normalizedClosingDateTime : $value;
+
+            if ($currentValue != $nextValue) {
                 $changes[$key] = [
-                    'old' => $vacancy->$key,
-                    'new' => $value
+                    'old' => $currentValue,
+                    'new' => $nextValue
                 ];
             }
         }
-
-
-        $closingDate = Carbon::parse($validated['closing_date']);
-        $today = Carbon::today();
 
         $status = 'OPEN';
 
@@ -1438,7 +1466,7 @@ class JobVacancyController extends Controller
             'monthly_salary' => $validated['monthly_salary'],
             'place_of_assignment' => $validated['place_of_assignment'],
             //'vacancies' => $validated['vacancies'],
-            'closing_date' => $validated['closing_date'],
+            'closing_date' => $normalizedClosingDateTime,
             'status' => $status,
 
             'qualification_education' => $validated['qualification_education'],
@@ -1661,6 +1689,7 @@ class JobVacancyController extends Controller
             'pcn_no' => 'nullable|string',
             'plantilla_item_no' => 'nullable|string',
             'closing_date' => 'required|date|after_or_equal:today',
+            'closing_time' => 'required|date_format:H:i',
             // 'status' => 'nullable|in:OPEN,CLOSED', // Status is auto-set to OPEN
             'monthly_salary' => 'required|numeric',
             'salary_grade' => ['required', 'regex:/^SG-\\d{2}$/'],
@@ -1703,6 +1732,19 @@ class JobVacancyController extends Controller
             $validated['qualification_education_config'] ?? null
         );
 
+        $closingAt = $this->combineClosingDateAndTime(
+            $validated['closing_date'] ?? null,
+            $validated['closing_time'] ?? null
+        );
+
+        if (!$closingAt || $closingAt->lessThanOrEqualTo(now())) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors([
+                    'closing_time' => 'Deadline date and time must be in the future.',
+                ]);
+        }
+
         // 🔷 Generate vacancy_id
         /*
         $positionTitle = $validated['position_title'];
@@ -1723,10 +1765,6 @@ class JobVacancyController extends Controller
         $num = $latestVacancy ? intval(substr($latestVacancy->vacancy_id, strpos($latestVacancy->vacancy_id, '-') + 1)) + 1 : 1;
         $vacancy_id = $letters . '-' . str_pad($num, 3, '0', STR_PAD_LEFT);
         */
-
-        $closingDate = Carbon::parse($validated['closing_date']);
-        $today = Carbon::today();
-
         $status = 'OPEN'; // Default status for new vacancies
 
         $hasCscFormPathColumn = $this->hasJobVacancyCscFormPathColumn();
@@ -1738,7 +1776,7 @@ class JobVacancyController extends Controller
             'vacancy_type' => $validated['vacancy_type'],
             'pcn_no' => $validated['pcn_no'] ?? null,
             'plantilla_item_no' => $validated['plantilla_item_no'] ?? null,
-            'closing_date' => $validated['closing_date'],
+            'closing_date' => $closingAt->format('Y-m-d H:i:s'),
 
             'status' => $status,
             'monthly_salary' => $validated['monthly_salary'],
@@ -2552,7 +2590,7 @@ class JobVacancyController extends Controller
 
         $onboardingVacancies = JobVacancy::query()
             ->where('status', 'OPEN')
-            ->whereRaw('DATE(closing_date) >= DATE(NOW())')
+            ->where('closing_date', '>=', Carbon::now())
             ->orderBy('closing_date')
             ->get([
                 'vacancy_id',

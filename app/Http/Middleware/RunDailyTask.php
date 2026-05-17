@@ -14,13 +14,20 @@ class RunDailyTask
 {
     public function handle($request, Closure $next)
     {
-        $lastRun = Cache::get('daily_task_last_run');
+        $vacancyTaskLastRun = Cache::get('vacancy_deadline_task_last_run');
+        $vacancyTaskWindow = Carbon::now()->startOfMinute();
 
-        if (!$lastRun || Carbon::parse($lastRun)->lt(Carbon::today())) {
+        if (!$vacancyTaskLastRun || Carbon::parse($vacancyTaskLastRun)->lt($vacancyTaskWindow)) {
             JobVacancy::where('closing_date', '<', Carbon::now())
                 ->where('status', 'OPEN')
                 ->update(['status' => 'CLOSED']);
 
+            Cache::put('vacancy_deadline_task_last_run', Carbon::now());
+        }
+
+        $lastRun = Cache::get('daily_task_last_run');
+
+        if (!$lastRun || Carbon::parse($lastRun)->lt(Carbon::today())) {
             $workflow = app(ApplicantDeletionWorkflowService::class);
             $deletionResults = $workflow->processDailyTasks();
             $deadlineService = app(ApplicantRevisionDeadlineService::class);

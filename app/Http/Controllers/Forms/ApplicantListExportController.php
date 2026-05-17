@@ -140,7 +140,7 @@ class ApplicantListExportController extends Controller
             $templateProcessor->setValue('salary_grade', $vacancy->salary_grade ?: 'N/A');
             $templateProcessor->setValue('monthly_salary', number_format($vacancy->monthly_salary, 2));
             $templateProcessor->setValue('office', strtoupper($vacancy->place_of_assignment));
-            $templateProcessor->setValue('closing_date', \Carbon\Carbon::parse($vacancy->closing_date)->format('F j, Y'));
+            $templateProcessor->setValue('closing_date', optional($vacancy->closing_at)->format('F j, Y g:i A') ?? 'N/A');
             $templateProcessor->setValue('pcn_no', $vacancy->pcn_no ?: 'N/A');
             $templateProcessor->setValue('date_published', $vacancy->created_at->format('F j, Y'));
             

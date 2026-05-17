@@ -30,10 +30,10 @@ class CloseExpiredVacancies extends Command
      */
     public function handle()
     {
-        $today = Carbon::today();
+        $now = Carbon::now();
         
         $vacancies = JobVacancy::where('status', 'OPEN')
-            ->whereDate('closing_date', '<', $today)
+            ->where('closing_date', '<', $now)
             ->get();
 
         $count = 0;

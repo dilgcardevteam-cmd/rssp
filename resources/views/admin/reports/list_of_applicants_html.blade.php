@@ -16,7 +16,7 @@
             </tr>
             <tr>
                 <td>Due date of application:</td>
-                <td><span class="meta-line">{{ \Carbon\Carbon::parse($vacancy->closing_date)->format('F j, Y') }}</span></td>
+                <td><span class="meta-line">{{ optional($vacancy->closing_at)->format('F j, Y g:i A') ?? 'N/A' }}</span></td>
             </tr>
         </table>
     </div>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -164,8 +165,12 @@ class JobVacancy extends Model
             return $status;
         }
 
-        $closingDate = \Carbon\Carbon::parse($this->closing_date)->setTime(17, 0, 0);
-        $now = \Carbon\Carbon::now();
+        $closingDate = $this->closing_at;
+        if (!$closingDate) {
+            return self::STATUS_OPEN;
+        }
+
+        $now = Carbon::now();
         
         if ($now->greaterThan($closingDate)) {
             return 'CLOSED';
@@ -177,5 +182,27 @@ class JobVacancy extends Model
         }
 
         return self::STATUS_OPEN;
+    }
+
+    public function getClosingAtAttribute(): ?Carbon
+    {
+        if (empty($this->closing_date)) {
+            return null;
+        }
+
+        $closingDate = $this->closing_date instanceof Carbon
+            ? $this->closing_date->copy()
+            : Carbon::parse($this->closing_date);
+
+        // Legacy vacancy records were saved without an explicit time.
+        if (
+            $closingDate->hour === 0
+            && $closingDate->minute === 0
+            && $closingDate->second === 0
+        ) {
+            return $closingDate->setTime(17, 0, 0);
+        }
+
+        return $closingDate;
     }
 }

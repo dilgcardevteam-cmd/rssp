@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JobVacancy;
 use App\Support\ApplicantOnboarding;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -36,7 +37,7 @@ class ApplicantOnboardingController extends Controller
         $vacancy = JobVacancy::query()
             ->where('vacancy_id', trim((string) $validated['preferred_vacancy_id']))
             ->where('status', 'OPEN')
-            ->whereRaw('DATE(closing_date) >= DATE(NOW())')
+            ->where('closing_date', '>=', Carbon::now())
             ->first();
 
         if (!$vacancy) {

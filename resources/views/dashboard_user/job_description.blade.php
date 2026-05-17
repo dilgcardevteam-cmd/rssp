@@ -64,7 +64,7 @@
             : ($typeIsPlantilla ? 'Plantilla Position' : (string) $vacancy->vacancy_type);
 
         $datePostedDisplay = optional($vacancy->created_at)->format('M d, Y') ?? 'Not specified';
-        $deadlineDisplay = \Carbon\Carbon::parse($vacancy->closing_date)->subMinute()->format('M d, Y g:i A');
+        $deadlineDisplay = optional($vacancy->closing_at)->format('M d, Y g:i A') ?? 'Not specified';
         $salaryValue = $vacancy->monthly_salary;
         $monthlySalaryDisplay = is_numeric($salaryValue)
             ? 'PHP ' . number_format((float) $salaryValue, 2)

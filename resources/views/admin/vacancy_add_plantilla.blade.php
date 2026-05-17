@@ -47,10 +47,15 @@
       $defaultToPosition = old('to_position', $formSource?->to_position ?? ($defaultSignatory->designation ?? ''));
       $defaultToOffice = old('to_office', $formSource?->to_office ?? ($defaultSignatory->office ?? ''));
       $defaultToOfficeAddress = old('to_office_address', $formSource?->to_office_address ?? ($defaultSignatory->office_address ?? ''));
+      $resolvedClosingDateTime = isset($formSource) && !empty($formSource->closing_date)
+        ? ($formSource instanceof \App\Models\JobVacancy
+          ? $formSource->closing_at
+          : \Carbon\Carbon::parse($formSource->closing_date))
+        : null;
       $defaultClosingDate = old(
         'closing_date',
-        (!$isCreateMode && isset($formSource) && !empty($formSource->closing_date))
-        ? \Carbon\Carbon::parse($formSource->closing_date)->format('Y-m-d')
+        $resolvedClosingDateTime
+        ? $resolvedClosingDateTime->format('Y-m-d')
         : (
           $disablePositionFields
           ? (
@@ -61,11 +66,16 @@
           : ''
         )
       );
+      $defaultClosingTime = old(
+        'closing_time',
+        $resolvedClosingDateTime ? $resolvedClosingDateTime->format('H:i') : '17:00'
+      );
       $displayToPerson = $disablePositionFields ? '' : $defaultToPerson;
       $displayToPosition = $disablePositionFields ? '' : $defaultToPosition;
       $displayToOffice = $disablePositionFields ? '' : $defaultToOffice;
       $displayToOfficeAddress = $disablePositionFields ? '' : $defaultToOfficeAddress;
       $displayClosingDate = $disablePositionFields ? '' : $defaultClosingDate;
+      $displayClosingTime = $positionMode ? '' : $defaultClosingTime;
       $sectionTitle = 'text-lg font-semibold text-slate-900';
       $fieldLabel = 'mb-2 block text-sm font-medium text-slate-700';
       $fieldInput = 'h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100';
@@ -202,10 +212,19 @@
             <div class="grid gap-5 md:grid-cols-2">
               <div class="{{ $disablePositionFields ? 'hidden' : '' }}">
                 <label class="{{ $fieldLabel }}">Deadline of Application <span class="text-red-600">*</span></label>
-                <input id="closing_date" type="date" name="closing_date" value="{{ $displayClosingDate }}"
-                  placeholder="Select deadline" class="{{ $fieldInput }}">
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <input id="closing_date" type="date" name="closing_date" value="{{ $displayClosingDate }}"
+                    placeholder="Select deadline" class="{{ $fieldInput }}">
+                  @if(!$positionMode)
+                    <input id="closing_time" type="time" name="closing_time" value="{{ $displayClosingTime }}"
+                      class="{{ $fieldInput }}">
+                  @endif
+                </div>
                 <p id="closing_date_error" class="mt-1 hidden text-sm text-red-600">Deadline of application is required.
                 </p>
+                @if(!$positionMode)
+                  <p id="closing_time_error" class="mt-1 hidden text-sm text-red-600">Deadline time is required.</p>
+                @endif
               </div>
               @if($disablePositionFields)
                 <input type="hidden" name="closing_date" value="{{ $defaultClosingDate }}">
@@ -1314,11 +1333,13 @@
     // Validate all fields
     function checkAllFieldsFilled() {
       const form = document.getElementById('plantillaForm');
+      const positionMode = @json($positionMode);
       const requiredFields = new Set([
         'position_title',
         'salary_grade',
         'monthly_salary',
         'closing_date',
+        'closing_time',
         'place_of_assignment',
         'qualification_education',
         'qualification_training',
@@ -1336,6 +1357,9 @@
         requiredFields.delete('to_position');
         requiredFields.delete('to_office');
         requiredFields.delete('to_office_address');
+      }
+      if (positionMode) {
+        requiredFields.delete('closing_time');
       }
       const inputs = form.querySelectorAll('input:not([type="hidden"]), select, textarea');
       let allFilled = true;
@@ -1440,21 +1464,24 @@
       const positionTitle = document.getElementById('position_title_select');
       const salaryGrade = document.getElementById('salary_grade');
       const closingDate = document.getElementById('closing_date');
+      const closingTime = document.getElementById('closing_time');
       const place = document.getElementById('place_of_assignment');
       const monthlySalary = document.getElementById('monthly_salary');
 
       const eTitle = document.getElementById('position_title_error');
       const eSalaryGrade = document.getElementById('salary_grade_error');
       const eClosing = document.getElementById('closing_date_error');
+      const eClosingTime = document.getElementById('closing_time_error');
       const ePlace = document.getElementById('place_of_assignment_error');
       const eEducation = document.getElementById('qualification_education_error');
       const eEligibility = document.getElementById('qualification_eligibility_error');
       const eSalary = document.getElementById('monthly_salary_error');
-      [eTitle, eSalaryGrade, eClosing, ePlace, eEducation, eEligibility, eSalary].forEach(hide);
+      [eTitle, eSalaryGrade, eClosing, eClosingTime, ePlace, eEducation, eEligibility, eSalary].forEach(hide);
 
       if (!positionTitle || !positionTitle.value.trim()) { errors.push('Position title is required.'); show(eTitle, 'Position title is required.'); }
       if (!salaryGrade || !/^SG-\d{2}$/.test(String(salaryGrade.value || '').trim())) { errors.push('Salary grade must be in SG-00 format.'); show(eSalaryGrade, 'Salary grade must be in SG-00 format (example: SG-23).'); }
       if (!disablePositionFields && closingDate && !closingDate.value) { errors.push('Deadline is required.'); show(eClosing, 'Deadline of application is required.'); }
+      if (!@json($positionMode) && (!closingTime || !closingTime.value)) { errors.push('Deadline time is required.'); show(eClosingTime, 'Deadline time is required.'); }
       if (place && !place.value) { errors.push('Place of assignment is required.'); show(ePlace, 'Place of assignment is required.'); }
 
       const educationCode = document.getElementById('minimum_education_code');

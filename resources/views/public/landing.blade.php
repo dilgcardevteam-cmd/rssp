@@ -25,7 +25,7 @@
         $allCount = 0;
         
         foreach ($pageItems as $vacancy) {
-            $closingDate = \Carbon\Carbon::parse($vacancy->closing_date)->setTime(17, 0, 0);
+            $closingDate = $vacancy->closing_at ?? \Carbon\Carbon::parse($vacancy->closing_date);
             $now = \Carbon\Carbon::now();
             $isClosed = $now->greaterThan($closingDate);
             
@@ -394,7 +394,7 @@
                                         </div>
                                         <div class="flex items-center gap-2 text-red-600 text-sm sm:text-base">
                                             <i data-feather="calendar" class="w-4 h-4"></i>
-                                            <span>{{ $processStatus === 'CONCLUDED' ? 'Concluded' : 'Deadline' }}: {{ \Carbon\Carbon::parse($vacancy->closing_date)->format('F d, Y') }}</span>
+                                            <span>{{ $processStatus === 'CONCLUDED' ? 'Concluded' : 'Deadline' }}: {{ optional($vacancy->closing_at)->format('F d, Y h:i A') ?? 'N/A' }}</span>
                                         </div>
                                     </div>
 
@@ -607,8 +607,15 @@
                 if (job.closing_date) {
                     const d = new Date(job.closing_date);
                     if (!isNaN(d)) {
-                        const opts = { month: 'long', day: '2-digit', year: 'numeric' };
-                        formatted = d.toLocaleDateString('en-US', opts);
+                        const opts = {
+                            month: 'long',
+                            day: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        };
+                        formatted = d.toLocaleString('en-US', opts);
                     } else {
                         formatted = String(job.closing_date);
                     }

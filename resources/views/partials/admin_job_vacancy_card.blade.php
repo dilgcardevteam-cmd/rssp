@@ -33,7 +33,7 @@
     </div>
   </td>
   <td class="w-[14%] px-3 py-3 text-center align-top whitespace-nowrap">&#8369;{{ number_format($vacancy->monthly_salary, 2) }}</td>
-  <td class="w-[14%] px-3 py-3 text-center align-top whitespace-nowrap">{{ \Carbon\Carbon::parse($vacancy->closing_date)->format('F j, Y') }}</td>
+  <td class="w-[14%] px-3 py-3 text-center align-top whitespace-nowrap">{{ optional($vacancy->closing_at)->format('F j, Y g:i A') ?? 'N/A' }}</td>
   <td class="w-[18%] px-3 py-3 text-center align-top">
     <span class="block break-words leading-tight">{{ $vacancy->place_of_assignment }}</span>
   </td>

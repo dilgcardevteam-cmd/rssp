@@ -46,6 +46,7 @@
             ?? route('display_c5', [
                 'doc_track' => $vacancyTrackForModal,
                 'vacancy_id' => $vacancy->vacancy_id,
+                'simple' => 1,
             ]);
         $requiredDocsTrackForModal = $vacancyTrackForModal;
         $requiredDocsRedirectUrlForModal = $docUploadRedirectUrlForModal;
@@ -686,6 +687,7 @@
 
     const initialAssessmentSubmitUrl = @json(route('initial_assessment.submit', ['vacancy_id' => $vacancy->vacancy_id]));
     const pdsRedirectUrl = @json(route('display_c1', ['simple' => 1]));
+    const requiredDocsRedirectUrl = @json($requiredDocsRedirectUrlForModal);
     const hasIncompletePds = @json($hasIncompletePdsForApply);
     const hasDocTrackMismatch = @json($hasDocTrackMismatch);
     const initialAssessmentEducationAttainmentMeta = {
@@ -1202,12 +1204,7 @@
 
     function continueAfterInitialAssessment() {
         if (initialAssessmentState.hasSubscribedPds === true) {
-            if (hasDocTrackMismatch) {
-                openModal('docTrackMismatchModal');
-                return;
-            }
-
-            openModal('requiredDocsModal');
+            window.location.href = requiredDocsRedirectUrl;
             return;
         }
 
@@ -1313,6 +1310,10 @@
         }
 
         closeModal('initialAssessmentSubscribedPdsModal');
+        if (hasSubscribedPds) {
+            continueAfterInitialAssessment();
+            return;
+        }
         showInitialAssessmentDecision(
             'Qualified to Proceed',
             getContinueAssessmentPromptMessage(),

@@ -1796,6 +1796,23 @@
             }
 
             let lastAnnouncedError = { key: '', at: 0 };
+            let validationAnnouncementArmed = false;
+            let validationAnnouncementTimer = null;
+
+            function disarmValidationAnnouncementWindow() {
+                validationAnnouncementArmed = false;
+                window.clearTimeout(validationAnnouncementTimer);
+                validationAnnouncementTimer = null;
+            }
+
+            function armValidationAnnouncementWindow(duration = 2500) {
+                validationAnnouncementArmed = true;
+                window.clearTimeout(validationAnnouncementTimer);
+                validationAnnouncementTimer = window.setTimeout(() => {
+                    validationAnnouncementArmed = false;
+                    validationAnnouncementTimer = null;
+                }, duration);
+            }
 
             function announceFieldError(field, message, options = {}) {
                 if (!(field instanceof HTMLElement)) return;
@@ -1851,11 +1868,34 @@
             let pendingInvalidField = null;
             let invalidFlushTimer = null;
 
+            document.addEventListener('click', function (event) {
+                const target = event.target instanceof Element ? event.target : null;
+                const submitControl = target ? target.closest('button[type="submit"], input[type="submit"]') : null;
+                if (submitControl) {
+                    armValidationAnnouncementWindow();
+                }
+            }, true);
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter') return;
+                const target = event.target instanceof HTMLElement ? event.target : null;
+                if (target && target.closest('form')) {
+                    armValidationAnnouncementWindow();
+                }
+            }, true);
+
+            window.armPdsValidationAnnouncement = armValidationAnnouncementWindow;
+
             document.addEventListener('invalid', function (event) {
                 const field = event.target;
                 if (!(field instanceof HTMLElement)) return;
-                pendingInvalidField = pendingInvalidField || field;
                 field.classList.add('error-field');
+
+                if (!validationAnnouncementArmed) {
+                    return;
+                }
+
+                pendingInvalidField = pendingInvalidField || field;
 
                 window.clearTimeout(invalidFlushTimer);
                 invalidFlushTimer = window.setTimeout(() => {
@@ -1863,18 +1903,24 @@
                     const message = errorMessageForField(pendingInvalidField);
                     announceFieldError(pendingInvalidField, message);
                     pendingInvalidField = null;
+                    disarmValidationAnnouncementWindow();
                 }, 0);
             }, true);
 
             document.addEventListener('submit', function (event) {
                 const form = event.target;
                 if (!(form instanceof HTMLFormElement)) return;
+                armValidationAnnouncementWindow();
 
                 window.setTimeout(() => {
                     const field = firstErrorField(form);
-                    if (!field) return;
+                    if (!field) {
+                        disarmValidationAnnouncementWindow();
+                        return;
+                    }
                     const message = errorMessageForField(field);
                     announceFieldError(field, message);
+                    disarmValidationAnnouncementWindow();
                 }, 0);
             }, true);
 

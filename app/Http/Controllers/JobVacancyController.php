@@ -2231,16 +2231,11 @@ class JobVacancyController extends Controller
 
         $degree = trim((string) ($validated['degree'] ?? ''));
         $eligibility = trim((string) ($validated['eligibility'] ?? ''));
-        if ($eligibility === '' && Auth::check()) {
-            $eligibility = $this->resolvePrimaryEligibilityFromPds((int) Auth::id());
-        }
 
         $educationAligned = $degree === ''
             ? true
             : $this->isInitialAssessmentEducationAligned($vacancy, $degree);
-        $eligibilityAligned = $eligibility === ''
-            ? true
-            : $this->isInitialAssessmentEligibilityAligned($vacancy, $eligibility);
+        $eligibilityAligned = true;
 
         if (!$educationAligned || !$eligibilityAligned) {
             return response()->json([

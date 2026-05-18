@@ -663,7 +663,10 @@ Route::middleware([RedirectIfNotAdmin::class])->group(function () {
     Route::put('/admin/utilities/eligibilities/{id}', [EligibilityPresetController::class, 'update'])->name('admin.eligibilities.update');
     Route::delete('/admin/utilities/eligibilities/{id}', [EligibilityPresetController::class, 'destroy'])->name('admin.eligibilities.destroy');
     Route::get('/admin/utilities/courses', [CoursePresetController::class, 'index'])->name('admin.courses.index');
+    Route::get('/admin/utilities/courses/template', [CoursePresetController::class, 'downloadTemplate'])->name('admin.courses.template');
     Route::post('/admin/utilities/courses', [CoursePresetController::class, 'store'])->name('admin.courses.store');
+    Route::post('/admin/utilities/courses/preview-import', [CoursePresetController::class, 'previewImport'])->name('admin.courses.preview_import');
+    Route::post('/admin/utilities/courses/import', [CoursePresetController::class, 'import'])->name('admin.courses.import');
     Route::put('/admin/utilities/courses/{id}', [CoursePresetController::class, 'update'])->name('admin.courses.update');
     Route::delete('/admin/utilities/courses/{id}', [CoursePresetController::class, 'destroy'])->name('admin.courses.destroy');
     Route::get('/admin/utilities/courses/list', [CoursePresetController::class, 'listJson'])->name('admin.courses.list');

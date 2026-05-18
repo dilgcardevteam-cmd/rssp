@@ -9,6 +9,10 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Throwable;
 
 class CoursePresetController extends Controller
 {
@@ -433,6 +437,29 @@ class CoursePresetController extends Controller
         ]);
     }
 
+    public function downloadTemplate()
+    {
+        if (!$this->canManageCourses()) {
+            abort(403);
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Programs');
+        $sheet->setCellValue('A1', 'level');
+        $sheet->setCellValue('B1', 'course');
+        $sheet->getColumnDimension('A')->setWidth(40);
+        $sheet->getColumnDimension('B')->setWidth(60);
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+            $spreadsheet->disconnectWorksheets();
+        }, 'Academic-Settings.xlsx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }
+
     public function store(Request $request)
     {
         if (!$this->canManageCourses()) {
@@ -476,6 +503,106 @@ class CoursePresetController extends Controller
         return redirect()
             ->route('admin.courses.index')
             ->with('success', 'Program added successfully.');
+    }
+
+    public function previewImport(Request $request)
+    {
+        if (!$this->canManageCourses()) {
+            abort(403);
+        }
+
+        if (!$this->hasCoursesTable()) {
+            return response()->json([
+                'message' => 'Programs table is missing. Run migrations first.',
+            ], 422);
+        }
+
+        $validated = $request->validate([
+            'program_level' => ['required', Rule::in(self::PROGRAM_LEVELS)],
+            'import_file' => ['required', 'file', 'mimes:csv,txt,xls,xlsx', 'max:5120'],
+        ]);
+
+        try {
+            $preview = $this->buildImportPreview(
+                $request->file('import_file'),
+                $this->normalizeLevel((string) ($validated['program_level'] ?? 'COLLEGE'))
+            );
+        } catch (Throwable $e) {
+            return response()->json([
+                'message' => 'Unable to read the uploaded file. Use CSV or Excel with one program name per row.',
+            ], 422);
+        }
+
+        return response()->json($preview);
+    }
+
+    public function import(Request $request)
+    {
+        if (!$this->canManageCourses()) {
+            abort(403);
+        }
+
+        if (!$this->hasCoursesTable()) {
+            return redirect()
+                ->route('admin.courses.index')
+                ->withErrors(['course_presets' => 'Programs table is missing. Run migrations first.']);
+        }
+
+        $validated = $request->validate([
+            'program_level' => ['required', Rule::in(self::PROGRAM_LEVELS)],
+            'import_file' => ['required', 'file', 'mimes:csv,txt,xls,xlsx', 'max:5120'],
+        ]);
+
+        $programLevel = $this->normalizeLevel((string) ($validated['program_level'] ?? 'COLLEGE'));
+
+        try {
+            $preview = $this->buildImportPreview($request->file('import_file'), $programLevel);
+        } catch (Throwable $e) {
+            return redirect()
+                ->route('admin.courses.index')
+                ->withErrors(['import_file' => 'Unable to read the uploaded file. Use CSV or Excel with one program name per row.']);
+        }
+
+        $imported = 0;
+        foreach ($preview['items'] as $item) {
+            if (($item['status'] ?? '') !== 'ready') {
+                continue;
+            }
+
+            $programName = trim((string) ($item['name'] ?? ''));
+            $itemLevel = $this->normalizeLevel((string) ($item['level'] ?? $programLevel));
+            if ($programName === '') {
+                continue;
+            }
+
+            $payload = [
+                'course_code' => $this->nextUniqueCode($itemLevel . '_' . $programName),
+                'course_name' => $programName,
+            ];
+
+            if ($this->hasProgramLevelColumn()) {
+                $payload['program_level'] = $itemLevel;
+            }
+
+            CoursePreset::query()->create($payload);
+            $imported++;
+        }
+
+        if ($imported === 0) {
+            return redirect()
+                ->route('admin.courses.index')
+                ->withErrors(['import_file' => 'No new programs were imported. Remove duplicates or blank rows and try again.']);
+        }
+
+        $skipped = max(0, (int) ($preview['summary']['total_rows'] ?? 0) - $imported);
+        $message = $imported === 1 ? '1 program imported successfully.' : $imported . ' programs imported successfully.';
+        if ($skipped > 0) {
+            $message .= ' ' . $skipped . ' row' . ($skipped === 1 ? ' was' : 's were') . ' skipped.';
+        }
+
+        return redirect()
+            ->route('admin.courses.index')
+            ->with('success', $message);
     }
 
     public function update(Request $request, int $id)
@@ -655,5 +782,165 @@ class CoursePresetController extends Controller
         return redirect()
             ->route('admin.courses.index')
             ->with('success', 'Program suggestion declined.');
+    }
+
+    private function buildImportPreview($file, string $programLevel): array
+    {
+        $rows = $this->parseImportRows($file->getRealPath());
+
+        $existingNamesByLevel = [];
+        foreach (CoursePreset::query()->get(['course_name', 'program_level']) as $existingCourse) {
+            $existingLevel = $this->hasProgramLevelColumn()
+                ? $this->normalizeLevel((string) ($existingCourse->program_level ?? 'COLLEGE'))
+                : 'COLLEGE';
+            $existingName = mb_strtolower(trim((string) ($existingCourse->course_name ?? '')));
+            if ($existingName === '') {
+                continue;
+            }
+
+            if (!isset($existingNamesByLevel[$existingLevel])) {
+                $existingNamesByLevel[$existingLevel] = [];
+            }
+
+            $existingNamesByLevel[$existingLevel][$existingName] = true;
+        }
+
+        $items = [];
+        $seenInFile = [];
+        $readyCount = 0;
+
+        foreach ($rows as $row) {
+            $name = trim((string) ($row['name'] ?? ''));
+            $normalized = mb_strtolower($name);
+            $rawLevel = trim((string) ($row['level'] ?? ''));
+            $levelState = $this->resolveImportLevel($rawLevel, $programLevel);
+            $effectiveLevel = $levelState['level'];
+            $status = 'ready';
+            $message = 'Ready to import';
+
+            if ($name === '') {
+                $status = 'empty';
+                $message = 'Blank row skipped';
+            } elseif (!$levelState['valid']) {
+                $status = 'invalid_level';
+                $message = 'Invalid level value';
+            } elseif (isset($seenInFile[$effectiveLevel . '|' . $normalized])) {
+                $status = 'duplicate_file';
+                $message = 'Duplicate in upload';
+            } elseif (isset($existingNamesByLevel[$effectiveLevel][$normalized])) {
+                $status = 'duplicate_existing';
+                $message = 'Already exists';
+            } else {
+                $readyCount++;
+                $seenInFile[$effectiveLevel . '|' . $normalized] = true;
+            }
+
+            $items[] = [
+                'row_number' => (int) ($row['row_number'] ?? 0),
+                'level' => $levelState['display_level'],
+                'name' => $name,
+                'status' => $status,
+                'message' => $message,
+            ];
+        }
+
+        return [
+            'program_level' => $programLevel,
+            'items' => $items,
+            'summary' => [
+                'total_rows' => count($items),
+                'ready_rows' => $readyCount,
+                'skipped_rows' => count($items) - $readyCount,
+            ],
+        ];
+    }
+
+    private function parseImportRows(string $path): array
+    {
+        $spreadsheet = IOFactory::load($path);
+        $sheet = $spreadsheet->getSheet(0);
+        $rawRows = $sheet->toArray('', true, true, false);
+
+        if (count($rawRows) === 0) {
+            return [];
+        }
+
+        $headerIndex = null;
+        $levelIndex = null;
+        $firstRow = array_map(
+            static fn($value) => strtolower(trim((string) $value)),
+            (array) ($rawRows[0] ?? [])
+        );
+
+        foreach ($firstRow as $index => $column) {
+            if ($levelIndex === null && in_array($column, ['program_level', 'level'], true)) {
+                $levelIndex = (int) $index;
+            }
+
+            if ($headerIndex === null && in_array($column, ['program_name', 'course_name', 'program', 'course', 'name'], true)) {
+                $headerIndex = (int) $index;
+            }
+        }
+
+        $startIndex = $headerIndex === null ? 0 : 1;
+        $parsed = [];
+
+        for ($rowIndex = $startIndex; $rowIndex < count($rawRows); $rowIndex++) {
+            $row = array_map(
+                static fn($value) => trim((string) $value),
+                (array) ($rawRows[$rowIndex] ?? [])
+            );
+
+            $name = '';
+            $level = '';
+            if ($headerIndex !== null) {
+                $name = trim((string) ($row[$headerIndex] ?? ''));
+            } else {
+                foreach ($row as $cell) {
+                    if ($cell !== '') {
+                        $name = $cell;
+                        break;
+                    }
+                }
+            }
+
+            if ($levelIndex !== null) {
+                $level = trim((string) ($row[$levelIndex] ?? ''));
+            }
+
+            $parsed[] = [
+                'row_number' => $rowIndex + 1,
+                'level' => $level,
+                'name' => $name,
+            ];
+        }
+
+        return $parsed;
+    }
+
+    private function resolveImportLevel(?string $value, string $defaultLevel): array
+    {
+        $rawLevel = strtoupper(trim((string) $value));
+        if ($rawLevel === '') {
+            return [
+                'level' => $defaultLevel,
+                'display_level' => $defaultLevel,
+                'valid' => true,
+            ];
+        }
+
+        if (in_array($rawLevel, self::PROGRAM_LEVELS, true)) {
+            return [
+                'level' => $rawLevel,
+                'display_level' => $rawLevel,
+                'valid' => true,
+            ];
+        }
+
+        return [
+            'level' => $defaultLevel,
+            'display_level' => $rawLevel,
+            'valid' => false,
+        ];
     }
 }

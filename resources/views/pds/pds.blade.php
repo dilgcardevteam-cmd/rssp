@@ -1162,6 +1162,9 @@
         const simpleParam = new URLSearchParams(window.location.search).get('simple');
         const simpleQuery = simpleParam ? `?simple=${simpleParam}` : '';
         form.action = `/pds/submit_c1/${location}${simpleQuery}`;
+        if (typeof window.armPdsValidationAnnouncement === 'function') {
+            window.armPdsValidationAnnouncement();
+        }
         form.requestSubmit();
     }
     function parsePdsEducationDate(value) {
@@ -1541,7 +1544,6 @@
         jhsFrom.min = formatPdsEducationDateForInput(elemToDate);
         if (jhsFromDate.getTime() < elemToDate.getTime()) {
             jhsFrom.setCustomValidity('Secondary "From" date must not be before Elementary "To" date.');
-            jhsFrom.reportValidity();
         }
     }
 
@@ -1569,7 +1571,6 @@
             collegeFrom.min = formatPdsEducationDateForInput(jhsToDate);
             if (collegeFromDate.getTime() < jhsToDate.getTime()) {
                 collegeFrom.setCustomValidity('College "From" date must not be before Secondary "To" date.');
-                collegeFrom.reportValidity();
             }
         });
     }
@@ -1870,7 +1871,7 @@ function addPdsEducationDays(date, days) {
 
         const dobInput = document.querySelector('[data-dob-input]');
         if (dobInput) {
-            dobInput.addEventListener('blur', () => validateDobAge(true, true, dobPicker));
+            dobInput.addEventListener('blur', () => validateDobAge(false, true, dobPicker));
             dobInput.addEventListener('change', () => validateDobAge(false, true, dobPicker));
             dobInput.addEventListener('input', () => dobInput.setCustomValidity(''));
             validateDobAge(false, true, dobPicker);
@@ -2527,8 +2528,8 @@ function addPdsEducationDays(date, days) {
             const radios=new Set(); let ok=true;
             els.forEach(el=>{
                 if(el.type==='radio'){ radios.add(el.name); }
-                else if(el.tagName==='SELECT'){ if(!el.value) ok=false; }
-                else { if(!el.checkValidity() || !String(el.value).trim()) ok=false; }
+                else if(el.tagName==='SELECT'){ if(!el.value || !el.validity.valid) ok=false; }
+                else { if(!el.validity.valid || !String(el.value).trim()) ok=false; }
             });
             radios.forEach(n=>{ if(!document.querySelector('input[name="'+n+'"]:checked')) ok=false; });
             const c=radioVal('citizenship');

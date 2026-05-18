@@ -6162,7 +6162,6 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
         $vacancyId = trim((string) $vacancy->vacancy_id);
         $assessmentVacancyId = trim((string) ($assessment['vacancy_id'] ?? ''));
         $degree = trim((string) ($assessment['degree'] ?? ''));
-        $eligibility = trim((string) ($assessment['eligibility'] ?? ''));
         $q1Passed = array_key_exists('q1_passed', $assessment) ? (bool) $assessment['q1_passed'] : false;
         $q2Passed = array_key_exists('q2_passed', $assessment) ? (bool) $assessment['q2_passed'] : false;
         $hasSubscribedPdsAnswered = array_key_exists('has_subscribed_pds', $assessment);
@@ -6171,7 +6170,6 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
             $vacancyId === ''
             || $assessmentVacancyId !== $vacancyId
             || $degree === ''
-            || $eligibility === ''
             || !$q1Passed
             || !$q2Passed
             || !$hasSubscribedPdsAnswered

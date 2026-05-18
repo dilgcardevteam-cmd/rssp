@@ -2232,20 +2232,6 @@ class JobVacancyController extends Controller
         $degree = trim((string) ($validated['degree'] ?? ''));
         $eligibility = trim((string) ($validated['eligibility'] ?? ''));
 
-        $educationAligned = $degree === ''
-            ? true
-            : $this->isInitialAssessmentEducationAligned($vacancy, $degree);
-        $eligibilityAligned = true;
-
-        if (!$educationAligned || !$eligibilityAligned) {
-            return response()->json([
-                'ok' => false,
-                'education_aligned' => $educationAligned,
-                'eligibility_aligned' => $eligibilityAligned,
-                'message' => $this->buildInitialAssessmentNotQualifiedMessage($educationAligned, $eligibilityAligned),
-            ], 422);
-        }
-
         $sessionPayload = [
             'vacancy_id' => (string) $vacancy->vacancy_id,
             'degree' => $degree,
@@ -2777,27 +2763,6 @@ class JobVacancyController extends Controller
                     'vacancy_track' => $docTrackMismatchState['vacancyTrack'],
                     'redirect_url' => $docTrackMismatchState['redirectUrl'],
                 ]);
-        }
-
-        if (!$hasSubscribedPds) {
-            $qualificationGate = $this->evaluateApplicantQualificationGateForVacancy((int) Auth::id(), $vacancy);
-            $missingQualificationLabels = $this->collectMissingQualificationLabels((array) ($qualificationGate['checks'] ?? []));
-            if (!empty($missingQualificationLabels)) {
-                Log::info('Apply blocked: qualification requirements not met', [
-                    'user_id' => Auth::id(),
-                    'vacancy_id' => $vacancy_id,
-                    'qualification_checks' => $qualificationGate['checks'],
-                ]);
-
-                $qualificationMismatchMessage = $qualificationGate['message'] ?? (
-                    'You are not yet qualified to apply for this position. '
-                    . 'Please review the missing requirements and update your PDS.'
-                );
-
-                return redirect()
-                    ->route('job_description', ['id' => $vacancy->vacancy_id])
-                    ->with('error', $qualificationMismatchMessage);
-            }
         }
 
         $requiredDocumentIds = $this->getRequiredDocumentIdsForVacancyType((string) $vacancy->vacancy_type, $vacancy);

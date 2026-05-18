@@ -6163,7 +6163,6 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
     {
         $vacancyId = trim((string) $vacancy->vacancy_id);
         $assessmentVacancyId = trim((string) ($assessment['vacancy_id'] ?? ''));
-        $degree = trim((string) ($assessment['degree'] ?? ''));
         $q1Passed = array_key_exists('q1_passed', $assessment) ? (bool) $assessment['q1_passed'] : false;
         $q2Passed = array_key_exists('q2_passed', $assessment) ? (bool) $assessment['q2_passed'] : false;
         $hasSubscribedPdsAnswered = array_key_exists('has_subscribed_pds', $assessment);
@@ -6171,7 +6170,6 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
         if (
             $vacancyId === ''
             || $assessmentVacancyId !== $vacancyId
-            || $degree === ''
             || !$q1Passed
             || !$q2Passed
             || !$hasSubscribedPdsAnswered
@@ -6254,26 +6252,6 @@ $rules_data_vol["voluntary_to_$i"] = 'required|date';
                     'message' => 'Please complete your Personal Data Sheet first before applying.',
                     'reason_code' => 'incomplete_pds',
                 ];
-            }
-
-            if (!$hasSubscribedPds) {
-                $qualificationGate = $jobVacancyController->evaluateQualificationGateForApplicant((int) Auth::id(), $vacancy);
-                if (!(bool) ($qualificationGate['isQualified'] ?? false)) {
-                    Log::info('C5 application submit blocked: qualification requirements not met', [
-                        'user_id' => Auth::id(),
-                        'vacancy_id' => $vacancyId,
-                        'qualification_checks' => $qualificationGate['checks'] ?? [],
-                    ]);
-
-                    return [
-                        'ok' => false,
-                        'created' => false,
-                        'message' => (string) ($qualificationGate['message']
-                            ?? 'You are not yet qualified to apply for this position.'),
-                        'reason_code' => 'qualification',
-                        'missing_requirements' => array_values((array) ($qualificationGate['missing_labels'] ?? [])),
-                    ];
-                }
             }
 
             if (!$this->hasCompletedInitialAssessmentForVacancy($vacancy, $initialAssessment)) {

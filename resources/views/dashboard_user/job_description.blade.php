@@ -34,7 +34,12 @@
         $requiredDocsPayload = session('required_docs_prompt');
         $showRequiredDocsModalOnLoad = is_array($requiredDocsPayload)
             && (($requiredDocsPayload['vacancy_id'] ?? $vacancy->vacancy_id) === $vacancy->vacancy_id);
-        $showPdsRequiredModalOnLoad = (bool) session('pds_required_prompt', false);
+        $initialAssessmentSession = session('initial_assessment_answers.' . trim((string) $vacancy->vacancy_id), []);
+        $hasSubscribedPdsFromAssessment = is_array($initialAssessmentSession)
+            && array_key_exists('has_subscribed_pds', $initialAssessmentSession)
+            ? (bool) $initialAssessmentSession['has_subscribed_pds']
+            : false;
+        $showPdsRequiredModalOnLoad = (bool) session('pds_required_prompt', false) && !$hasSubscribedPdsFromAssessment;
 
         $mismatchPayload = session('doc_track_mismatch');
         $showMismatchModalOnLoad = is_array($mismatchPayload)
@@ -52,7 +57,7 @@
         $requiredDocsRedirectUrlForModal = $docUploadRedirectUrlForModal;
         $requiredDocsPreviewForModal = $requiredDocsPreview ?? [];
         $hasMissingRequiredDocsForModal = (bool) ($hasMissingRequiredDocs ?? false);
-        $hasIncompletePdsForApply = !($hasCompletedPdsForApply ?? false);
+        $hasIncompletePdsForApply = !($hasCompletedPdsForApply ?? false) && !$hasSubscribedPdsFromAssessment;
         $isEligibilityQualifiedForPanel = (bool) ($isEligibilityQualified ?? true);
 
         $statusRaw = strtolower(trim((string) $vacancy->status));
@@ -254,16 +259,11 @@
                                 class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-sm font-semibold transition">
                                 <i data-feather="clipboard" class="w-4 h-4"></i> APPLY
                             </button>
-                        @elseif (!$isClosed && !$isEligibilityQualifiedForPanel)
-                            <button disabled
-                                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-red-500 text-white text-sm font-semibold cursor-not-allowed">
-                                <i data-feather="x-circle" class="w-4 h-4"></i> NOT ELIGIBLE
-                            </button>
                         @elseif (!$isClosed)
                             <button type="button" onclick="openApplyModal()"
                                 class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition">
                                 <i data-feather="arrow-right" class="w-4 h-4"></i> APPLY FOR THIS POSITION
-                            </button>
+                                </button>
                         @else
                             <button disabled
                                 class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-gray-400 text-white text-sm font-semibold cursor-not-allowed">
@@ -275,18 +275,6 @@
                             <div class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700">
                                 <p class="font-semibold">Before applying, complete the initial assessment first.</p>
                                 <p class="mt-1">This runs each time you submit an application for this vacancy.</p>
-                            </div>
-                        @elseif(!$isClosed && !$hasApplied && !$hasIncompletePdsForApply && !$isEligibilityQualifiedForPanel)
-                            <div class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-                                <p class="font-semibold">You are not yet qualified for this position.</p>
-                                <p class="mt-1">{{ $eligibilityMismatchMessage ?: 'Please complete the missing requirement(s) below.' }}</p>
-                                @if(!empty($missingQualificationLabelsForPanel))
-                                    <ul class="mt-2 list-disc list-inside space-y-1">
-                                        @foreach($missingQualificationLabelsForPanel as $item)
-                                            <li>{{ $item }}</li>
-                                        @endforeach
-                                    </ul>
-                                @endif
                             </div>
                         @endif
                     </div>
@@ -1160,10 +1148,7 @@
     }
 
     async function submitInitialAssessment(options = {}) {
-        const payload = {
-            education_attainment: initialAssessmentState.educationAttainment,
-            degree: initialAssessmentState.degree,
-        };
+        const payload = {};
 
         if (typeof options.hasPqe === 'boolean') {
             payload.has_pqe = options.hasPqe;
@@ -1201,16 +1186,11 @@
 
     function continueAfterInitialAssessment() {
         if (initialAssessmentState.hasSubscribedPds !== true) {
-            openModal('pdsRequiredModal');
+            window.location.href = pdsRedirectUrl;
             return;
         }
 
-        if (hasDocTrackMismatch) {
-            openModal('docTrackMismatchModal');
-            return;
-        }
-
-        openModal('requiredDocsModal');
+        window.location.href = requiredDocsRedirectUrl;
     }
 
     async function completeInitialAssessmentEducation() {
@@ -1305,7 +1285,7 @@
             continueAfterInitialAssessment();
             return;
         }
-        openModal('pdsRequiredModal');
+        window.location.href = pdsRedirectUrl;
     }
 
     document.addEventListener('DOMContentLoaded', function() {

@@ -91,10 +91,16 @@
                     <p id="programCodePreview" class="mt-1 text-xs text-slate-500">Code preview: <span class="font-mono text-slate-700">-</span></p>
                     <p id="programDuplicateWarning" class="mt-1 hidden text-xs font-medium text-amber-700">This program already exists in the selected level.</p>
                 </div>
-                <button id="programAddSubmit" type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0D2B70] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#12347f] disabled:cursor-not-allowed disabled:opacity-60">
-                    <i class="fa-solid fa-plus"></i>
-                    <span>Add program</span>
-                </button>
+                <div class="space-y-2">
+                    <button id="programAddSubmit" type="submit" class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0D2B70] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#12347f] disabled:cursor-not-allowed disabled:opacity-60">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Add program</span>
+                    </button>
+                    <button id="openProgramImportModal" type="button" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                        <i class="fa-solid fa-file-import"></i>
+                        <span>Import programs</span>
+                    </button>
+                </div>
             </form>
         </article>
 
@@ -265,6 +271,81 @@
     </div>
 </div>
 
+<div id="programImportModal" class="fixed inset-0 z-[130] hidden bg-black/40">
+    <div class="grid min-h-screen place-items-center p-4">
+        <div class="w-full max-w-4xl rounded-2xl border border-slate-200 bg-white shadow-xl">
+            <div class="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-[#0D2B70]">Import programs</h3>
+                    <p class="mt-1 text-sm text-slate-600">Upload a CSV or Excel file using the `level` and `course` columns.</p>
+                </div>
+                <button type="button" data-close-import class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" aria-label="Close import modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form id="programImportForm" method="POST" action="{{ route('admin.courses.import') }}" enctype="multipart/form-data" class="space-y-5 px-6 py-5">
+                @csrf
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div>
+                        <label for="import_program_level" class="mb-1 block text-sm font-medium text-slate-700">Program level</label>
+                        <select id="import_program_level" name="program_level" required class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                            @foreach ($levelOptions as $code)
+                                @php $levelCode = strtoupper((string) $code); @endphp
+                                <option value="{{ $levelCode }}">{{ $levelLabels[$levelCode] ?? $levelCode }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="programImportFile" class="mb-1 block text-sm font-medium text-slate-700">Upload file</label>
+                        <input id="programImportFile" type="file" name="import_file" accept=".csv,.txt,.xls,.xlsx" required class="block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-200">
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                            <a href="{{ route('admin.courses.template') }}" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Download template</span>
+                            </a>
+                            <p class="text-xs text-slate-500">Use the academic program template before uploading.</p>
+                        </div>
+                        <p class="mt-1 text-xs text-slate-500">Accepted files: CSV, TXT, XLS, XLSX. Required columns: `level` and `course`. If `level` is blank, the selected program level will be used.</p>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-slate-200 bg-slate-50">
+                    <div class="flex flex-col gap-2 border-b border-slate-200 px-4 py-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h4 class="text-sm font-semibold text-slate-900">Uploaded data preview</h4>
+                            <p id="programImportStatus" class="mt-1 text-xs text-slate-500">Choose a file to preview uploaded programs.</p>
+                        </div>
+                        <p id="programImportSummary" class="text-xs font-medium text-slate-600"></p>
+                    </div>
+                    <div class="max-h-[360px] overflow-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="sticky top-0 bg-slate-100 text-slate-600">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Row</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Level</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Program name</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="programImportPreviewBody" class="divide-y divide-slate-200 bg-white">
+                                <tr id="programImportEmptyRow">
+                                    <td colspan="4" class="px-4 py-10 text-center text-slate-500">No uploaded data yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <button type="button" data-close-import class="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                    <button id="programImportSubmit" type="submit" disabled class="rounded-xl bg-[#0D2B70] px-4 py-2 text-sm font-semibold text-white hover:bg-[#12347f] disabled:cursor-not-allowed disabled:opacity-60">Save imported programs</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 (function () {
     const rows = Array.from(document.querySelectorAll('tr[data-row="program"]'));
@@ -292,6 +373,25 @@
     const deleteModal = document.getElementById('deleteModal');
     const deleteConfirmForm = document.getElementById('deleteConfirmForm');
     const deleteProgramName = document.getElementById('deleteProgramName');
+
+    const importModal = document.getElementById('programImportModal');
+    const openImportButton = document.getElementById('openProgramImportModal');
+    const importForm = document.getElementById('programImportForm');
+    const importLevelInput = document.getElementById('import_program_level');
+    const importFileInput = document.getElementById('programImportFile');
+    const importPreviewBody = document.getElementById('programImportPreviewBody');
+    const importStatus = document.getElementById('programImportStatus');
+    const importSummary = document.getElementById('programImportSummary');
+    const importSubmit = document.getElementById('programImportSubmit');
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
 
     function normalize(v) {
         return String(v || '').trim().toLowerCase();
@@ -362,6 +462,148 @@
         document.body.classList.remove('overflow-hidden');
     }
 
+    function openImportModal() {
+        if (!importModal) return;
+        if (importLevelInput && addLevelInput) {
+            importLevelInput.value = String(addLevelInput.value || 'COLLEGE').toUpperCase();
+        }
+        importModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    }
+
+    function closeImportModal() {
+        if (!importModal) return;
+        importModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+
+    function resetImportPreview(message) {
+        if (importPreviewBody) {
+            importPreviewBody.innerHTML = `
+                <tr id="programImportEmptyRow">
+                    <td colspan="4" class="px-4 py-10 text-center text-slate-500">${escapeHtml(message || 'No uploaded data yet.')}</td>
+                </tr>
+            `;
+        }
+        if (importStatus) {
+            importStatus.textContent = message || 'Choose a file to preview uploaded programs.';
+        }
+        if (importSummary) {
+            importSummary.textContent = '';
+        }
+        if (importSubmit) {
+            importSubmit.disabled = true;
+        }
+    }
+
+    function badgeMarkup(status, message) {
+        const label = escapeHtml(message || status || 'Unknown');
+
+        if (status === 'ready') {
+            return `<span class="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">${label}</span>`;
+        }
+        if (status === 'duplicate_existing' || status === 'duplicate_file') {
+            return `<span class="inline-flex rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">${label}</span>`;
+        }
+
+        return `<span class="inline-flex rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">${label}</span>`;
+    }
+
+    function renderImportPreview(payload) {
+        const items = Array.isArray(payload?.items) ? payload.items : [];
+        const summary = payload?.summary || {};
+        const readyRows = Number(summary.ready_rows || 0);
+        const totalRows = Number(summary.total_rows || 0);
+        const skippedRows = Number(summary.skipped_rows || 0);
+
+        if (importPreviewBody) {
+            if (items.length === 0) {
+                importPreviewBody.innerHTML = `
+                    <tr id="programImportEmptyRow">
+                        <td colspan="4" class="px-4 py-10 text-center text-slate-500">No importable rows were found in the uploaded file.</td>
+                    </tr>
+                `;
+            } else {
+                importPreviewBody.innerHTML = items.map((item) => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-4 py-3 text-slate-500">${escapeHtml(item.row_number)}</td>
+                        <td class="px-4 py-3 text-slate-700">${escapeHtml(item.level || '-')}</td>
+                        <td class="px-4 py-3 font-medium text-slate-900">${escapeHtml(item.name || '-')}</td>
+                        <td class="px-4 py-3">${badgeMarkup(item.status, item.message)}</td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        if (importStatus) {
+            importStatus.textContent = readyRows > 0
+                ? 'Review the uploaded rows below before saving.'
+                : 'No new programs are ready to import from this file.';
+        }
+        if (importSummary) {
+            importSummary.textContent = `${readyRows} ready, ${skippedRows} skipped, ${totalRows} total`;
+        }
+        if (importSubmit) {
+            importSubmit.disabled = readyRows < 1;
+        }
+    }
+
+    function extractImportError(payload) {
+        if (payload?.message) {
+            return String(payload.message);
+        }
+
+        const errors = payload?.errors || {};
+        const firstField = Object.keys(errors)[0];
+        if (firstField && Array.isArray(errors[firstField]) && errors[firstField][0]) {
+            return String(errors[firstField][0]);
+        }
+
+        return 'Unable to preview the uploaded file.';
+    }
+
+    async function previewImportFile() {
+        if (!importFileInput?.files?.length || !importLevelInput || !importForm) {
+            resetImportPreview('Choose a file to preview uploaded programs.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('_token', importForm.querySelector('input[name="_token"]')?.value || '');
+        formData.append('program_level', importLevelInput.value || 'COLLEGE');
+        formData.append('import_file', importFileInput.files[0]);
+
+        if (importStatus) {
+            importStatus.textContent = 'Reading uploaded file...';
+        }
+        if (importSummary) {
+            importSummary.textContent = '';
+        }
+        if (importSubmit) {
+            importSubmit.disabled = true;
+        }
+
+        try {
+            const response = await fetch(@json(route('admin.courses.preview_import')), {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: formData,
+            });
+
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                throw new Error(extractImportError(payload));
+            }
+
+            renderImportPreview(payload);
+        } catch (error) {
+            resetImportPreview(error?.message || 'Unable to preview the uploaded file.');
+        }
+    }
+
     if (searchInput) searchInput.addEventListener('input', applyFilters);
     if (levelFilter) levelFilter.addEventListener('change', applyFilters);
     cards.forEach((card) => {
@@ -375,6 +617,13 @@
 
     if (addNameInput) addNameInput.addEventListener('input', updateAddFormHints);
     if (addLevelInput) addLevelInput.addEventListener('change', updateAddFormHints);
+    if (openImportButton) openImportButton.addEventListener('click', openImportModal);
+    if (importFileInput) importFileInput.addEventListener('change', previewImportFile);
+    if (importLevelInput) importLevelInput.addEventListener('change', () => {
+        if (importFileInput?.files?.length) {
+            previewImportFile();
+        }
+    });
 
     document.querySelectorAll('.program-edit-btn').forEach((button) => {
         button.addEventListener('click', () => {
@@ -401,6 +650,7 @@
 
     document.querySelectorAll('[data-close-edit]').forEach((button) => button.addEventListener('click', closeEditModal));
     document.querySelectorAll('[data-close-delete]').forEach((button) => button.addEventListener('click', closeDeleteModal));
+    document.querySelectorAll('[data-close-import]').forEach((button) => button.addEventListener('click', closeImportModal));
 
     if (editModal) {
         editModal.addEventListener('click', (event) => {
@@ -412,6 +662,25 @@
             if (event.target === deleteModal) closeDeleteModal();
         });
     }
+    if (importModal) {
+        importModal.addEventListener('click', (event) => {
+            if (event.target === importModal) closeImportModal();
+        });
+    }
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        if (importModal && !importModal.classList.contains('hidden')) {
+            closeImportModal();
+            return;
+        }
+        if (editModal && !editModal.classList.contains('hidden')) {
+            closeEditModal();
+            return;
+        }
+        if (deleteModal && !deleteModal.classList.contains('hidden')) {
+            closeDeleteModal();
+        }
+    });
 
     const successAlert = document.getElementById('programSuccessAlert');
     const dismissSuccessButton = document.getElementById('dismissProgramSuccess');
@@ -422,7 +691,7 @@
 
     updateAddFormHints();
     applyFilters();
+    resetImportPreview('Choose a file to preview uploaded programs.');
 })();
 </script>
 @endsection
-

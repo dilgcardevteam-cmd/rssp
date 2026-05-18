@@ -87,7 +87,7 @@
       $defaultRequiredSupportingDocuments = strtoupper((string) old('vacancy_type', $formSource?->vacancy_type ?? 'Plantilla')) === 'COS'
         ? ['passport_photo', 'signed_pds', 'signed_work_exp_sheet', 'photocopy_diploma', 'application_letter', 'cert_training']
         : collect($allSupportingDocumentTypes)
-          ->reject(fn($doc) => in_array($doc, ['cert_lgoo_induction', 'other_documents', 'pqe_result', 'ipcr', 'non_academic', 'designation_order', 'cert_employment'], true))
+          ->reject(fn($doc) => in_array($doc, ['cert_lgoo_induction', 'other_documents', 'pqe_result', 'ipcr', 'non_academic', 'designation_order', 'cert_employment', 'cert_grades_masteral_doctorate', 'tor_masteral_doctorate'], true))
           ->values()
           ->all();
       $persistedSupportingDocumentSelection = old('supporting_documents_required', $formSource?->supporting_documents_required);
@@ -101,20 +101,22 @@
         ? array_values(array_unique(array_values(array_filter($persistedSupportingDocumentSelection, fn($doc) => in_array((string) $doc, $allSupportingDocumentTypes, true)))))
         : $defaultRequiredSupportingDocuments;
       $documentLabelMap = [
-      'application_letter' => 'Signed Application letter indicating the position applying for',
-      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result',
-      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned',
-      'photocopy_diploma' => 'Duly Authenticated Diploma',
-      'signed_pds' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)',
+      'application_letter' => 'Application Letter',
+      'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
+      'transcript_records' => 'Photocopy of Transcript of Records (Baccalaureate Degree)',
+      'photocopy_diploma' => 'Photocopy of Diploma',
+      'signed_pds' => 'Fully accomplished, updated and subscribed/notarized Personal Data Sheet (PDS)',
       'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
       'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
       'passport_photo' => 'Passport-Sized Picture',
-      'cert_eligibility' => 'Certificate of Eligibility/Board Rating License',
-      'ipcr' => 'Performance Rating in the last rating period in the present position',
-      'non_academic' => 'Non-academic Awards received within the past 2 years',
-      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
-      'designation_order' => 'Confirmed Designation Order/s',
-      'cert_employment' => 'Certificate of Employment with duties and functions',
+      'cert_eligibility' => 'Photocopy of Certificate of Eligibility/Boarding Rating',
+      'ipcr' => 'Certification of Numerical Rating/Performance Ratining/IPCR',
+      'non_academic' => 'Non-Academic awards received',
+      'cert_training' => 'Certified/authenticated copy of Certificates of Training/Participation',
+      'designation_order' => 'List with certified photocopy of duly confirmed Designation/Orders',
+      'cert_grades_masteral_doctorate' => 'Certified photocopy of Certificate of Grades with Masteral/Doctorate units earned',
+      'tor_masteral_doctorate' => 'Certified photocopy of TOR with Masteral/Doctorate degree',
+      'cert_employment' => 'Certificate of Employment (if any)',
       'other_documents' => 'Other Documents Submitted',
       ];
     @endphp

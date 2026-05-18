@@ -547,6 +547,23 @@
 			NEEDS_REVISIONS: 'Needs Revisions',
 			NOT_QUALIFIED: 'Not Qualified',
 		});
+		const NOTIFY_DOCUMENT_ORDER = [
+			'application_letter',
+			'signed_pds',
+			'signed_work_exp_sheet',
+			'pqe_result',
+			'cert_eligibility',
+			'ipcr',
+			'non_academic',
+			'cert_training',
+			'designation_order',
+			'transcript_records',
+			'photocopy_diploma',
+			'cert_grades_masteral_doctorate',
+			'tor_masteral_doctorate',
+			'cert_employment',
+			'other_documents',
+		];
 
 		function isRequiredDocument(docId) {
 			return requiredDocumentSet.has(docId);
@@ -598,17 +615,21 @@
 
 		function sortDocumentsForRequiredPriority(docList) {
 			return [...(docList || [])].sort((a, b) => {
-				// Primary: documents with an uploaded/pending file come before not-submitted ones
-				const uploadedA = docHasUpload(a) ? 0 : 1;
-				const uploadedB = docHasUpload(b) ? 0 : 1;
-				if (uploadedA !== uploadedB) return uploadedA - uploadedB;
-
-				// Secondary (within same upload tier): required before "if any"
 				const requiredA = isRequiredDocument(a?.id) ? 0 : 1;
 				const requiredB = isRequiredDocument(b?.id) ? 0 : 1;
-				if (requiredA !== requiredB) return requiredA - requiredB;
+				if (requiredA !== requiredB) {
+					return requiredA - requiredB;
+				}
 
-				// Tertiary: alphabetical by label
+				const indexA = NOTIFY_DOCUMENT_ORDER.indexOf(String(a?.id || ''));
+				const indexB = NOTIFY_DOCUMENT_ORDER.indexOf(String(b?.id || ''));
+				const rankA = indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA;
+				const rankB = indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB;
+
+				if (rankA !== rankB) {
+					return rankA - rankB;
+				}
+
 				const labelA = (a?.text || a?.name || a?.id || '').toLowerCase();
 				const labelB = (b?.text || b?.name || b?.id || '').toLowerCase();
 				return labelA.localeCompare(labelB);
@@ -625,7 +646,26 @@
 				if (!doc.preview || doc.preview === '') return false;
 				return true;
 			});
-			return sortDocumentsForRequiredPriority(uploaded);
+			return [...uploaded].sort((a, b) => {
+				const indexA = NOTIFY_DOCUMENT_ORDER.indexOf(String(a?.id || ''));
+				const indexB = NOTIFY_DOCUMENT_ORDER.indexOf(String(b?.id || ''));
+				const rankA = indexA === -1 ? Number.MAX_SAFE_INTEGER : indexA;
+				const rankB = indexB === -1 ? Number.MAX_SAFE_INTEGER : indexB;
+
+				if (rankA !== rankB) {
+					return rankA - rankB;
+				}
+
+				const requiredA = isRequiredDocument(a?.id) ? 0 : 1;
+				const requiredB = isRequiredDocument(b?.id) ? 0 : 1;
+				if (requiredA !== requiredB) {
+					return requiredA - requiredB;
+				}
+
+				const labelA = (a?.text || a?.name || a?.id || '').toLowerCase();
+				const labelB = (b?.text || b?.name || b?.id || '').toLowerCase();
+				return labelA.localeCompare(labelB);
+			});
 		}
 
 		let deadlineHiddenByChoice = false;
@@ -1583,24 +1623,22 @@
 			const listEl = document.getElementById('document-list');
 			if (!listEl) return;
 			listEl.innerHTML = "";
-
-			let lastHadUpload = null; // track group transitions
+			let insertedOptionalDivider = false;
 
 			docList.forEach((doc, index) => {
-				const hasUpload = docHasUpload(doc);
-
-				// Insert a divider when transitioning from uploaded group to not-submitted group
-				if (lastHadUpload !== null && lastHadUpload === true && !hasUpload) {
+				if (!isRequiredDocument(doc?.id) && !insertedOptionalDivider) {
 					const divider = document.createElement('li');
 					divider.setAttribute('aria-hidden', 'true');
-					divider.className = "my-2 border-t border-dashed border-gray-300 flex items-center gap-2 px-1";
+					divider.className = "my-2 border-t border-dashed border-gray-300 pt-2 px-1";
+
 					const label = document.createElement('span');
 					label.className = "text-[10px] text-gray-400 uppercase tracking-wide whitespace-nowrap";
 					label.textContent = "Other Documents";
+
 					divider.appendChild(label);
 					listEl.appendChild(divider);
+					insertedOptionalDivider = true;
 				}
-				lastHadUpload = hasUpload;
 
 				const li = document.createElement('li');
 				li.id = `doc-item-${doc.id}`;

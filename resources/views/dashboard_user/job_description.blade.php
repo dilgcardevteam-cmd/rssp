@@ -593,12 +593,9 @@
         <div id="initialAssessmentSubscribedPdsModal" class="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md hidden px-4 py-6">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 border border-[#0D2B70]/10">
                 <p class="text-xs uppercase tracking-[0.15em] text-[#0D2B70]/70 font-semibold">Preliminary Information</p>
-                <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 3</h2>
+                <h2 class="text-lg font-semibold text-[#002C76] mt-1">Question 1</h2>
                 <p class="text-sm text-gray-700 mt-3 font-medium">Do you have a subscribed PDS form?</p>
                 <div class="mt-6 flex justify-end gap-2">
-                    <button type="button" onclick="goBackToInitialAssessmentPqeOrEligibility()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
-                        Back
-                    </button>
                     <button type="button" onclick="answerInitialAssessmentSubscribedPds(false)" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
                         No
                     </button>
@@ -654,7 +651,7 @@
 
     function openApplyModal() {
         const shouldRunInitialAssessment = @json($showInitialAssessmentFlow);
-        if (shouldRunInitialAssessment) { openModal('initialAssessmentEducationModal'); return; }
+        if (shouldRunInitialAssessment) { openModal('initialAssessmentSubscribedPdsModal'); return; }
 
         if (hasIncompletePds) { openModal('pdsRequiredModal'); return; }
 
@@ -1203,13 +1200,8 @@
     }
 
     function continueAfterInitialAssessment() {
-        if (initialAssessmentState.hasSubscribedPds === true) {
-            window.location.href = requiredDocsRedirectUrl;
-            return;
-        }
-
-        if (hasIncompletePds) {
-            window.location.href = pdsRedirectUrl;
+        if (initialAssessmentState.hasSubscribedPds !== true) {
+            openModal('pdsRequiredModal');
             return;
         }
 
@@ -1298,11 +1290,10 @@
 
         const submitOptions = {
             hasSubscribedPds,
+            hasPqe: typeof initialAssessmentState.hasPqe === 'boolean'
+                ? initialAssessmentState.hasPqe
+                : false,
         };
-
-        if (typeof initialAssessmentState.hasPqe === 'boolean') {
-            submitOptions.hasPqe = initialAssessmentState.hasPqe;
-        }
 
         const result = await submitInitialAssessment(submitOptions);
         if (!result) {
@@ -1314,11 +1305,7 @@
             continueAfterInitialAssessment();
             return;
         }
-        showInitialAssessmentDecision(
-            'Qualified to Proceed',
-            getContinueAssessmentPromptMessage(),
-            continueAfterInitialAssessment
-        );
+        openModal('pdsRequiredModal');
     }
 
     document.addEventListener('DOMContentLoaded', function() {

@@ -3,20 +3,22 @@
 @section('content')
 @php
     $documentMeta = [
-        'application_letter' => ['label' => 'Signed Application letter indicating the position applying for', 'accept' => 'application/pdf'],
-        'pqe_result' => ['label' => 'DILG Pre-Qualifying Exam (PQE) Result', 'accept' => 'application/pdf'],
-        'transcript_records' => ['label' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned', 'accept' => 'application/pdf'],
-        'photocopy_diploma' => ['label' => 'Duly Authenticated Diploma', 'accept' => 'application/pdf'],
-        'signed_pds' => ['label' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)', 'accept' => 'application/pdf'],
+        'application_letter' => ['label' => 'Application Letter', 'accept' => 'application/pdf'],
+        'pqe_result' => ['label' => 'Pre-Qualifying Exam (PQE) Result', 'accept' => 'application/pdf'],
+        'transcript_records' => ['label' => 'Photocopy of Transcript of Records (Baccalaureate Degree)', 'accept' => 'application/pdf'],
+        'photocopy_diploma' => ['label' => 'Photocopy of Diploma', 'accept' => 'application/pdf'],
+        'signed_pds' => ['label' => 'Fully accomplished, updated and subscribed/notarized Personal Data Sheet (PDS)', 'accept' => 'application/pdf'],
         'signed_work_exp_sheet' => ['label' => 'Work Experience Sheet (for position/s requiring relevant Experience)', 'accept' => 'application/pdf'],
         'cert_lgoo_induction' => ['label' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)', 'accept' => 'application/pdf'],
         'passport_photo' => ['label' => 'Passport-Sized Picture', 'accept' => 'application/pdf,image/*'],
-        'cert_eligibility' => ['label' => 'Certificate of Eligibility/Board Rating License', 'accept' => 'application/pdf'],
-        'ipcr' => ['label' => 'Performance Rating in the last rating period in the present position', 'accept' => 'application/pdf'],
-        'non_academic' => ['label' => 'Non-academic Awards received within the past 2 years', 'accept' => 'application/pdf'],
-        'cert_training' => ['label' => 'Certificate/s of Training Attended/Participated relevant to the position being applied', 'accept' => 'application/pdf'],
-        'designation_order' => ['label' => 'Confirmed Designation Order/s', 'accept' => 'application/pdf'],
-        'cert_employment' => ['label' => 'Certificate of Employment with duties and functions', 'accept' => 'application/pdf'],
+        'cert_eligibility' => ['label' => 'Photocopy of Certificate of Eligibility/Boarding Rating', 'accept' => 'application/pdf'],
+        'ipcr' => ['label' => 'Certification of Numerical Rating/Performance Ratining/IPCR', 'accept' => 'application/pdf'],
+        'non_academic' => ['label' => 'Non-Academic awards received', 'accept' => 'application/pdf'],
+        'cert_training' => ['label' => 'Certified/authenticated copy of Certificates of Training/Participation', 'accept' => 'application/pdf'],
+        'designation_order' => ['label' => 'List with certified photocopy of duly confirmed Designation/Orders', 'accept' => 'application/pdf'],
+        'cert_grades_masteral_doctorate' => ['label' => 'Certified photocopy of Certificate of Grades with Masteral/Doctorate units earned', 'accept' => 'application/pdf'],
+        'tor_masteral_doctorate' => ['label' => 'Certified photocopy of TOR with Masteral/Doctorate degree', 'accept' => 'application/pdf'],
+        'cert_employment' => ['label' => 'Certificate of Employment (if any)', 'accept' => 'application/pdf'],
         'other_documents' => ['label' => 'Other Documents Submitted', 'accept' => 'application/pdf'],
     ];
 
@@ -178,7 +180,7 @@
                         $galleryDoc = $galleryDocumentsResolved[$docType] ?? null;
                         $status = trim((string) ($doc->status ?? ''));
                         $isApproved = strcasecmp($status, 'Okay/Confirmed') === 0;
-                        $docStoragePath = trim((string) ($galleryDoc->storage_path ?? ''));
+                        $docStoragePath = trim((string) (($doc->storage_path ?? '') ?: ($galleryDoc->storage_path ?? '')));
                         $previewUrl = '';
                         if ($docStoragePath !== '' && $docStoragePath !== 'NOINPUT') {
                             $previewUrl = \App\Support\PreviewUrl::forPath($docStoragePath);

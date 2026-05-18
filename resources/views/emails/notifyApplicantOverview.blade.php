@@ -215,8 +215,28 @@
 
 <body>
   @php
+    $documentOrder = [
+      'application_letter',
+      'signed_pds',
+      'signed_work_exp_sheet',
+      'pqe_result',
+      'cert_eligibility',
+      'ipcr',
+      'non_academic',
+      'cert_training',
+      'designation_order',
+      'transcript_records',
+      'photocopy_diploma',
+      'cert_grades_masteral_doctorate',
+      'tor_masteral_doctorate',
+      'cert_employment',
+      'other_documents',
+    ];
+    $documentOrderLookup = array_flip($documentOrder);
+
     $normalizedDocuments = collect($documents ?? [])->map(function ($doc) {
       return [
+        'id' => (string) ($doc['id'] ?? ''),
         'name' => $doc['name'] ?? $doc['text'] ?? $doc['id'] ?? 'N/A',
         'status' => strtolower(trim((string) ($doc['status'] ?? ''))),
         'remarks' => trim((string) ($doc['remarks'] ?? '')),
@@ -286,8 +306,9 @@
         // Only include documents the applicant actually uploaded (exclude not submitted / empty)
         return $doc['status'] !== '' && $doc['status'] !== 'not submitted';
       })
-      ->sortBy(function ($doc) {
-        return strtolower($doc['name']);
+      ->sortBy(function ($doc) use ($documentOrderLookup) {
+        $id = (string) ($doc['id'] ?? '');
+        return $documentOrderLookup[$id] ?? 9999;
       })->values();
 
     $logoPath = public_path('images/dilg_logo.png');

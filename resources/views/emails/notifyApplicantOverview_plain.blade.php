@@ -8,13 +8,38 @@ Document Progress: {{ $progress_count ?? '0/0' }} verified ({{ $progress_percent
 Reviewed by: {{ $reviewer_name ?? 'N/A' }}
 
 @php
+  $documentOrder = [
+    'application_letter',
+    'signed_pds',
+    'signed_work_exp_sheet',
+    'pqe_result',
+    'cert_eligibility',
+    'ipcr',
+    'non_academic',
+    'cert_training',
+    'designation_order',
+    'transcript_records',
+    'photocopy_diploma',
+    'cert_grades_masteral_doctorate',
+    'tor_masteral_doctorate',
+    'cert_employment',
+    'other_documents',
+  ];
+  $documentOrderLookup = array_flip($documentOrder);
+
   $normalizedDocuments = collect($documents ?? [])->map(function ($doc) {
     return [
+      'id' => (string) ($doc['id'] ?? ''),
       'name' => $doc['name'] ?? $doc['text'] ?? $doc['id'] ?? 'N/A',
       'status' => strtolower(trim((string) ($doc['status'] ?? ''))),
       'remarks' => trim((string) ($doc['remarks'] ?? '')),
     ];
-  });
+  })->filter(function ($doc) {
+    return $doc['status'] !== '' && $doc['status'] !== 'not submitted';
+  })->sortBy(function ($doc) use ($documentOrderLookup) {
+    $id = (string) ($doc['id'] ?? '');
+    return $documentOrderLookup[$id] ?? 9999;
+  })->values();
 
   $verifiedStatuses = ['verified', 'okay/confirmed', 'confirmed', 'approved', 'ok', 'uni'];
   $revisionStatuses = ['needs revision', 'disapproved with deficiency', 'rejected', 'ggs'];

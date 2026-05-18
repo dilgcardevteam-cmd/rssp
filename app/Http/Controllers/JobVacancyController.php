@@ -2223,7 +2223,7 @@ class JobVacancyController extends Controller
         $vacancy = JobVacancy::query()->where('vacancy_id', (string) $vacancy_id)->firstOrFail();
 
         $validated = $request->validate([
-            'degree' => ['required', 'string', 'max:255'],
+            'degree' => ['nullable', 'string', 'max:255'],
             'eligibility' => ['nullable', 'string', 'max:255'],
             'has_pqe' => ['nullable', 'boolean'],
             'has_subscribed_pds' => ['nullable', 'boolean'],
@@ -2235,7 +2235,9 @@ class JobVacancyController extends Controller
             $eligibility = $this->resolvePrimaryEligibilityFromPds((int) Auth::id());
         }
 
-        $educationAligned = $this->isInitialAssessmentEducationAligned($vacancy, $degree);
+        $educationAligned = $degree === ''
+            ? true
+            : $this->isInitialAssessmentEducationAligned($vacancy, $degree);
         $eligibilityAligned = $eligibility === ''
             ? true
             : $this->isInitialAssessmentEligibilityAligned($vacancy, $eligibility);
@@ -3089,17 +3091,19 @@ class JobVacancyController extends Controller
 
         $labelMap = [
             'application_letter' => 'Application Letter',
-            'signed_pds' => 'Signed and Subscribed Personal Data Sheet',
+            'signed_pds' => 'Fully accomplished, updated and subscribed/notarized Personal Data Sheet (PDS)',
             'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
             'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
-            'cert_eligibility' => 'Certificate of Eligibility / Board Rating',
-            'ipcr' => 'Performance Rating/IPCR in the last period (if applicable)',
-            'non_academic' => 'Non-Academic Awards Received',
-            'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
-            'designation_order' => 'List with Certified Photocopy of Duly Confirmed Designation Order/s',
-            'transcript_records' => 'Transcript of Records (Baccalaureate Degree)',
-            'photocopy_diploma' => 'Diploma',
-            'cert_employment' => 'Certificate of Employment (If Any)',
+            'cert_eligibility' => 'Photocopy of Certificate of Eligibility/Boarding Rating',
+            'ipcr' => 'Certification of Numerical Rating/Performance Ratining/IPCR',
+            'non_academic' => 'Non-Academic awards received',
+            'cert_training' => 'Certified/authenticated copy of Certificates of Training/Participation',
+            'designation_order' => 'List with certified photocopy of duly confirmed Designation/Orders',
+            'transcript_records' => 'Photocopy of Transcript of Records (Baccalaureate Degree)',
+            'photocopy_diploma' => 'Photocopy of Diploma',
+            'cert_grades_masteral_doctorate' => 'Certified photocopy of Certificate of Grades with Masteral/Doctorate units earned',
+            'tor_masteral_doctorate' => 'Certified photocopy of TOR with Masteral/Doctorate degree',
+            'cert_employment' => 'Certificate of Employment (if any)',
             'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training',
             'passport_photo' => '2" x 2" or Passport Size Picture',
             'other_documents' => 'Other Documents Submitted',
@@ -3379,17 +3383,19 @@ class JobVacancyController extends Controller
 
         $labelMap = [
             'application_letter' => 'Application Letter',
-            'signed_pds' => 'Signed and Subscribed Personal Data Sheet',
+            'signed_pds' => 'Fully accomplished, updated and subscribed/notarized Personal Data Sheet (PDS)',
             'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
             'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
-            'cert_eligibility' => 'Certificate of Eligibility / Board Rating',
-            'ipcr' => 'Performance Rating/IPCR in the last period (if applicable)',
-            'non_academic' => 'Non-Academic Awards Received',
-            'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
-            'designation_order' => 'List with Certified Photocopy of Duly Confirmed Designation Order/s',
-            'transcript_records' => 'Transcript of Records (Baccalaureate Degree)',
-            'photocopy_diploma' => 'Diploma',
-            'cert_employment' => 'Certificate of Employment (If Any)',
+            'cert_eligibility' => 'Photocopy of Certificate of Eligibility/Boarding Rating',
+            'ipcr' => 'Certification of Numerical Rating/Performance Ratining/IPCR',
+            'non_academic' => 'Non-Academic awards received',
+            'cert_training' => 'Certified/authenticated copy of Certificates of Training/Participation',
+            'designation_order' => 'List with certified photocopy of duly confirmed Designation/Orders',
+            'transcript_records' => 'Photocopy of Transcript of Records (Baccalaureate Degree)',
+            'photocopy_diploma' => 'Photocopy of Diploma',
+            'cert_grades_masteral_doctorate' => 'Certified photocopy of Certificate of Grades with Masteral/Doctorate units earned',
+            'tor_masteral_doctorate' => 'Certified photocopy of TOR with Masteral/Doctorate degree',
+            'cert_employment' => 'Certificate of Employment (if any)',
             'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training',
             'passport_photo' => '2" x 2" or Passport Size Picture',
             'other_documents' => 'Other Documents Submitted',
@@ -3847,20 +3853,22 @@ class JobVacancyController extends Controller
     private function getDocumentLabelMap(): array
     {
         return [
-      'application_letter' => 'Signed Application letter indicating the position applying for',
-      'pqe_result' => 'DILG Pre-Qualifying Exam (PQE) Result',
-      'transcript_records' => 'Duly authenticated Transcript of Records and/or Certification of Grades with Masteral/Doctoral units earned',
-      'photocopy_diploma' => 'Duly Authenticated Diploma',
-      'signed_pds' => 'Fully accomplished and subcribed/notarized Personal Data Sheet (PDS)',
+      'application_letter' => 'Application Letter',
+      'pqe_result' => 'Pre-Qualifying Exam (PQE) Result',
+      'transcript_records' => 'Photocopy of Transcript of Records (Baccalaureate Degree)',
+      'photocopy_diploma' => 'Photocopy of Diploma',
+      'signed_pds' => 'Fully accomplished, updated and subscribed/notarized Personal Data Sheet (PDS)',
       'signed_work_exp_sheet' => 'Work Experience Sheet (for position/s requiring relevant Experience)',
       'cert_lgoo_induction' => 'Certificate of Completion of LGOO Induction Training/Apprenticeship Program (for LGOOs IV, V & VI)',
       'passport_photo' => 'Passport-Sized Picture',
-      'cert_eligibility' => 'Certificate of Eligibility/Board Rating License',
-      'ipcr' => 'Performance Rating in the last rating period in the present position',
-      'non_academic' => 'Non-academic Awards received within the past 2 years',
-      'cert_training' => 'Certificate/s of Training Attended/Participated relevant to the position being applied',
-      'designation_order' => 'Confirmed Designation Order/s',
-      'cert_employment' => 'Certificate of Employment with duties and functions',
+      'cert_eligibility' => 'Photocopy of Certificate of Eligibility/Boarding Rating',
+      'ipcr' => 'Certification of Numerical Rating/Performance Ratining/IPCR',
+      'non_academic' => 'Non-Academic awards received',
+      'cert_training' => 'Certified/authenticated copy of Certificates of Training/Participation',
+      'designation_order' => 'List with certified photocopy of duly confirmed Designation/Orders',
+      'cert_grades_masteral_doctorate' => 'Certified photocopy of Certificate of Grades with Masteral/Doctorate units earned',
+      'tor_masteral_doctorate' => 'Certified photocopy of TOR with Masteral/Doctorate degree',
+      'cert_employment' => 'Certificate of Employment (if any)',
       'other_documents' => 'Other Documents Submitted',
         ];
     }
@@ -3884,6 +3892,8 @@ class JobVacancyController extends Controller
                     'non_academic',
                     'designation_order',
                     'cert_employment',
+                    'cert_grades_masteral_doctorate',
+                    'tor_masteral_doctorate',
                 ]
             )),
         ];
@@ -5039,7 +5049,6 @@ class JobVacancyController extends Controller
     {
         $vacancyId = trim((string) $vacancy->vacancy_id);
         $assessmentVacancyId = trim((string) ($assessment['vacancy_id'] ?? ''));
-        $degree = trim((string) ($assessment['degree'] ?? ''));
         $q1Passed = array_key_exists('q1_passed', $assessment) ? (bool) $assessment['q1_passed'] : false;
         $q2Passed = array_key_exists('q2_passed', $assessment) ? (bool) $assessment['q2_passed'] : false;
         $hasSubscribedPdsAnswered = array_key_exists('has_subscribed_pds', $assessment);
@@ -5047,7 +5056,6 @@ class JobVacancyController extends Controller
         if (
             $vacancyId === ''
             || $assessmentVacancyId !== $vacancyId
-            || $degree === ''
             || !$q1Passed
             || !$q2Passed
             || !$hasSubscribedPdsAnswered

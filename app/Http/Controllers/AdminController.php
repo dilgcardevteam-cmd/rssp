@@ -1897,13 +1897,9 @@ class AdminController extends Controller
                 if ($request->has('status'))
                     $document->status = $status;
 
-                // Only update remarks if explicitly provided, but force it to empty string if verified
-                // or ensure it is not null if it is being updated
+                // Only update remarks when explicitly provided.
                 if ($request->has('remarks')) {
                     $document->remarks = $remarks ?? '';
-                } elseif ($status === 'Verified') {
-                    // When verifying, we often clear remarks, but we must ensure we don't save NULL
-                    $document->remarks = '';
                 }
 
                 // Update last modified by

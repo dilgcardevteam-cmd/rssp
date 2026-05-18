@@ -93,6 +93,7 @@
 									@foreach($qsFields as $field => $label)
 										@php
 											$val = old($field, $application->$field ?? 'no');
+											$allowsNonRequired = in_array($field, ['qs_experience', 'qs_training'], true);
 										@endphp
 										<div class="flex flex-col gap-2 pb-3 border-b border-gray-50 last:border-0">
 											<span class="text-sm font-semibold text-gray-800">{{ $label }}</span>
@@ -107,6 +108,13 @@
 														class="w-3.5 h-3.5 text-red-600 bg-gray-100 border-gray-300 focus:ring-red-500"
 														{{ $val === 'no' ? 'checked' : '' }}> Not Qualified
 												</label>
+												@if($allowsNonRequired)
+													<label class="flex items-center gap-1 cursor-pointer text-xs text-slate-600 font-medium ml-1">
+														<input type="radio" name="{{ $field }}" value="na"
+															class="w-3.5 h-3.5 text-slate-500 bg-gray-100 border-gray-300 focus:ring-slate-400"
+															{{ $val === 'na' ? 'checked' : '' }}> Non Required
+													</label>
+												@endif
 											</div>
 										</div>
 									@endforeach
@@ -148,8 +156,16 @@
 									@foreach($qsFieldsReadonly as $field => $label)
 										@php
 											$val = strtolower(trim((string) ($application->$field ?? 'no')));
-											$display = $val === 'yes' ? 'Qualified' : 'Not Qualified';
-											$color = $val === 'yes' ? 'text-green-600' : 'text-red-600';
+											$display = match ($val) {
+												'yes' => 'Qualified',
+												'na' => 'Non Required',
+												default => 'Not Qualified',
+											};
+											$color = match ($val) {
+												'yes' => 'text-green-600',
+												'na' => 'text-slate-600',
+												default => 'text-red-600',
+											};
 										@endphp
 										<div class="flex flex-col gap-2 pb-3 border-b border-gray-50 last:border-0">
 											<span class="text-sm font-semibold text-gray-800">{{ $label }}</span>
@@ -490,7 +506,7 @@
 						<h4 class="text-xs font-bold text-gray-600 uppercase tracking-wider">Required Documents</h4>
 						<div class="text-[10px] text-gray-400 font-medium text-right">
 							<div>Documents marked <span class="text-red-600 font-bold">(required)</span> must be uploaded for this vacancy.</div>
-							<div>With remarks only for items needing revision</div>
+							<div>Saved remarks are shown for any document status.</div>
 						</div>
 					</div>
 					<table class="min-w-full text-sm">
@@ -991,8 +1007,18 @@
 			const remarksEl = document.getElementById('remarks');
 			remarksEl.value = doc.remarks || "";
 
-			if (doc.status === "Needs Revision" || doc.status === "Disapproved With Deficiency") {
+			if (
+				doc.status === "Needs Revision"
+				|| doc.status === "Disapproved With Deficiency"
+				|| doc.status === "Verified"
+				|| doc.status === "Okay/Confirmed"
+			) {
 				setDocumentRemarksVisibility(true);
+				if (remarksEl) {
+					remarksEl.placeholder = doc.status === "Verified" || doc.status === "Okay/Confirmed"
+						? "Add remarks for this verified document..."
+						: "Add remarks for this document...";
+				}
 			} else {
 				setDocumentRemarksVisibility(false);
 			}
@@ -1147,9 +1173,10 @@
 					}
 				}
 			} else if (newStatus === 'Verified') {
-				if (remarksEl) remarksEl.value = "";
-				if (currentSelectedDoc) currentSelectedDoc.remarks = "";
-				setDocumentRemarksVisibility(false);
+				setDocumentRemarksVisibility(true);
+				if (remarksEl) {
+					remarksEl.placeholder = "Add remarks for this verified document...";
+				}
 			}
 
 			// Immediately re-select the document to trigger all UI states (like disabling buttons)
@@ -1165,9 +1192,6 @@
 					document_type: currentSelectedDoc.id,
 					status: newStatus
 				};
-				if (newStatus === 'Verified') {
-					payload.remarks = "";
-				}
 
 				const response = await fetch(`/admin/applicant_status/${userId}/${vacancyId}/update-document`, {
 					method: 'POST',
@@ -1480,6 +1504,9 @@
 					} else if (value === 'no') {
 						text = 'Does not meet standard';
 						color = 'text-red-600';
+					} else if (value === 'na') {
+						text = 'Non Required';
+						color = 'text-slate-600';
 					}
 					const li = document.createElement('li');
 					li.innerHTML = `<span class="font-semibold">${item.label}:</span> <span class="${color}">${text}</span>`;
@@ -1503,10 +1530,8 @@
 			notifyDocs.forEach(doc => {
 				const status = doc.status || "";
 				const iconHtml = getStatusIcon(status);
-				let remarksText = "";
-				if (status === "Needs Revision" || status === "Disapproved With Deficiency") {
-					remarksText = doc.remarks || "";
-				}
+				const remarksText = String(doc.remarks || '').trim();
+				const remarksHtml = remarksText !== '' ? escapeHtml(remarksText) : '<span class="text-gray-300">No remarks</span>';
 				rowsHtml += `
 					<tr class="hover:bg-gray-50/50 transition-colors">
 						<td class="px-5 py-4 align-top text-gray-800 font-medium w-[40%]">${getDocumentLabelHtml(doc)}</td>
@@ -1516,7 +1541,7 @@
 								<span class="font-semibold text-xs">${status}</span>
 							</div>
 						</td>
-						<td class="px-5 py-4 align-top text-gray-600 text-xs italic">${remarksText || '<span class="text-gray-300">No remarks</span>'}</td>
+						<td class="px-5 py-4 align-top text-gray-600 text-xs italic">${remarksHtml}</td>
 					</tr>
 				`;
 			});
@@ -1571,7 +1596,7 @@
 					divider.className = "my-2 border-t border-dashed border-gray-300 flex items-center gap-2 px-1";
 					const label = document.createElement('span');
 					label.className = "text-[10px] text-gray-400 uppercase tracking-wide whitespace-nowrap";
-					label.textContent = "Not yet submitted";
+					label.textContent = "Other Documents";
 					divider.appendChild(label);
 					listEl.appendChild(divider);
 				}

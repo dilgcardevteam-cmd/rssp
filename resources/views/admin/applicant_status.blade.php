@@ -764,58 +764,13 @@
 				});
 			}
 
-			// Bind radio change events for QS
-			const qsRadioNames = ['qs_education', 'qs_eligibility', 'qs_experience', 'qs_training'];
-			qsRadioNames.forEach(name => {
-				document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
-					radio.addEventListener('change', checkOverallQualification);
-				});
-			});
-
 			document.querySelectorAll('input[name="qs_result"]').forEach(radio => {
 				radio.addEventListener('change', syncNotifyActionRequirementsByQsResult);
 			});
 		});
 
 		// --- QS Logic ---
-		function checkOverallQualification() {
-			const selectedQsResult = getSelectedQsResult();
-			if (selectedQsResult === QS_RESULT_VALUES.NEEDS_REVISIONS) {
-				return;
-			}
-
-			const fields = ['qs_education', 'qs_eligibility', 'qs_experience', 'qs_training'];
-			let allGreen = true;
-			let hasRequirements = false;
-
-			fields.forEach(field => {
-				const checkedRadio = document.querySelector(`input[name="${field}"]:checked`);
-				if (!checkedRadio) return;
-				const val = checkedRadio.value;
-
-				if (val === 'na') return; // Skip N/A
-
-				hasRequirements = true;
-				if (val !== 'yes') {
-					allGreen = false;
-				}
-			});
-
-			if (hasRequirements && allGreen) {
-				updateResultButton('Qualified');
-			} else {
-				updateResultButton('Not Qualified');
-			}
-		}
-
-		function updateResultButton(state) {
-			const radios = document.querySelectorAll(`input[name="qs_result"]`);
-			if (radios.length === 0) return;
-			radios.forEach(r => {
-				r.checked = (r.value === state);
-			});
-		}
-
+		// Qualification Standards are intentionally manual user selections.
 		// --- Document Logic ---
 
 		// Document Selection State

@@ -736,7 +736,6 @@
 			// Initialize UI
 			renderDocuments(documents);
 			updateProgressCircle();
-			updateQualificationStatus(); // Initial check
 
 			// Initialize deadline check
 			checkDeadline();
@@ -779,30 +778,9 @@
 		});
 
 		// --- QS Logic ---
-		function updateQualificationStatus() {
-			// Keep overall result in sync with QS radios and progress rules.
-			checkOverallQualification();
-		}
-
-		function setQualificationFieldsState(state) {
-			const fields = ['qs_education', 'qs_eligibility', 'qs_experience', 'qs_training'];
-			const value = state === 'Qualified' ? 'yes' : 'no';
-			fields.forEach(field => {
-				const target = document.querySelector(`input[name="${field}"][value="${value}"]`);
-				if (target) target.checked = true;
-			});
-		}
-
 		function checkOverallQualification() {
 			const selectedQsResult = getSelectedQsResult();
 			if (selectedQsResult === QS_RESULT_VALUES.NEEDS_REVISIONS) {
-				return;
-			}
-
-			const { percentage } = getApplicationProgressStats();
-			if (percentage === 100) {
-				setQualificationFieldsState('Qualified');
-				updateResultButton('Qualified');
 				return;
 			}
 
@@ -1716,8 +1694,6 @@
 
 			const countText = document.getElementById('progress-count');
 			if (countText) countText.textContent = `${confirmedDocs}/${totalDocs}`;
-
-			checkOverallQualification();
 
 			// Tooltip updates can be kept simple or removed if not critical
 		}

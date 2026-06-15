@@ -1485,8 +1485,12 @@ class AdminController extends Controller
                 return true;
             }
 
-            // Optional documents: include only when a file was actually submitted.
-            return $this->isDocumentSubmitted($doc);
+            $status = strtolower(trim((string) ($doc['status'] ?? '')));
+            $isRevisionStatus = in_array($status, ['needs revision', 'disapproved with deficiency'], true);
+
+            // Optional documents stay visible once explicitly flagged for revision,
+            // even if the applicant has not uploaded an initial file for that field yet.
+            return $isRevisionStatus || $this->isDocumentSubmitted($doc);
         }));
 
         return $this->sortDocumentsAscending($filtered);

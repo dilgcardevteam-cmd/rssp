@@ -3033,12 +3033,21 @@ class JobVacancyController extends Controller
             $snapshotStatus = trim((string) ($snapshotDoc['status'] ?? ''));
             $snapshotIsReviewStatus = $snapshotStatus !== ''
                 && in_array(strtolower($snapshotStatus), $reviewStatuses, true);
+            $liveIsRevisionStatus = in_array(strtolower(trim($resolvedStatus)), ['needs revision', 'disapproved with deficiency'], true);
 
             if ($snapshotIsReviewStatus) {
                 return [
                     'status' => $snapshotStatus,
                     'remarks' => (string) ($snapshotDoc['remarks'] ?? ''),
                     'last_modified_by' => $snapshotDoc['last_modified_by'] ?? null,
+                ];
+            }
+
+            if ($liveIsRevisionStatus) {
+                return [
+                    'status' => $resolvedStatus,
+                    'remarks' => $resolvedRemarks,
+                    'last_modified_by' => $resolvedLastModifiedBy,
                 ];
             }
 
@@ -3322,12 +3331,21 @@ class JobVacancyController extends Controller
             $snapshotStatus = trim((string) ($snapshotDoc['status'] ?? ''));
             $snapshotIsReviewStatus = $snapshotStatus !== ''
                 && in_array(strtolower($snapshotStatus), $reviewStatuses, true);
+            $liveIsRevisionStatus = in_array(strtolower(trim($resolvedStatus)), ['needs revision', 'disapproved with deficiency'], true);
 
             if ($snapshotIsReviewStatus) {
                 return [
                     'status' => $snapshotStatus,
                     'remarks' => (string) ($snapshotDoc['remarks'] ?? ''),
                     'last_modified_by' => $snapshotDoc['last_modified_by'] ?? null,
+                ];
+            }
+
+            if ($liveIsRevisionStatus) {
+                return [
+                    'status' => $resolvedStatus,
+                    'remarks' => $resolvedRemarks,
+                    'last_modified_by' => $resolvedLastModifiedBy,
                 ];
             }
 

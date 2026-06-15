@@ -170,6 +170,68 @@ class ApplicationStatusSyncTest extends TestCase
         $this->assertSame('Needs Revision', $returnedDoc['status'] ?? null);
     }
 
+    public function test_applicant_document_feed_shows_live_revision_status_for_optional_tor_without_waiting_for_snapshot(): void
+    {
+        Mail::fake();
+
+        $admin = Admin::create([
+            'username' => 'admin_live_revision',
+            'name' => 'Admin Live Revision',
+            'office' => 'HR',
+            'designation' => 'Officer',
+            'email' => 'admin.live@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $user = User::factory()->create(['email' => 'live-revision@example.com']);
+        $vacancy = JobVacancy::create([
+            'vacancy_id' => 'LIVE-REV-001',
+            'position_title' => 'Planning Officer',
+            'vacancy_type' => 'COS',
+            'monthly_salary' => 22000,
+            'status' => 'OPEN',
+            'closing_date' => now()->addWeek(),
+            'qualification_education' => 'Any',
+            'qualification_training' => 'None',
+            'qualification_experience' => 'None',
+            'qualification_eligibility' => 'None',
+            'to_person' => 'HR Officer',
+            'to_position' => 'HR',
+            'to_office' => 'DILG',
+            'to_office_address' => 'Baguio',
+            'place_of_assignment' => 'Baguio',
+        ]);
+
+        Applications::create([
+            'vacancy_id' => $vacancy->vacancy_id,
+            'user_id' => $user->id,
+            'status' => 'Compliance',
+            'qs_result' => 'Needs Revisions',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->post(route('admin.applicant_status.update_document', [
+                'user_id' => $user->id,
+                'vacancy_id' => $vacancy->vacancy_id,
+            ]), [
+                'document_type' => 'tor_masteral_doctorate',
+                'status' => 'Needs Revision',
+                'remarks' => 'Please upload your TOR with Masteral/Doctorate degree.',
+            ])
+            ->assertOk();
+
+        $response = $this->actingAs($user)
+            ->getJson(route('application_status.get_documents', ['user' => $user->id, 'vacancy' => $vacancy->vacancy_id]));
+
+        $response->assertOk();
+        $returnedDoc = collect($response->json('documents'))->firstWhere('id', 'tor_masteral_doctorate');
+
+        $this->assertSame('Needs Revision', $returnedDoc['status'] ?? null);
+        $this->assertSame('Please upload your TOR with Masteral/Doctorate degree.', $returnedDoc['remarks'] ?? null);
+    }
+
     public function test_qualification_standards_recalculate_on_admin_update(): void
     {
         $admin = Admin::create([

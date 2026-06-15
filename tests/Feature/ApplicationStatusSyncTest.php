@@ -91,6 +91,85 @@ class ApplicationStatusSyncTest extends TestCase
         $this->assertSame($application->deadline_time, $notification->data['deadline_time'] ?? null);
     }
 
+    public function test_notify_snapshot_keeps_optional_document_marked_for_revision_visible_to_applicant(): void
+    {
+        Mail::fake();
+
+        $admin = Admin::create([
+            'username' => 'admin_optional_revision',
+            'name' => 'Admin Optional Revision',
+            'office' => 'HR',
+            'designation' => 'Officer',
+            'email' => 'admin.optional@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+            'is_active' => true,
+        ]);
+
+        $user = User::factory()->create(['email' => 'optional-revision@example.com']);
+        $vacancy = JobVacancy::create([
+            'vacancy_id' => 'OPT-REV-001',
+            'position_title' => 'Administrative Aide',
+            'vacancy_type' => 'COS',
+            'monthly_salary' => 18000,
+            'status' => 'OPEN',
+            'closing_date' => now()->addWeek(),
+            'qualification_education' => 'Any',
+            'qualification_training' => 'None',
+            'qualification_experience' => 'None',
+            'qualification_eligibility' => 'None',
+            'to_person' => 'HR Officer',
+            'to_position' => 'HR',
+            'to_office' => 'DILG',
+            'to_office_address' => 'Baguio',
+            'place_of_assignment' => 'Baguio',
+        ]);
+
+        Applications::create([
+            'vacancy_id' => $vacancy->vacancy_id,
+            'user_id' => $user->id,
+            'status' => 'Pending',
+        ]);
+
+        $this->actingAs($admin, 'admin')
+            ->post(route('admin.applicant_status.update_document', [
+                'user_id' => $user->id,
+                'vacancy_id' => $vacancy->vacancy_id,
+            ]), [
+                'document_type' => 'cert_employment',
+                'status' => 'Needs Revision',
+                'remarks' => 'Please upload your certificate of employment.',
+            ])
+            ->assertOk();
+
+        $this->actingAs($admin, 'admin')
+            ->post(route('admin.applicant_status.notify', [$user->id, $vacancy->vacancy_id]))
+            ->assertOk();
+
+        $notification = Notification::where('notifiable_type', 'App\Models\User')
+            ->where('notifiable_id', $user->id)
+            ->where('data->type', 'application_overview')
+            ->latest()
+            ->first();
+
+        $this->assertNotNull($notification);
+
+        $documents = collect($notification->data['documents'] ?? []);
+        $certEmployment = $documents->firstWhere('id', 'cert_employment');
+
+        $this->assertNotNull($certEmployment);
+        $this->assertSame('Needs Revision', $certEmployment['status'] ?? null);
+        $this->assertSame('Please upload your certificate of employment.', $certEmployment['remarks'] ?? null);
+        $this->assertFalse((bool) ($certEmployment['has_file'] ?? true));
+
+        $response = $this->actingAs($user)
+            ->getJson(route('application_status.get_documents', ['user' => $user->id, 'vacancy' => $vacancy->vacancy_id]));
+
+        $response->assertOk();
+        $returnedDoc = collect($response->json('documents'))->firstWhere('id', 'cert_employment');
+        $this->assertSame('Needs Revision', $returnedDoc['status'] ?? null);
+    }
+
     public function test_qualification_standards_recalculate_on_admin_update(): void
     {
         $admin = Admin::create([
